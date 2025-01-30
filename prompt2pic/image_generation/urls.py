@@ -4,4 +4,5 @@ app_name = 'image_generation'
 
 urlpatterns = [
     path('generate/', views.generate_image, name='generate_image'),
-    path('dashboard/', views.dashboard, name='dashboard')]
+    path('dashboard/', views.dashboard, name='dashboard'),
+    path('guest-dashboard/', views.guest_dashboard, name='guest_dashboard')]

@@ -61,10 +61,10 @@
             <div class="divider">OR</div>
 
             <div class="space-y-4">
-                <a href="/auth/login/" class="btn btn-outline btn-block">
+                <a href="{% url 'authentication:login' %}" class="btn btn-outline btn-block">
                     <i class="fas fa-sign-in-alt mr-2"></i> Already have an account? Log in
                 </a>
-                <a href="/prompt/" class="btn btn-ghost btn-block">
+                <a href="{% url 'image_generation:guest_dashboard' %}" class="btn btn-ghost btn-block">
                     <i class="fas fa-user-secret mr-2"></i> Continue as Guest
                 </a>
             </div>

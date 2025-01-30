@@ -14,7 +14,11 @@ def generate_image(request):
     return render(request, 'image_generation/generate_image.html')
 
 def dashboard(request):
+    if request.user.is_authenticated:
+        return render(request, 'image_generation/dashboard.html')
+    return redirect('authentication:login')  # Redirect to login if not authenticated
+def guest_dashboard(request):
     # if request.user.is_authenticated:
     #     return render(request, 'image_generation/dashboard.html')
-    return render(request, 'image_generation/dashboard.html')
+    return render(request, 'image_generation/guest_user_dashboard.html')
 

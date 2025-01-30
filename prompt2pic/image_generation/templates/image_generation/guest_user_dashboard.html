@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt2Pic - Guest Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500">
+    <div class="navbar bg-base-100 bg-opacity-80 backdrop-blur-md shadow-lg">
+        <div class="flex-1">
+            <a class="btn btn-ghost normal-case text-2xl text-primary">
+                Prompt2Pic
+                <i class="fas fa-magic ml-2 text-secondary"></i>
+            </a>
+        </div>
+        <div class="flex-none gap-2">
+            <a href="/auth/login/" class="btn btn-primary">Log In</a>
+            <a href="/auth/signup/" class="btn btn-secondary">Sign Up</a>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8">
+        <main class="max-w-4xl mx-auto">
+            <h1 class="text-4xl font-bold mb-8 text-white text-center">Welcome to Prompt2Pic</h1>
+            
+            <div class="card bg-base-100 shadow-xl overflow-hidden mb-8">
+                <div class="card-body p-8">
+                    <h2 class="card-title text-2xl mb-4 text-primary">Try Our AI Image Generator</h2>
+                    <textarea class="textarea textarea-bordered w-full h-32" placeholder="Describe the image you want to create..." disabled></textarea>
+                    <div class="card-actions justify-end mt-4">
+                        <button class="btn btn-primary" disabled>
+                            Generate Image
+                            <i class="fas fa-wand-magic-sparkles ml-2"></i>
+                        </button>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-2">Sign up or log in to start generating images!</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div class="card bg-base-100 shadow-xl">
+                    <div class="card-body">
+                        <h2 class="card-title text-xl mb-2">
+                            <i class="fas fa-history text-primary mr-2"></i>
+                            Prompt History
+                        </h2>
+                        <p>Keep track of your past prompts and easily reuse them.</p>
+                        <div class="card-actions justify-end mt-4">
+                            <a href="/auth/signup/" class="btn btn-primary btn-sm">Sign Up to Access</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card bg-base-100 shadow-xl">
+                    <div class="card-body">
+                        <h2 class="card-title text-xl mb-2">
+                            <i class="fas fa-images text-primary mr-2"></i>
+                            Recent Creations
+                        </h2>
+                        <p>View and manage your recently generated images.</p>
+                        <div class="card-actions justify-end mt-4">
+                            <a href="/auth/signup/" class="btn btn-primary btn-sm">Sign Up to Access</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card bg-base-100 shadow-xl overflow-hidden">
+                <div class="card-body p-8 text-center">
+                    <h2 class="card-title text-2xl mb-4 text-primary justify-center">Unlock the Full Power of Prompt2Pic</h2>
+                    <p class="mb-6">Sign up now to start creating amazing AI-generated images!</p>
+                    <img src="https://www.tailwindai.dev/placeholder.svg" alt="AI Generated Sample" class="rounded-xl mx-auto mb-6 max-w-sm float-animation" />
+                    <div class="card-actions justify-center">
+                        <a href="/auth/signup/" class="btn btn-primary btn-lg">
+                            Get Started
+                            <i class="fas fa-rocket ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer class="footer footer-center p-4 bg-base-300 text-base-content mt-8">
+        <div>
+            <p>Copyright © 2023 - All rights reserved by Prompt2Pic</p>
+        </div>
+    </footer>
+</body>
+</html>
