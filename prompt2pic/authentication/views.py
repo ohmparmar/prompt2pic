@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 import re
 from django.contrib.auth.hashers import make_password,check_password
-from django.contrib.auth import authenticate, login,get_user_model
+from django.contrib.auth import authenticate, login as auth_login, logout, get_user_model
 CustomUser = get_user_model()
 import random
 
@@ -18,7 +18,7 @@ def signup(request):
 
         # Check if email is already registered
         try:
-            user = CustomUser.objects.get(email=email)  # ✅ Use CustomUser
+            user = CustomUser.objects.get(email=email)  # Use CustomUser
             if user.otp_verified:
                 messages.error(request, 'Email is already registered.')
                 return render(request, 'authentication/signup.html', {'username': username, 'email': email})
@@ -40,7 +40,7 @@ def signup(request):
         otp = str(random.randint(100000, 999999))  # Generate a 6-digit OTP
         
         # Save user with OTP
-        user = CustomUser.objects.create(username=username, email=email, password=hashed_password, otp=otp)  # ✅ Use CustomUser
+        user = CustomUser.objects.create(username=username, email=email, password=hashed_password, otp=otp)  # Use CustomUser
         
         # Send OTP to user's email
         send_mail(
@@ -78,7 +78,7 @@ def otp_verification(request):
             return render(request, 'authentication/otp_verification.html', {'email': email})
 
         try:
-            user = CustomUser.objects.get(email=email)  # ✅ Use CustomUser
+            user = CustomUser.objects.get(email=email)  # Use CustomUser
         except CustomUser.DoesNotExist:
             messages.error(request, 'User not found. Please register first.')
             return render(request, 'authentication/otp_verification.html', {'email': email})
@@ -95,9 +95,9 @@ def otp_verification(request):
             user.save()
             # Authenticate the user using the username and password
             password = request.session.get('password')  # Retrieve password from session
-            user = authenticate(username=user.username, password=password)  # ✅ Use CustomUser
+            user = authenticate(username=user.username, password=password)  # Use CustomUser
             if user is not None:
-                login(request, user)
+                auth_login(request, user)
                 del request.session['email']  
                 del request.session['password']  # Clear password from session
                 messages.success(request, 'OTP verified successfully!')
@@ -107,3 +107,29 @@ def otp_verification(request):
         else:
             messages.error(request, 'Invalid OTP. Please try again.')
     return render(request, 'authentication/otp_verification.html', {'email': email})
+
+def login(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        # Authenticate the user
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            auth_login(request, user)  # Log the user in
+            messages.success(request, 'Login successful!')
+            return redirect('image_generation:dashboard')  # Redirect to the dashboard
+        else:
+            messages.error(request, 'Invalid credentials. Please try again.')
+            return render(request, 'authentication/login.html')  # Return to login form
+
+    return render(request, 'authentication/login.html')  # Render the login form for GET requests
+
+
+
+def user_logout(request):
+    logout(request)
+    messages.success(request, 'You have been logged out successfully.')
+    return redirect('authentication:signup')  # Redirect to login or home page
+    # return redirect('authentication:signup')

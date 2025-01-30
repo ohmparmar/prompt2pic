@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
-
+from django.contrib.auth import logout
+from django.contrib import messages
 # Create your views here.
 
 def generate_image(request):
@@ -17,4 +18,3 @@ def dashboard(request):
     #     return render(request, 'image_generation/dashboard.html')
     return render(request, 'image_generation/dashboard.html')
 
-    # return redirect('authentication:signup')

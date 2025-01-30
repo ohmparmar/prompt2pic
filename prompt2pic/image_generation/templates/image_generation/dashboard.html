@@ -66,6 +66,7 @@
         <span>{{ request.user.username|slice:':2' }}</span>
         <div class="profile-menu" id="profile-menu">
             <a href="#">Change Password</a>
+            <a href="{% url 'authentication:logout' %}">Logout</a>
         </div>
     </div>
 </body>
