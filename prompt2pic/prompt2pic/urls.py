@@ -18,15 +18,19 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.shortcuts import render
+from django.conf import settings
+from django.conf.urls.static import static
 
 # Index view
 
 def index(request):
     return render(request, 'index.html')
 
-urlpatterns = [
+urlpatterns = ([
     path('', index, name='index'),
     path("admin/", admin.site.urls),
     path('auth/', include('authentication.urls')),
     path('image/', include('image_generation.urls')),  # Include image generation URLs
-]
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+)

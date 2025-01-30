@@ -1,50 +1,72 @@
+{% load static %}
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Welcome to Prompt2Pic</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f8ff;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-image: url('background.jpg');
-            background-size: cover;
-            color: #333;
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
         }
-        .welcome-container {
-            text-align: center;
-            background-color: rgba(255, 255, 255, 0.8);
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-        }
-        .welcome-container h1 {
-            font-size: 3em;
-            margin-bottom: 10px;
-        }
-        .welcome-container p {
-            font-size: 1.2em;
-            margin-bottom: 20px;
-        }
-        .welcome-container a {
-            text-decoration: none;
-            color: #007bff;
-            font-weight: bold;
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
         }
     </style>
 </head>
-<body>
-    <div class="welcome-container">
-        <h1>Welcome to Prompt2Pic</h1>
-        <p>Create stunning images from your text prompts with ease.</p>
-        <a href="/auth/signup/">Get Started</a>
+<body class="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex justify-center items-center p-4">
+    <div class="container mx-auto px-4">
+        <div class="card bg-base-100 shadow-xl max-w-5xl mx-auto overflow-hidden">
+            <div class="card-body p-8 md:p-16 text-center">
+                <h1 class="text-5xl font-bold mb-6 text-primary">
+                    Welcome to Prompt2Pic
+                    <i class="fas fa-magic ml-2 text-secondary"></i>
+                </h1>
+                <p class="text-xl mb-8">Transform your imagination into stunning visuals!</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                    <div class="flex flex-col items-center space-y-4">
+                        <i class="fas fa-pencil-alt text-4xl text-accent"></i>
+                        <h3 class="text-2xl font-semibold">Write Your Prompt</h3>
+                        <p>Describe the image you want to create in words.</p>
+                    </div>
+                    <div class="flex flex-col items-center space-y-4">
+                        <i class="fas fa-image text-4xl text-success"></i>
+                        <h3 class="text-2xl font-semibold">Generate Beautiful Images</h3>
+                        <p>Our AI turns your prompts into stunning visuals.</p>
+                    </div>
+                </div>
+                
+                <div class="mb-12 relative">
+                    <img src="{% static 'authentication/images/ai-image.png' %}" 
+                    alt="AI-generated futuristic cityscape" 
+                    class="rounded-lg shadow-2xl mx-auto max-w-xs float-animation">
+                                   <div class="absolute -top-4 -left-4 bg-secondary text-white rounded-full p-3 shadow-lg">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="absolute -bottom-4 -right-4 bg-accent text-white rounded-full p-3 shadow-lg">
+                        <i class="fas fa-palette"></i>
+                    </div>
+                </div>
+
+                <div class="flex justify-center space-x-4">
+                    <a href="/auth/signup/" class="btn btn-primary btn-lg">
+                        Get Started
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                    <a href="#" class="btn btn-outline btn-lg">
+                        Learn More
+                        <i class="fas fa-info-circle ml-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>

@@ -1,73 +1,119 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Dashboard</title>
+    <title>Prompt2Pic Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            display: flex;
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
         }
-        .sidebar {
-            width: 250px;
-            background-color: #f4f4f4;
-            padding: 20px;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-        }
-        .main {
-            flex: 1;
-            padding: 20px;
-        }
-        .profile {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            cursor: pointer;
-        }
-        .profile-menu {
-            display: none;
-            position: absolute;
-            top: 60px;
-            right: 20px;
-            background-color: white;
-            border: 1px solid #ddd;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .profile-menu a {
-            display: block;
-            padding: 10px;
-            text-decoration: none;
-            color: #333;
-        }
-        .profile-menu a:hover {
-            background-color: #f4f4f4;
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
         }
     </style>
-    <script>
-        function toggleProfileMenu() {
-            const menu = document.getElementById('profile-menu');
-            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-        }
-    </script>
 </head>
-<body>
-    <div class="sidebar">
-        <h2>Prompt History</h2>
-        <!-- Display user's prompt history here -->
-    </div>
-    <div class="main">
-        <h1>Welcome to Your Dashboard</h1>
-        <textarea placeholder="Write your prompt here..." style="width: 100%; height: 100px;"></textarea>
-    </div>
-    <div class="profile" onclick="toggleProfileMenu()">
-        <span>{{ request.user.username|slice:':2' }}</span>
-        <div class="profile-menu" id="profile-menu">
-            <a href="#">Change Password</a>
-            <a href="{% url 'authentication:logout' %}">Logout</a>
+<body class="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500">
+    <div class="navbar bg-base-100 bg-opacity-80 backdrop-blur-md shadow-lg">
+        <div class="flex-1">
+            <a class="btn btn-ghost normal-case text-2xl text-primary">
+                Prompt2Pic
+                <i class="fas fa-magic ml-2 text-secondary"></i>
+            </a>
+        </div>
+        <div class="flex-none gap-2">
+            <div class="dropdown dropdown-end">
+                <label tabindex="0" class="btn btn-ghost btn-circle avatar">
+                    <div class="w-10 rounded-full">
+                        <img src="https://api.dicebear.com/6.x/initials/svg?seed={{ request.user.username }}" alt="User Avatar" />
+                    </div>
+                </label>
+                <ul tabindex="0" class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
+                    <li><a><i class="fas fa-key mr-2"></i>Change Password</a></li>
+                    <li><a href="{% url 'authentication:logout' %}"><i class="fas fa-sign-out-alt mr-2"></i>Logout</a></li>
+                </ul>
+            </div>
         </div>
     </div>
+
+    <div class="container mx-auto px-4 py-8 flex flex-col md:flex-row gap-8">
+        <aside class="w-full md:w-64 bg-base-100 rounded-lg shadow-xl p-6">
+            <h2 class="text-2xl font-bold mb-4 text-primary">Prompt History</h2>
+            <ul class="menu bg-base-200 w-full rounded-box">
+                <li><a><i class="fas fa-history mr-2"></i>Futuristic City</a></li>
+                <li><a><i class="fas fa-history mr-2"></i>Underwater World</a></li>
+                <li><a><i class="fas fa-history mr-2"></i>Space Explorer</a></li>
+            </ul>
+        </aside>
+
+        <main class="flex-1">
+            <h1 class="text-4xl font-bold mb-8 text-white text-center">Welcome to Your Creative Hub</h1>
+            <div class="card bg-base-100 shadow-xl overflow-hidden">
+                <div class="card-body p-8">
+                    <h2 class="card-title text-2xl mb-4 text-primary">Enter Your Prompt</h2>
+                    <textarea class="textarea textarea-bordered w-full h-32" placeholder="Describe the image you want to create..."></textarea>
+                    <div class="card-actions justify-end mt-4">
+                        <button class="btn btn-primary">
+                            Generate Image
+                            <i class="fas fa-wand-magic-sparkles ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8">
+                <h2 class="text-2xl font-bold mb-4 text-white">Recent Creations</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="card bg-base-100 shadow-xl">
+                        <figure class="px-4 pt-4">
+                            <img src="https://www.tailwindai.dev/placeholder.svg" alt="AI Generated Image" class="rounded-xl float-animation" />
+                        </figure>
+                        <div class="card-body">
+                            <h3 class="card-title">Futuristic City</h3>
+                            <p>A vibrant cityscape with flying cars and neon lights.</p>
+                            <div class="card-actions justify-end">
+                                <button class="btn btn-sm btn-outline btn-primary">View</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card bg-base-100 shadow-xl">
+                        <figure class="px-4 pt-4">
+                            <img src="https://www.tailwindai.dev/placeholder.svg" alt="AI Generated Image" class="rounded-xl float-animation" />
+                        </figure>
+                        <div class="card-body">
+                            <h3 class="card-title">Underwater World</h3>
+                            <p>A magical underwater scene with bioluminescent creatures.</p>
+                            <div class="card-actions justify-end">
+                                <button class="btn btn-sm btn-outline btn-primary">View</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card bg-base-100 shadow-xl">
+                        <figure class="px-4 pt-4">
+                            <img src="https://www.tailwindai.dev/placeholder.svg" alt="AI Generated Image" class="rounded-xl float-animation" />
+                        </figure>
+                        <div class="card-body">
+                            <h3 class="card-title">Space Explorer</h3>
+                            <p>An astronaut exploring a distant alien planet.</p>
+                            <div class="card-actions justify-end">
+                                <button class="btn btn-sm btn-outline btn-primary">View</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer class="footer footer-center p-4 bg-base-300 text-base-content mt-8">
+        <div>
+            <p>Copyright © 2023 - All rights reserved by Prompt2Pic</p>
+        </div>
+    </footer>
 </body>
 </html>

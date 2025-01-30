@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "authentication",
     "image_generation",
+    "tailwind"
 ]
 
 MIDDLEWARE = [
@@ -140,3 +141,5 @@ AUTH_USER_MODEL = 'authentication.CustomUser'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+STATIC_URL = "static/"
+STATICFILES_DIRS = [BASE_DIR / "static"]
