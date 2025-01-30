@@ -4,7 +4,8 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError
 import re
 from django.contrib.auth.hashers import make_password,check_password
-from .models import User
+from django.contrib.auth import authenticate, login,get_user_model
+CustomUser = get_user_model()
 import random
 
 # Create your views here.
@@ -13,11 +14,11 @@ def signup(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         email = request.POST.get('email')
-        password = make_password(request.POST.get('password'))
+        password = request.POST.get('password')
 
         # Check if email is already registered
         try:
-            user = User.objects.get(email=email)
+            user = CustomUser.objects.get(email=email)  # ✅ Use CustomUser
             if user.otp_verified:
                 messages.error(request, 'Email is already registered.')
                 return render(request, 'authentication/signup.html', {'username': username, 'email': email})
@@ -25,8 +26,9 @@ def signup(request):
                 resend_otp(user)
                 messages.info(request, 'OTP sent to your email. Please verify.')
                 request.session['email'] = email  # Store email in session
-                return redirect('otp_verification')
-        except User.DoesNotExist:
+                request.session['password'] = password  # Store password in session
+                return redirect('authentication:otp_verification')
+        except CustomUser.DoesNotExist:
             pass
 
         # Password validation
@@ -38,7 +40,7 @@ def signup(request):
         otp = str(random.randint(100000, 999999))  # Generate a 6-digit OTP
         
         # Save user with OTP
-        user = User.objects.create(username=username, email=email, password=hashed_password, otp=otp)
+        user = CustomUser.objects.create(username=username, email=email, password=hashed_password, otp=otp)  # ✅ Use CustomUser
         
         # Send OTP to user's email
         send_mail(
@@ -50,7 +52,8 @@ def signup(request):
         )
         messages.success(request, 'OTP sent to your email. Please verify.')
         request.session['email'] = email  # Store email in session
-        return redirect('otp_verification')
+        request.session['password'] = password  # Store password in session
+        return redirect('authentication:otp_verification')
     return render(request, 'authentication/signup.html')
 
 
@@ -75,8 +78,8 @@ def otp_verification(request):
             return render(request, 'authentication/otp_verification.html', {'email': email})
 
         try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
+            user = CustomUser.objects.get(email=email)  # ✅ Use CustomUser
+        except CustomUser.DoesNotExist:
             messages.error(request, 'User not found. Please register first.')
             return render(request, 'authentication/otp_verification.html', {'email': email})
 
@@ -90,11 +93,17 @@ def otp_verification(request):
             user.otp_verified = True
             user.otp = None
             user.save()
-            del request.session['email']  
-            messages.success(request, 'OTP verified successfully!')
-            return redirect('image_generation:dashboard')  
+            # Authenticate the user using the username and password
+            password = request.session.get('password')  # Retrieve password from session
+            user = authenticate(username=user.username, password=password)  # ✅ Use CustomUser
+            if user is not None:
+                login(request, user)
+                del request.session['email']  
+                del request.session['password']  # Clear password from session
+                messages.success(request, 'OTP verified successfully!')
+                return redirect('image_generation:dashboard')  
+            else:
+                messages.error(request, 'Invalid credentials. Please try again.')  
         else:
             messages.error(request, 'Invalid OTP. Please try again.')
     return render(request, 'authentication/otp_verification.html', {'email': email})
-
-
