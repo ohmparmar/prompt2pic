@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Verification - Prompt2Pic</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: url('otp-background.jpg');
+            background-size: cover;
+            color: #333;
+        }
+        .otp-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            width: 400px;
+            text-align: center;
+        }
+        .otp-container h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .otp-container input {
+            width: 40px;
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 1.2em;
+        }
+        .otp-container button {
+            width: 100%;
+            padding: 10px;
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .otp-container button:hover {
+            background-color: #4cae4c;
+        }
+    </style>
+    <script>
+        function moveToNext(current, nextFieldID) {
+            if (current.value.length >= 1) {
+                document.getElementById(nextFieldID).focus();
+            }
+        }
+
+        // Store email in local storage when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const email = '{{ email }}';
+            if (email) {
+                localStorage.setItem('otpEmail', email);
+                console.log('Email stored in local storage:', email);
+            }
+        });
+
+        // Retrieve email from local storage when resending OTP
+        function getEmailFromLocalStorage() {
+            const email = localStorage.getItem('otpEmail');
+            console.log('Email retrieved from local storage:', email);
+            return email;
+        }
+
+        // Clear email from local storage on successful OTP verification
+        function clearEmailFromLocalStorage() {
+            localStorage.removeItem('otpEmail');
+            console.log('Email cleared from local storage');
+        }
+    </script>
+</head>
+<body>
+    <div class="otp-container">
+        <h2>Enter OTP</h2>
+        <div class="messages">
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="email" value="{{ email }}">
+            <input type="text" name="otp1" maxlength="1" oninput="moveToNext(this, 'otp2')" required>
+            <input type="text" name="otp2" id="otp2" maxlength="1" oninput="moveToNext(this, 'otp3')" required>
+            <input type="text" name="otp3" id="otp3" maxlength="1" oninput="moveToNext(this, 'otp4')" required>
+            <input type="text" name="otp4" id="otp4" maxlength="1" oninput="moveToNext(this, 'otp5')" required>
+            <input type="text" name="otp5" id="otp5" maxlength="1" oninput="moveToNext(this, 'otp6')" required>
+            <input type="text" name="otp6" id="otp6" maxlength="1" required>
+            <button type="submit" onclick="clearEmailFromLocalStorage()">Verify OTP</button>
+        </form>
+        <form method="POST" style="margin-top: 10px;">
+            {% csrf_token %}
+            <input type="hidden" name="email" value="" id="hiddenEmail">
+            <button type="submit" name="resend_otp" onclick="document.getElementById('hiddenEmail').value = getEmailFromLocalStorage();">Resend OTP</button>
+        </form>
+    </div>
+</body>
+</html>

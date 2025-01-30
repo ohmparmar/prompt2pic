@@ -1,0 +1,100 @@
+from django.shortcuts import render, redirect
+from django.core.mail import send_mail
+from django.contrib import messages
+from django.core.exceptions import ValidationError
+import re
+from django.contrib.auth.hashers import make_password,check_password
+from .models import User
+import random
+
+# Create your views here.
+
+def signup(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = make_password(request.POST.get('password'))
+
+        # Check if email is already registered
+        try:
+            user = User.objects.get(email=email)
+            if user.otp_verified:
+                messages.error(request, 'Email is already registered.')
+                return render(request, 'authentication/signup.html', {'username': username, 'email': email})
+            else:
+                resend_otp(user)
+                messages.info(request, 'OTP sent to your email. Please verify.')
+                request.session['email'] = email  # Store email in session
+                return redirect('otp_verification')
+        except User.DoesNotExist:
+            pass
+
+        # Password validation
+        if len(password) < 6 or not re.search(r'[A-Z]', password) or not re.search(r'[0-9]', password) or not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+            messages.error(request, 'Password must be at least 6 characters long and include one capital letter, one number, and one special character.')
+            return render(request, 'authentication/signup.html', {'username': username, 'email': email})
+
+        hashed_password = make_password(password)  # Hash the password
+        otp = str(random.randint(100000, 999999))  # Generate a 6-digit OTP
+        
+        # Save user with OTP
+        user = User.objects.create(username=username, email=email, password=hashed_password, otp=otp)
+        
+        # Send OTP to user's email
+        send_mail(
+            'Your OTP Code',
+            f'Your OTP code is {otp}',
+            'from@example.com',
+            [email],
+            fail_silently=False,
+        )
+        messages.success(request, 'OTP sent to your email. Please verify.')
+        request.session['email'] = email  # Store email in session
+        return redirect('otp_verification')
+    return render(request, 'authentication/signup.html')
+
+
+def resend_otp(user):
+    otp = str(random.randint(100000, 999999))  # Generate a new OTP
+    user.otp = otp
+    user.save()
+    send_mail(
+        'Your OTP Code',
+        f'Your OTP code is {otp}',
+        'from@example.com',
+        [user.email],
+        fail_silently=False,
+    )
+
+
+def otp_verification(request):
+    email = request.session.get('email')  # Retrieve email from session
+    if request.method == 'POST':
+        if not email:
+            messages.error(request, 'Email is required to resend OTP.')
+            return render(request, 'authentication/otp_verification.html', {'email': email})
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            messages.error(request, 'User not found. Please register first.')
+            return render(request, 'authentication/otp_verification.html', {'email': email})
+
+        if 'resend_otp' in request.POST:
+            resend_otp(user)
+            messages.info(request, 'OTP resent successfully.')
+            return render(request, 'authentication/otp_verification.html', {'email': email})
+
+        otp_input = ''.join([request.POST.get(f'otp{i}') for i in range(1, 7)])
+        if user.otp == otp_input:
+            user.otp_verified = True
+            user.otp = None
+            user.save()
+            del request.session['email']  
+            messages.success(request, 'OTP verified successfully!')
+            return redirect('image_generation:dashboard')  
+        else:
+            messages.error(request, 'Invalid OTP. Please try again.')
+    return render(request, 'authentication/otp_verification.html', {'email': email})
+
+
