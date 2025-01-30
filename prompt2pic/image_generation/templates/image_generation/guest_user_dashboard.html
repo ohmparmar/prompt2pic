@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
@@ -71,7 +73,7 @@
                         </h2>
                         <p>View and manage your recently generated images.</p>
                         <div class="card-actions justify-end mt-4">
-                            <a href="/auth/signup/" class="btn btn-primary btn-sm">Sign Up to Access</a>
+                            <a href="{% url 'authentication:signup' %}" class="btn btn-primary btn-sm">Sign Up to Access</a>
                         </div>
                     </div>
                 </div>
@@ -81,9 +83,9 @@
                 <div class="card-body p-8 text-center">
                     <h2 class="card-title text-2xl mb-4 text-primary justify-center">Unlock the Full Power of Prompt2Pic</h2>
                     <p class="mb-6">Sign up now to start creating amazing AI-generated images!</p>
-                    <img src="https://www.tailwindai.dev/placeholder.svg" alt="AI Generated Sample" class="rounded-xl mx-auto mb-6 max-w-sm float-animation" />
+                    <img src="{% static 'image_generation/images/guest-user-dashboard.png' %}" alt="AI Generated Sample" class="rounded-xl mx-auto mb-6 max-w-sm float-animation" />
                     <div class="card-actions justify-center">
-                        <a href="/auth/signup/" class="btn btn-primary btn-lg">
+                        <a href="{% url 'authentication:signup' %}" class="btn btn-primary btn-lg">
                             Get Started
                             <i class="fas fa-rocket ml-2"></i>
                         </a>
