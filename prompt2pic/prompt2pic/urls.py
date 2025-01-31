@@ -25,9 +25,12 @@ from django.conf.urls.static import static
 
 def index(request):
     return render(request, 'index.html')
+def about(request):
+    return render(request, 'about.html')
 
 urlpatterns = ([
     path('', index, name='index'),
+    path('/about', about, name='about'),
     path("admin/", admin.site.urls),
     path('auth/', include('authentication.urls')),
     path('image/', include('image_generation.urls')),  # Include image generation URLs
