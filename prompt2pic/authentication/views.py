@@ -5,6 +5,9 @@ from django.core.exceptions import ValidationError
 import re
 from django.contrib.auth.hashers import make_password,check_password
 from django.contrib.auth import authenticate, login as auth_login, logout, get_user_model
+from django.contrib.messages import get_messages
+
+
 CustomUser = get_user_model()
 import random
 
@@ -128,8 +131,15 @@ def login(request):
 
 
 
+
 def user_logout(request):
     logout(request)
+
+    # Clear any previous messages
+    storage = get_messages(request)
+    for _ in storage:
+        pass  # This clears stored messages
+
     messages.success(request, 'You have been logged out successfully.')
-    return redirect('authentication:signup')  # Redirect to login or home page
-    # return redirect('authentication:signup')
+    return redirect('authentication:login')
+
