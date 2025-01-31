@@ -6,14 +6,19 @@ import re
 from django.contrib.auth.hashers import make_password,check_password
 from django.contrib.auth import authenticate, login as auth_login, logout, get_user_model
 from django.contrib.messages import get_messages
-
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 
 CustomUser = get_user_model()
 import random
 
 # Create your views here.
+from django.template.loader import get_template
+
 
 def signup(request):
+
     if request.method == 'POST':
         username = request.POST.get('username')
         email = request.POST.get('email')
@@ -45,14 +50,19 @@ def signup(request):
         # Save user with OTP
         user = CustomUser.objects.create(username=username, email=email, password=hashed_password, otp=otp)  # Use CustomUser
         
-        # Send OTP to user's email
-        send_mail(
-            'Your OTP Code',
-            f'Your OTP code is {otp}',
-            'from@example.com',
-            [email],
-            fail_silently=False,
+          # Render email template with OTP
+        email_html_content = render_to_string('authentication/email_otp_template.html', {'otp': otp})
+        email_text_content = strip_tags(email_html_content)  
+
+        # Send HTML email
+        email_message = EmailMultiAlternatives(
+            subject="Your OTP Code",
+            body=email_text_content,  # Plain text version
+            from_email="from@example.com",
+            to=[email]
         )
+        email_message.attach_alternative(email_html_content, "text/html")
+        email_message.send()
         messages.success(request, 'OTP sent to your email. Please verify.')
         request.session['email'] = email  # Store email in session
         request.session['password'] = password  # Store password in session
@@ -64,13 +74,26 @@ def resend_otp(user):
     otp = str(random.randint(100000, 999999))  # Generate a new OTP
     user.otp = otp
     user.save()
-    send_mail(
-        'Your OTP Code',
-        f'Your OTP code is {otp}',
-        'from@example.com',
-        [user.email],
-        fail_silently=False,
-    )
+    email_html_content = render_to_string('authentication/email_otp_template.html', {'otp': otp})
+    email_text_content = strip_tags(email_html_content)  
+
+        # Send HTML email
+    email_message = EmailMultiAlternatives(
+        subject="Your OTP Code",
+        body=email_text_content,  # Plain text version
+        from_email="from@example.com",
+        to=[user.email]
+        )
+    email_message.attach_alternative(email_html_content, "text/html")
+    email_message.send()
+
+    # send_mail(
+    #     'Your OTP Code',
+    #     f'Your OTP code is {otp}',
+    #     'from@example.com',
+    #     [user.email],
+    #     fail_silently=False,
+    # )
 
 
 def otp_verification(request):

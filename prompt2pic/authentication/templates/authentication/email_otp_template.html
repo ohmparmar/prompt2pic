@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Verification</title>
+    <style>
+        /* Default Light Mode */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border: 2px solid #cccccc; /* Light mode border */
+        }
+        .header {
+            background: linear-gradient(135deg, #9333ea, #ec4899, #ef4444);
+            color: white;
+            padding: 20px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+        .otp-code {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            background: #f3f4f6;
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            letter-spacing: 2px;
+            border: 1px solid #999;
+        }
+        .footer {
+            font-size: 14px;
+            color: #666;
+            margin-top: 20px;
+        }
+
+        /* Dark Mode Styles */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #121212 !important; /* Dark mode background */
+                color: #f4f4f4 !important;
+            }
+            .container {
+                background: #1e1e1e !important; /* Dark mode container */
+                color: #f4f4f4 !important;
+                border: 2px solid #666666 !important; /* Dark mode border */
+                box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1);
+            }
+            .otp-code {
+                background: #444 !important;
+                color: #ffffff !important;
+                border: 1px solid #888 !important;
+            }
+            .footer {
+                color: #bbb !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Prompt2Pic - OTP Verification</h2>
+        </div>
+        <p>Hello,</p>
+        <p>Use the following OTP to verify your email address:</p>
+        <div class="otp-code">{{ otp }}</div>
+        <p>This OTP is valid for only a few minutes. Do not share it with anyone.</p>
+        <p class="footer">If you did not request this, please ignore this email.</p>
+    </div>
+</body>
+</html>

@@ -52,9 +52,9 @@
                     <input type="hidden" name="email" value="{{ email }}">
                     <div class="flex justify-between">
                         {% for _ in "123456" %}
-                            <input type="text" name="otp{{ forloop.counter }}" id="otp{{ forloop.counter }}" 
-                                   maxlength="1" class="input input-bordered w-12 h-12 text-center text-xl" 
-                                   {% if not forloop.first %}oninput="moveToNext(this, 'otp{{ forloop.counter|add:1 }}')"{% endif %} required>
+                            <input type="text" name="otp{{ forloop.counter }}" id="otp{{ forloop.counter }}"
+                                   maxlength="1" class="input input-bordered w-12 h-12 text-center text-xl"
+                                   oninput="this.value.length >= 1 ? document.getElementById('otp{{ forloop.counter|add:1 }}').focus() : null" required>
                         {% endfor %}
                     </div>
                     
@@ -72,12 +72,6 @@
     </div>
 
     <script>
-        function moveToNext(current, nextFieldID) {
-            if (current.value.length >= 1) {
-                document.getElementById(nextFieldID).focus();
-            }
-        }
-
         document.addEventListener('DOMContentLoaded', function() {
             const email = '{{ email }}';
             if (email) {
