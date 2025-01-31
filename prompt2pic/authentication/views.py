@@ -113,8 +113,19 @@ def otp_verification(request):
             resend_otp(user)
             messages.info(request, 'OTP resent successfully.')
             return render(request, 'authentication/otp_verification.html', {'email': email})
-
+        
         otp_input = ''.join([request.POST.get(f'otp{i}') for i in range(1, 7)])
+        if 'forgot_password' in request.session:
+            del request.session['forgot_password']
+            if user.otp == otp_input:
+                return redirect('authentication:reset_password')    
+            else:
+                messages.error(request, 'Invalid OTP. Please try again.')
+                return render(request, 'authentication/otp_verification.html', {'email': email})
+
+
+
+
         if user.otp == otp_input:
             user.otp_verified = True
             user.otp = None
@@ -166,3 +177,82 @@ def user_logout(request):
     messages.success(request, 'You have been logged out successfully.')
     return redirect('authentication:login')
 
+
+
+def forgot_password(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        
+        # Validate email format
+        if not validate_email(email):
+            messages.error(request, 'Invalid email format.')
+            return render(request, 'authentication/forgot_password.html')
+
+        try:
+            user = CustomUser.objects.get(email=email)
+            if user.otp_verified:  # Check if the user is verified
+                otp = str(random.randint(100000, 999999))  # Generate OTP
+                user.otp = otp
+                user.save()
+
+                # Send OTP email
+                email_html_content = render_to_string('authentication/email_otp_template.html', {'otp': otp})
+                email_text_content = strip_tags(email_html_content)
+
+                email_message = EmailMultiAlternatives(
+                    subject="Your OTP Code",
+                    body=email_text_content,
+                    from_email="noreply@prompt2pic.com",
+                    to=[email]
+                )
+                email_message.attach_alternative(email_html_content, "text/html")
+                email_message.send()
+                request.session['email'] = email  
+                request.session['forgot_password'] = 1  
+
+                messages.success(request, 'OTP sent to your email. Please verify.')
+                return redirect('authentication:otp_verification')  # Redirect to OTP verification page
+            else:
+                messages.error(request, 'User is not verified.')
+        except CustomUser.DoesNotExist:
+            messages.error(request, 'User does not exist.')
+
+    return render(request, 'authentication/forgot_password.html')
+
+def validate_email(email):
+    # Basic email validation logic
+    import re
+    email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(email_regex, email) is not None
+
+
+
+
+def reset_password(request):
+    if request.method == 'POST':
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+
+        # Validate password
+        if new_password != confirm_password:
+            messages.error(request, "Passwords do not match.")
+            return render(request, 'authentication/reset_password.html')
+
+        if len(new_password) < 6 or not re.search(r'[A-Z]', new_password) or not re.search(r'[a-z]', new_password):
+            messages.error(request, "Password must be at least 6 characters long and include one capital letter and one small letter.")
+            return render(request, 'authentication/reset_password.html')
+
+        # Update password logic here
+
+        print(request.session)
+        hashed_password = make_password(new_password)  # Hash the password
+        user = CustomUser.objects.get(email=request.session['email'])
+        user.password = hashed_password
+        user.save()
+
+        # user.set_password(new_password)
+        # user.save()
+        messages.success(request, "Password reset successfully.")
+        return redirect('authentication:login')  # Redirect to login after successful reset
+
+    return render(request, 'authentication/reset_password.html')

@@ -58,7 +58,7 @@
                         {% endfor %}
                     </div>
                     
-                    <button type="submit" class="btn btn-primary w-full" onclick="clearEmailFromLocalStorage()">Verify OTP</button>
+                    <button type="submit" class="btn btn-primary w-full" ">Verify OTP</button>
                 </form>
 
                 <!-- Resend OTP Form -->
@@ -71,25 +71,5 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const email = '{{ email }}';
-            if (email) {
-                localStorage.setItem('otpEmail', email);
-                console.log('Email stored in local storage:', email);
-            }
-        });
-
-        function getEmailFromLocalStorage() {
-            const email = localStorage.getItem('otpEmail');
-            console.log('Email retrieved from local storage:', email);
-            return email;
-        }
-
-        function clearEmailFromLocalStorage() {
-            localStorage.removeItem('otpEmail');
-            console.log('Email cleared from local storage');
-        }
-    </script>
 </body>
 </html>

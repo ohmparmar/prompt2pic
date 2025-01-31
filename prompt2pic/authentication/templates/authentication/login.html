@@ -52,7 +52,7 @@
 {% endif %}
             <div class="divider">OR</div>
             <div class="text-center">
-                <a href="#" class="link link-hover">Forgot Password?</a>
+                <a href="{% url 'authentication:forgot_password' %}" class="link link-hover">Forgot Password?</a>
                 <p class="mt-2">Don't have an account? <a href="{% url 'authentication:signup' %}" class="link link-primary">Sign up</a></p>
             </div>
         </div>
