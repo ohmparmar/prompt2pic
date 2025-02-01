@@ -1,119 +1,180 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prompt2Pic Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.css" rel="stylesheet" type="text/css" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
-        .float-animation {
-            animation: float 6s ease-in-out infinite;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prompt2Pic Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+    .float-animation {
+      animation: float 6s ease-in-out infinite;
+    }
+  </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500">
-    <div class="navbar bg-base-100 bg-opacity-80 backdrop-blur-md shadow-lg">
-        <div class="flex-1">
-            <a class="btn btn-ghost normal-case text-2xl text-primary">
-                Prompt2Pic
-                <i class="fas fa-magic ml-2 text-secondary"></i>
+  <div class="navbar bg-base-100 bg-opacity-80 backdrop-blur-md shadow-lg">
+    <div class="flex-1">
+      <a class="btn btn-ghost normal-case text-2xl text-primary">
+        Prompt2Pic
+        <i class="fas fa-magic ml-2 text-secondary"></i>
+      </a>
+    </div>
+    <div class="flex-none gap-2">
+      <div class="dropdown dropdown-end">
+        <label tabindex="0" class="btn btn-ghost btn-circle avatar">
+          <div class="w-10 rounded-full">
+            <img src="https://api.dicebear.com/6.x/initials/svg?seed={{ request.user.username }}" alt="User Avatar" />
+          </div>
+        </label>
+        <ul tabindex="0" class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
+          <li>
+            <a>
+              <i class="fas fa-key mr-2"></i>Change Password
             </a>
-        </div>
-        <div class="flex-none gap-2">
-            <div class="dropdown dropdown-end">
-                <label tabindex="0" class="btn btn-ghost btn-circle avatar">
-                    <div class="w-10 rounded-full">
-                        <img src="https://api.dicebear.com/6.x/initials/svg?seed={{ request.user.username }}" alt="User Avatar" />
-                    </div>
-                </label>
-                <ul tabindex="0" class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
-                    <li><a><i class="fas fa-key mr-2"></i>Change Password</a></li>
-                    <li><a href="{% url 'authentication:logout' %}"><i class="fas fa-sign-out-alt mr-2"></i>Logout</a></li>
+          </li>
+          <li>
+            <a href="{% url 'authentication:logout' %}">
+              <i class="fas fa-sign-out-alt mr-2"></i>Logout
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="container mx-auto px-4 py-8 flex flex-col md:flex-row gap-8">
+    <aside class="w-full md:w-64 bg-base-100 rounded-lg shadow-xl p-6">
+      <h2 class="text-2xl font-bold mb-4 text-primary">Prompt History</h2>
+      <ul class="menu bg-base-200 w-full rounded-box">
+        <li>
+          <a>
+            <i class="fas fa-history mr-2"></i>Futuristic City
+          </a>
+        </li>
+        <li>
+          <a>
+            <i class="fas fa-history mr-2"></i>Underwater World
+          </a>
+        </li>
+        <li>
+          <a>
+            <i class="fas fa-history mr-2"></i>Space Explorer
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <main class="flex-1">
+      <h1 class="text-4xl font-bold mb-8 text-white text-center">
+        Welcome to Your Creative Hub
+      </h1>
+      <div class="card bg-base-100 shadow-xl overflow-hidden">
+        <div class="card-body p-8">
+          <h2 class="card-title text-2xl mb-4 text-primary">Enter Your Prompt</h2>
+          <textarea class="textarea textarea-bordered w-full h-32" placeholder="Describe the image you want to create..."></textarea>
+          
+          <!-- Flex container for Model Selector and Generate Button -->
+          <div class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <!-- Model Selector -->
+            <div class="flex items-center gap-2">
+              <label class="label mb-0">
+                <span class="label-text text-sm">Select Model</span>
+              </label>
+              <div class="dropdown inline-block">
+                <button tabindex="0" id="modelDropdownButton" class="btn btn-secondary btn-sm flex items-center gap-2">
+                  <i class="fas fa-robot"></i>
+                  <span id="selected-model-text">Select a Model</span>
+                  <i class="fas fa-caret-down"></i>
+                </button>
+                <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+                  {% for model in models %}
+                    <li>
+                      <a href="javascript:void(0)" onclick="selectModel('{{ model.id }}', '{{ model.name }}')">
+                        <i class="fas fa-robot"></i> {{ model.name }}
+                        {% if model.description %}
+                          <span class="text-xs text-gray-400"> - {{ model.description }}</span>
+                        {% endif %}
+                      </a>
+                    </li>
+                  {% endfor %}
                 </ul>
+              </div>
+              <!-- Hidden input to store selected model value -->
+              <input type="hidden" id="model-input" name="model" value="">
             </div>
+            <!-- Generate Image Button -->
+            <button class="btn btn-primary btn-sm">
+              Generate Image
+              <i class="fas fa-wand-magic-sparkles ml-2"></i>
+            </button>
+          </div>
         </div>
-    </div>
+      </div>
 
-    <div class="container mx-auto px-4 py-8 flex flex-col md:flex-row gap-8">
-        <aside class="w-full md:w-64 bg-base-100 rounded-lg shadow-xl p-6">
-            <h2 class="text-2xl font-bold mb-4 text-primary">Prompt History</h2>
-            <ul class="menu bg-base-200 w-full rounded-box">
-                <li><a><i class="fas fa-history mr-2"></i>Futuristic City</a></li>
-                <li><a><i class="fas fa-history mr-2"></i>Underwater World</a></li>
-                <li><a><i class="fas fa-history mr-2"></i>Space Explorer</a></li>
-            </ul>
-        </aside>
-
-        <main class="flex-1">
-            <h1 class="text-4xl font-bold mb-8 text-white text-center">Welcome to Your Creative Hub</h1>
-            <div class="card bg-base-100 shadow-xl overflow-hidden">
-                <div class="card-body p-8">
-                    <h2 class="card-title text-2xl mb-4 text-primary">Enter Your Prompt</h2>
-                    <textarea class="textarea textarea-bordered w-full h-32" placeholder="Describe the image you want to create..."></textarea>
-                    <div class="card-actions justify-end mt-4">
-                        <button class="btn btn-primary">
-                            Generate Image
-                            <i class="fas fa-wand-magic-sparkles ml-2"></i>
-                        </button>
-                    </div>
-                </div>
+      <div class="mt-8">
+        <h2 class="text-2xl font-bold mb-4 text-white">Recent Creations</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="card bg-base-100 shadow-xl">
+            <figure class="px-4 pt-4">
+              <img src="https://www.tailwindai.dev/placeholder.svg" alt="AI Generated Image" class="rounded-xl float-animation" />
+            </figure>
+            <div class="card-body">
+              <h3 class="card-title">Futuristic City</h3>
+              <p>A vibrant cityscape with flying cars and neon lights.</p>
+              <div class="card-actions justify-end">
+                <button class="btn btn-sm btn-outline btn-primary">View</button>
+              </div>
             </div>
-
-            <div class="mt-8">
-                <h2 class="text-2xl font-bold mb-4 text-white">Recent Creations</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div class="card bg-base-100 shadow-xl">
-                        <figure class="px-4 pt-4">
-                            <img src="https://www.tailwindai.dev/placeholder.svg" alt="AI Generated Image" class="rounded-xl float-animation" />
-                        </figure>
-                        <div class="card-body">
-                            <h3 class="card-title">Futuristic City</h3>
-                            <p>A vibrant cityscape with flying cars and neon lights.</p>
-                            <div class="card-actions justify-end">
-                                <button class="btn btn-sm btn-outline btn-primary">View</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card bg-base-100 shadow-xl">
-                        <figure class="px-4 pt-4">
-                            <img src="https://www.tailwindai.dev/placeholder.svg" alt="AI Generated Image" class="rounded-xl float-animation" />
-                        </figure>
-                        <div class="card-body">
-                            <h3 class="card-title">Underwater World</h3>
-                            <p>A magical underwater scene with bioluminescent creatures.</p>
-                            <div class="card-actions justify-end">
-                                <button class="btn btn-sm btn-outline btn-primary">View</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card bg-base-100 shadow-xl">
-                        <figure class="px-4 pt-4">
-                            <img src="https://www.tailwindai.dev/placeholder.svg" alt="AI Generated Image" class="rounded-xl float-animation" />
-                        </figure>
-                        <div class="card-body">
-                            <h3 class="card-title">Space Explorer</h3>
-                            <p>An astronaut exploring a distant alien planet.</p>
-                            <div class="card-actions justify-end">
-                                <button class="btn btn-sm btn-outline btn-primary">View</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+          </div>
+          <div class="card bg-base-100 shadow-xl">
+            <figure class="px-4 pt-4">
+              <img src="https://www.tailwindai.dev/placeholder.svg" alt="AI Generated Image" class="rounded-xl float-animation" />
+            </figure>
+            <div class="card-body">
+              <h3 class="card-title">Underwater World</h3>
+              <p>A magical underwater scene with bioluminescent creatures.</p>
+              <div class="card-actions justify-end">
+                <button class="btn btn-sm btn-outline btn-primary">View</button>
+              </div>
             </div>
-        </main>
-    </div>
-
-    <footer class="footer footer-center p-4 bg-base-300 text-base-content mt-8">
-        <div>
-            <p>Copyright © 2025 - All rights reserved by Prompt2Pic</p>
+          </div>
+          <div class="card bg-base-100 shadow-xl">
+            <figure class="px-4 pt-4">
+              <img src="https://www.tailwindai.dev/placeholder.svg" alt="AI Generated Image" class="rounded-xl float-animation" />
+            </figure>
+            <div class="card-body">
+              <h3 class="card-title">Space Explorer</h3>
+              <p>An astronaut exploring a distant alien planet.</p>
+              <div class="card-actions justify-end">
+                <button class="btn btn-sm btn-outline btn-primary">View</button>
+              </div>
+            </div>
+          </div>
         </div>
-    </footer>
+      </div>
+    </main>
+  </div>
+
+  <footer class="footer footer-center p-4 bg-base-300 text-base-content mt-8">
+    <div>
+      <p>Copyright © 2025 - All rights reserved by Prompt2Pic</p>
+    </div>
+  </footer>
+
+  <script>
+    function selectModel(modelId, modelName) {
+      // Update the button text with the selected model name
+      document.getElementById('selected-model-text').innerText = modelName;
+      // Set the hidden input value for form submission
+      document.getElementById('model-input').value = modelId;
+    }
+  </script>
 </body>
 </html>
