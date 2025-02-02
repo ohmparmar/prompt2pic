@@ -27,14 +27,14 @@
       </a>
     </div>
     <div class="flex-none gap-2">
-      <!-- Avatar Dropdown with upward opening -->
-      <div class="dropdown dropdown-end dropdown-top">
+      <!-- Avatar Dropdown with downward opening -->
+      <div class="dropdown dropdown-end">
         <label tabindex="0" class="btn btn-ghost btn-circle avatar">
           <div class="w-10 rounded-full">
             <img src="https://api.dicebear.com/6.x/initials/svg?seed={{ request.user.username }}" alt="User Avatar" />
           </div>
         </label>
-        <ul tabindex="0" class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-300 text-base-content rounded-box w-52">
+        <ul tabindex="0" class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-300 text-base-content rounded-box w-52 hidden">
           <li>
             <a>
               <i class="fas fa-key mr-2"></i>Change Password
@@ -156,6 +156,8 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", function () {
+
+      
       const dropdownButton = document.getElementById("modelDropdownButton");
       const dropdownMenu = document.getElementById("modelDropdown");
 
@@ -178,6 +180,25 @@
           dropdownMenu.classList.add("hidden");
         }
       });
+
+      // Avatar dropdown handling
+    const avatarDropdownButton = document.querySelector(".avatar");
+    const avatarDropdownMenu = avatarDropdownButton.nextElementSibling;  // The <ul> element that contains the dropdown items
+
+    // Toggle the avatar dropdown visibility
+    avatarDropdownButton.addEventListener("click", function (event) {
+      event.stopPropagation();
+      avatarDropdownMenu.classList.toggle("hidden");
+    });
+
+    // Close avatar dropdown when clicking outside
+    document.addEventListener("click", function (event) {
+      if (!avatarDropdownButton.contains(event.target) && !avatarDropdownMenu.contains(event.target)) {
+        avatarDropdownMenu.classList.add("hidden");
+      }
+    });
+
+
     });
   </script>  
   
