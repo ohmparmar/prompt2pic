@@ -27,14 +27,14 @@
       </a>
     </div>
     <div class="flex-none gap-2">
-      <!-- Avatar Dropdown with downward opening -->
+      <!-- Avatar Dropdown -->
       <div class="dropdown dropdown-end">
         <label tabindex="0" class="btn btn-ghost btn-circle avatar">
           <div class="w-10 rounded-full">
             <img src="https://api.dicebear.com/6.x/initials/svg?seed={{ request.user.username }}" alt="User Avatar" />
           </div>
         </label>
-        <ul tabindex="0" class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-300 text-base-content rounded-box w-52 hidden">
+        <ul tabindex="0" class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-300 text-base-content rounded-box w-52">
           <li>
             <a>
               <i class="fas fa-key mr-2"></i>Change Password
@@ -53,18 +53,12 @@
   <div class="container mx-auto px-4 py-8 flex flex-col md:flex-row gap-8">
     <!-- Prompt History Section -->
     <aside class="w-full md:w-64 bg-base-100 rounded-lg shadow-xl p-6">
-      <h2 class="text-2xl font-bold mb-4 text-primary">Prompt History</h2>
+      <h2 class="text-2xl font-bold mb-4 text-primary">Chat Sessions</h2>
       <ul class="menu bg-base-200 w-full rounded-box">
-        {% for item in history %}
-          <li>
-            <a>
-              <i class="fas fa-history mr-2"></i> {{ item.prompt }}
-            </a>
-          </li>
+        {% for chat in history %}
+          <li><a href="?chat_id={{ chat.id }}">{{ chat.title }}</a></li>
         {% empty %}
-          <li>
-            <a>No history available.</a>
-          </li>
+          <li><a>No chats available</a></li>
         {% endfor %}
       </ul>
     </aside>
@@ -74,74 +68,103 @@
       <h1 class="text-4xl font-bold mb-8 text-white text-center">
         Welcome to Your Creative Hub
       </h1>
-      <div class="card bg-base-100 shadow-xl overflow-hidden">
-        <div class="card-body p-8">
-          <h2 class="card-title text-2xl mb-4 text-primary">Enter Your Prompt</h2>
-          <textarea class="textarea textarea-bordered w-full h-32" placeholder="Describe the image you want to create..."></textarea>
-          
-          <!-- Flex container for Model Selector and Generate Button -->
-          <div class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <!-- Model Selector -->
-            <div class="flex items-center gap-2">
-              <label class="label mb-0">
-                <span class="label-text text-sm">Select Model</span>
-              </label>
-              <!-- Dropdown container with inline-block ensures the width is dictated by the button -->
-              <div class="dropdown dropdown-top inline-block">
-                <button tabindex="0" id="modelDropdownButton" class="btn btn-secondary btn-sm flex items-center gap-2">
-                  <i class="fas fa-robot"></i>
-                  <span id="selected-model-text">Select a Model</span>
-                  <i class="fas fa-caret-down"></i>
-                </button>
-                <!-- The dropdown-content uses w-full so it matches the button's width -->
-                <ul id="modelDropdown" class="dropdown-content menu p-2 shadow bg-base-300 text-base-content rounded-box w-full hidden">
-                  {% for model in models %}
-                    <li>
-                      <a href="javascript:void(0)" onclick="selectModel('{{ model.id }}', '{{ model.name }}')"
-                        class="flex items-center gap-2 block w-full rounded-md hover:bg-base-200">
-                        <i class="fas fa-robot"></i>
-                        <span class="block truncate">
-                          {{ model.name }}
-                          {% if model.description %}
-                            <span class="text-xs text-gray-400"> - {{ model.description }}</span>
-                          {% endif %}
-                        </span>
-                      </a>
-                    </li>
-                  {% endfor %}
-                </ul>
+
+      {% if messages %}
+        <div class="space-y-4 mb-4">
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} shadow-lg">
+              <div>
+                {% if message.tags == 'error' %}
+                  <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                {% else %}
+                  <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                {% endif %}
+                <span>{{ message }}</span>
               </div>
-              <!-- Hidden input to store selected model value -->
-              <input type="hidden" id="model-input" name="model" value="">
             </div>
-            <!-- Generate Image Button -->
-            <button class="btn btn-primary btn-sm">
-              Generate Image
-              <i class="fas fa-wand-magic-sparkles ml-2"></i>
-            </button>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <form method="POST" action="{% url 'image_generation:generate_image' %}">
+        {% csrf_token %}
+        <div class="card bg-base-100 shadow-xl overflow-hidden">
+          <div class="card-body p-8">
+            <h2 class="card-title text-2xl mb-4 text-primary">Enter Your Prompt</h2>
+            <textarea name="prompt" class="textarea textarea-bordered w-full h-32" 
+                     placeholder="Describe the image you want to create...">{{ prompt_input }}</textarea>
+            
+            <div class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div class="flex items-center gap-2">
+                <label class="label mb-0">
+                  <span class="label-text text-sm">Select Model</span>
+                </label>
+                <div class="dropdown dropdown-top" id="modelDropdownContainer">
+                  <button type="button" class="btn btn-secondary btn-sm flex items-center gap-2" onclick="toggleModelDropdown()">
+                    <i class="fas fa-robot"></i>
+                    <span id="selected-model-text">
+                      {% if selected_model %}
+                        {{ selected_model.name }}
+                      {% else %}
+                        Select a Model
+                      {% endif %}
+                    </span>
+                    <i class="fas fa-caret-down"></i>
+                  </button>
+                  <ul id="modelDropdown" class="dropdown-content menu p-2 shadow bg-base-300 text-base-content rounded-box w-full hidden">
+                    {% for model in models %}
+                      <li>
+                        <button type="button" onclick="selectModel('{{ model.id }}', '{{ model.name }}')"
+                          class="flex items-center gap-2 block w-full rounded-md hover:bg-base-200">
+                          <i class="fas fa-robot"></i>
+                          <span class="block truncate">
+                            {{ model.name }}
+                            {% if model.description %}
+                              <span class="text-xs text-gray-400"> - {{ model.description }}</span>
+                            {% endif %}
+                          </span>
+                        </button>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </div>
+                <input type="hidden" id="model-input" name="model" value="{{ selected_model.id }}">
+              </div>
+              <button type="submit" class="btn btn-primary btn-sm">
+                Generate Image
+                <i class="fas fa-wand-magic-sparkles ml-2"></i>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </form>
 
-      <!-- Recent Creations Section -->
+      <!-- Chat History -->
       <div class="mt-8">
-        <h2 class="text-2xl font-bold mb-4 text-white">Recent Creations</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {% for creation in recent_creations %}
-            <div class="card bg-base-100 shadow-xl">
-              <figure class="px-4 pt-4">
-                <img src="{{ creation.image_url|default:'https://www.tailwindai.dev/placeholder.svg' }}" alt="AI Generated Image" class="rounded-xl float-animation" />
-              </figure>
-              <div class="card-body">
-                <h3 class="card-title">{{ creation.title }}</h3>
-                <p>{{ creation.description }}</p>
-                <div class="card-actions justify-end">
-                  <button class="btn btn-sm btn-outline btn-primary">View</button>
-                </div>
+        <h2 class="text-2xl font-bold mb-4 text-white">Chat History</h2>
+        <div class="space-y-4 bg-base-100 p-4 rounded-box max-h-[600px] overflow-y-auto">
+          {% for message in active_chat.messages.all %}
+            <div class="chat {% if message.user == request.user %}chat-end{% else %}chat-start{% endif %}">
+              <div class="chat-bubble {% if message.user == request.user %}chat-bubble-primary{% else %}chat-bubble-secondary{% endif %}">
+                {% if message.image_generated %}
+                  <img src="{{ message.image_generated.url }}" class="w-48 h-48 object-cover rounded-lg float-animation" alt="Generated image">
+                {% else %}
+                  <p>{{ message.user_prompt }}</p>
+                {% endif %}
+              </div>
+              <div class="chat-footer opacity-50 text-xs mt-1">
+                {{ message.created_at|timesince }} ago
+                {% if message.agent %}
+                  <span class="ml-2">via {{ message.agent.name }}</span>
+                {% endif %}
               </div>
             </div>
           {% empty %}
-            <p class="text-white">No recent creations to display.</p>
+            <div class="text-center text-neutral-content">No messages yet. Start by generating an image!</div>
           {% endfor %}
         </div>
       </div>
@@ -155,52 +178,40 @@
   </footer>
 
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    // Model Dropdown Handling
+    function toggleModelDropdown() {
+      const dropdown = document.getElementById('modelDropdown');
+      dropdown.classList.toggle('hidden');
+    }
 
-      
-      const dropdownButton = document.getElementById("modelDropdownButton");
-      const dropdownMenu = document.getElementById("modelDropdown");
+    function selectModel(modelId, modelName) {
+      document.getElementById('model-input').value = modelId;
+      document.getElementById('selected-model-text').textContent = modelName;
+      toggleModelDropdown();
+    }
 
-      // Toggle dropdown when clicking button
-      dropdownButton.addEventListener("click", function (event) {
-        event.stopPropagation(); // Prevent click from propagating to document listener
-        dropdownMenu.classList.toggle("hidden");
-      });
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(event) {
+      // Model dropdown
+      const modelContainer = document.getElementById('modelDropdownContainer');
+      if (!modelContainer.contains(event.target)) {
+        document.getElementById('modelDropdown').classList.add('hidden');
+      }
 
-      // Function to select model and close dropdown
-      window.selectModel = function (modelId, modelName) {
-        document.getElementById("selected-model-text").innerText = modelName;
-        document.getElementById("model-input").value = modelId;
-        dropdownMenu.classList.add("hidden"); // Close dropdown
-      };
-
-      // Close dropdown when clicking outside
-      document.addEventListener("click", function (event) {
-        if (!dropdownButton.contains(event.target) && !dropdownMenu.contains(event.target)) {
-          dropdownMenu.classList.add("hidden");
-        }
-      });
-
-      // Avatar dropdown handling
-    const avatarDropdownButton = document.querySelector(".avatar");
-    const avatarDropdownMenu = avatarDropdownButton.nextElementSibling;  // The <ul> element that contains the dropdown items
-
-    // Toggle the avatar dropdown visibility
-    avatarDropdownButton.addEventListener("click", function (event) {
-      event.stopPropagation();
-      avatarDropdownMenu.classList.toggle("hidden");
-    });
-
-    // Close avatar dropdown when clicking outside
-    document.addEventListener("click", function (event) {
-      if (!avatarDropdownButton.contains(event.target) && !avatarDropdownMenu.contains(event.target)) {
-        avatarDropdownMenu.classList.add("hidden");
+      // Avatar dropdown
+      const avatarDropdown = document.querySelector('.dropdown-end');
+      if (!avatarDropdown.contains(event.target)) {
+        const avatarMenu = avatarDropdown.querySelector('.dropdown-content');
+        if (avatarMenu) avatarMenu.classList.add('hidden');
       }
     });
 
-
+    // Avatar dropdown toggle
+    document.querySelector('.avatar').addEventListener('click', function(event) {
+      event.stopPropagation();
+      const menu = this.parentNode.querySelector('.dropdown-content');
+      menu.classList.toggle('hidden');
     });
-  </script>  
-  
+  </script>
 </body>
 </html>
