@@ -94,12 +94,11 @@
                   <i class="fas fa-caret-down"></i>
                 </button>
                 <!-- The dropdown-content uses w-full so it matches the button's width -->
-                <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-300 text-base-content rounded-box w-full">
+                <ul id="modelDropdown" class="dropdown-content menu p-2 shadow bg-base-300 text-base-content rounded-box w-full hidden">
                   {% for model in models %}
                     <li>
-                      <!-- Added block, w-full, and rounded-md with a hover bg color -->
                       <a href="javascript:void(0)" onclick="selectModel('{{ model.id }}', '{{ model.name }}')"
-                         class="flex items-center gap-2 block w-full rounded-md hover:bg-base-200">
+                        class="flex items-center gap-2 block w-full rounded-md hover:bg-base-200">
                         <i class="fas fa-robot"></i>
                         <span class="block truncate">
                           {{ model.name }}
@@ -156,20 +155,31 @@
   </footer>
 
   <script>
-    function selectModel(modelId, modelName) {
-      // Update the button text with the selected model name
-      document.getElementById('selected-model-text').innerText = modelName;
-  
-      // Set the hidden input value for form submission
-      document.getElementById('model-input').value = modelId;
-  
-      // Close the dropdown
-      let dropdown = document.getElementById('modelDropdownButton');
-      if (dropdown) {
-        dropdown.click(); // Simulates a click to close it
-      }
-    }
-  </script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const dropdownButton = document.getElementById("modelDropdownButton");
+      const dropdownMenu = document.getElementById("modelDropdown");
+
+      // Toggle dropdown when clicking button
+      dropdownButton.addEventListener("click", function (event) {
+        event.stopPropagation(); // Prevent click from propagating to document listener
+        dropdownMenu.classList.toggle("hidden");
+      });
+
+      // Function to select model and close dropdown
+      window.selectModel = function (modelId, modelName) {
+        document.getElementById("selected-model-text").innerText = modelName;
+        document.getElementById("model-input").value = modelId;
+        dropdownMenu.classList.add("hidden"); // Close dropdown
+      };
+
+      // Close dropdown when clicking outside
+      document.addEventListener("click", function (event) {
+        if (!dropdownButton.contains(event.target) && !dropdownMenu.contains(event.target)) {
+          dropdownMenu.classList.add("hidden");
+        }
+      });
+    });
+  </script>  
   
 </body>
 </html>
