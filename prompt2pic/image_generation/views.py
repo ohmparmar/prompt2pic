@@ -13,6 +13,12 @@ from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
 import openai
 from django.conf import settings
+from django.core.files.base import ContentFile
+from io import BytesIO
+import requests
+
+
+client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)  # Explicitly passing API key
 
 def dashboard(request):
     if not request.user.is_authenticated:
@@ -32,6 +38,7 @@ def dashboard(request):
         'prompt_input': request.POST.get('prompt', ''),
         'selected_model': Agent.objects.filter(id=request.POST.get('model')).first()
     }
+
     return render(request, 'image_generation/dashboard.html', context)
 
 
@@ -197,9 +204,6 @@ pipe = pipe.to(device)
 
 
 
-from django.core.files.base import ContentFile
-import openai
-from io import BytesIO
 
 
 def generate_image(request):
@@ -228,16 +232,49 @@ def generate_image(request):
 
             # Generate image using the selected model
             generated_image = None
+            print("model.name.lower()",model.name.lower())
 
             if model.name.lower() == "chat-gpt":
-                response = openai.Image.create(
-                    prompt=prompt,
-                    n=1,
-                    size="1024x1024"
-                )
-                image_url = response["data"][0]["url"]
+                print("inside chat-gpt")
+                response = client.images.generate(
+                            model="dall-e-2",  # or "dall-e-3"
+                            prompt=prompt,
+                            n=1,
+                            size="1024x1024"
+                            )
+
+                image_url = response.data[0].url
+                print("image_url",image_url)
                 response_content = requests.get(image_url).content
+                print("response_content",response_content)
                 generated_image = ContentFile(response_content, name=f"{uuid.uuid4()}.png")
+            elif model.name.lower() == "stability-ai":
+                print("Using Stability AI API for image generation", settings.STABILITYAI_API_KEY)
+                url = "https://api.stability.ai/v2beta/stable-image/generate/ultra"
+    
+                headers = {
+                    "Authorization": f"Bearer {settings.STABILITYAI_API_KEY}",
+                    "Accept": "image/*"
+                }
+
+                # Match --form parameters from cURL
+                files = {
+                    "prompt": (None, prompt),
+                    "output_format": (None, "png"),
+                    "width": (None, "1024"),
+                    "height": (None, "1024"),
+                    "samples": (None, "1")
+                }
+
+                response = requests.post(url, headers=headers, files=files)
+
+                if response.status_code == 200:
+                    generated_image = ContentFile(response.content, name=f"{uuid.uuid4()}.png")
+                else:
+                    print("response",response)
+                    error_message = response.json().get("message", "Unknown error")
+                    messages.error(request, f"Stability AI Error: {error_message}")
+                    return redirect('image_generation:dashboard')
             else:
                 result = pipe(prompt)
                 generated_image = result.images[0]
@@ -261,8 +298,8 @@ def generate_image(request):
             return redirect(f'{reverse("image_generation:dashboard")}?chat_id={active_chat.id}')
 
         except Exception as e:
+            print (str(e))
             messages.error(request, f'Error generating image: {str(e)}')
             return redirect('image_generation:dashboard')
 
     return redirect('image_generation:dashboard')
-    

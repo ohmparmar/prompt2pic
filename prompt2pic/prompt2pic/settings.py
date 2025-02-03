@@ -148,3 +148,4 @@ MEDIA_URL = '/media/'
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 OPENAI_API_KEY = env('OPENAI_API_KEY')
+STABILITYAI_API_KEY = env('STABILITYAI_API_KEY')
