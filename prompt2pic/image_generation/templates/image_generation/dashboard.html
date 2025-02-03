@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
@@ -16,9 +18,55 @@
     .float-animation {
       animation: float 6s ease-in-out infinite;
     }
+
+    /* Loader Animations */
+    @keyframes pulse-ring {
+      0% { transform: scale(0.33); }
+      80%, 100% { opacity: 0; }
+    }
+    @keyframes pulse-dot {
+      0% { transform: scale(0.8); }
+      50% { transform: scale(1); }
+      100% { transform: scale(0.8); }
+    }
+    .loader-ring {
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      animation: pulse-ring 1.25s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+    }
+    .loader-dot {
+      position: absolute;
+      width: 150px;
+      height: 150px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 50%;
+      animation: pulse-dot 1.25s cubic-bezier(0.455, 0.03, 0.515, 0.955) -0.4s infinite;
+    }
+
+    /* Message fade-out animation */
+    .alert-fade {
+      transition: opacity 0.5s ease-out;
+    }
   </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500">
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center backdrop-blur-sm">
+    <div class="relative flex flex-col items-center">
+      <div class="loader-ring"></div>
+      <div class="loader-dot"></div>
+      <div class="text-white text-xl mt-40 font-bold">Generating Your Image</div>
+      <div class="text-white text-sm mt-2">Please wait while we create something amazing...</div>
+      <div class="mt-4">
+        <span class="loading loading-dots loading-lg text-primary"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navbar -->
   <div class="navbar bg-base-100 bg-opacity-80 backdrop-blur-md shadow-lg">
     <div class="flex-1">
       <a class="btn btn-ghost normal-case text-2xl text-primary">
@@ -27,7 +75,6 @@
       </a>
     </div>
     <div class="flex-none gap-2">
-      <!-- Avatar Dropdown -->
       <div class="dropdown dropdown-end">
         <label tabindex="0" class="btn btn-ghost btn-circle avatar">
           <div class="w-10 rounded-full">
@@ -69,10 +116,11 @@
         Welcome to Your Creative Hub
       </h1>
 
+      <!-- Messages Section -->
       {% if messages %}
-        <div class="space-y-4 mb-4">
+        <div id="messagesContainer" class="space-y-4 mb-4">
           {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} shadow-lg">
+            <div class="alert alert-{{ message.tags }} shadow-lg alert-fade">
               <div>
                 {% if message.tags == 'error' %}
                   <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
@@ -90,13 +138,18 @@
         </div>
       {% endif %}
 
-      <form method="POST" action="{% url 'image_generation:generate_image' %}">
+      <!-- Image Generation Form -->
+      <form method="POST" action="{% url 'image_generation:generate_image' %}" id="generateForm">
         {% csrf_token %}
         <div class="card bg-base-100 shadow-xl overflow-hidden">
           <div class="card-body p-8">
             <h2 class="card-title text-2xl mb-4 text-primary">Enter Your Prompt</h2>
-            <textarea name="prompt" class="textarea textarea-bordered w-full h-32" 
-                     placeholder="Describe the image you want to create...">{{ prompt_input }}</textarea>
+            <textarea 
+              name="prompt" 
+              id="promptInput"
+              class="textarea textarea-bordered w-full h-32" 
+              placeholder="Describe the image you want to create..."
+            >{{ prompt_input }}</textarea>
             
             <div class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div class="flex items-center gap-2">
@@ -134,7 +187,12 @@
                 </div>
                 <input type="hidden" id="model-input" name="model" value="{{ selected_model.id }}">
               </div>
-              <button type="submit" class="btn btn-primary btn-sm">
+              <button 
+                type="submit" 
+                id="generateBtn" 
+                class="btn btn-primary btn-sm disabled:opacity-50" 
+                disabled
+              >
                 Generate Image
                 <i class="fas fa-wand-magic-sparkles ml-2"></i>
               </button>
@@ -178,6 +236,34 @@
   </footer>
 
   <script>
+    // Handle form submission and loading state
+    document.getElementById('generateForm').addEventListener('submit', function(e) {
+      document.getElementById('loadingOverlay').classList.remove('hidden');
+    });
+
+    // Handle prompt input and button state
+    const promptInput = document.getElementById('promptInput');
+    const generateBtn = document.getElementById('generateBtn');
+
+    promptInput.addEventListener('input', function() {
+      generateBtn.disabled = this.value.trim().length === 0;
+    });
+
+    // Auto-hide messages after 3 seconds
+    document.addEventListener('DOMContentLoaded', function() {
+      const messages = document.querySelectorAll('.alert');
+      if (messages.length > 0) {
+        setTimeout(() => {
+          messages.forEach(message => {
+            message.style.opacity = '0';
+            setTimeout(() => {
+              message.remove();
+            }, 500);
+          });
+        }, 3000);
+      }
+    });
+
     // Model Dropdown Handling
     function toggleModelDropdown() {
       const dropdown = document.getElementById('modelDropdown');
@@ -211,6 +297,11 @@
       event.stopPropagation();
       const menu = this.parentNode.querySelector('.dropdown-content');
       menu.classList.toggle('hidden');
+    });
+
+    // Check initial prompt value on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      generateBtn.disabled = promptInput.value.trim().length === 0;
     });
   </script>
 </body>
