@@ -16,6 +16,9 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from io import BytesIO
 import requests
+import json
+
+
 
 
 client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)  # Explicitly passing API key
@@ -303,3 +306,54 @@ def generate_image(request):
             return redirect('image_generation:dashboard')
 
     return redirect('image_generation:dashboard')
+
+
+
+# views.py
+from django.db import transaction
+
+def create_chat(request):
+    if not request.user.is_authenticated:
+        return redirect('authentication:login')
+    
+    with transaction.atomic():
+        # Create new chat with default title
+        new_chat = Chat.objects.create(
+            user=request.user,
+            title="New Chat"
+        )
+    
+    return redirect(f'{reverse("image_generation:dashboard")}?chat_id={new_chat.id}')
+
+
+def delete_chat(request, chat_id):
+    if not request.user.is_authenticated:
+        return redirect('authentication:login')
+    
+    try:
+        chat = Chat.objects.get(id=chat_id, user=request.user)
+        chat.delete()
+        messages.success(request, 'Chat deleted successfully')
+    except ObjectDoesNotExist:
+        messages.error(request, 'Chat not found')
+    
+    return redirect('image_generation:dashboard')
+
+
+def rename_chat(request, chat_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=401)
+    
+    if request.method == 'POST':
+        try:
+            chat = Chat.objects.get(id=chat_id, user=request.user)
+            new_title = json.loads(request.body).get('title')
+            if new_title:
+                chat.title = new_title[:50]
+                chat.save()
+                return JsonResponse({'status': 'success'})
+        except Exception as e:
+            print(e)    
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400) 
+    
+    return JsonResponse({'status': 'error'}, status=400)
