@@ -1,5 +1,4 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
@@ -11,7 +10,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
   <style>
-    /* Keep your existing animations */
+    /* Animations */
     @keyframes float {
       0% { transform: translateY(0px); }
       50% { transform: translateY(-10px); }
@@ -21,7 +20,7 @@
       animation: float 6s ease-in-out infinite;
     }
   
-    /* Enhanced loader with vibrant colors */
+    /* Loader Animations */
     @keyframes pulse-ring {
       0% { transform: scale(0.33); opacity: 1; }
       80%, 100% { transform: scale(1.5); opacity: 0; }
@@ -50,7 +49,7 @@
       box-shadow: 0 0 30px rgba(99, 102, 241, 0.8);
     }
   
-    /* Keep your existing layout classes */
+    /* Layout Classes */
     .chat-container {
       height: calc(100vh - 64px - 4rem);
       display: flex;
@@ -71,7 +70,7 @@
       z-index: 10;
     }
   
-    /* Enhanced chat bubbles with vibrant gradients */
+    /* Chat Bubbles */
     .chat-bubble-primary {
       background: linear-gradient(135deg, #6366F1, #818CF8) !important;
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -83,7 +82,7 @@
       color: white;
     }
   
-    /* Keep your existing sidebar styles */
+    /* Sidebar Styles */
     .sidebar-expanded {
       width: 16rem;
       transition: width 0.3s ease;
@@ -92,24 +91,20 @@
       width: 3.5rem;
       transition: width 0.3s ease;
     }
-    .sidebar-collapsed .sidebar-content {
-      display: none;
-    }
+    .sidebar-collapsed .sidebar-content,
     .sidebar-collapsed .sidebar-title {
       display: none;
     }
-  
-    /* Enhanced sidebar with light theme */
     .sidebar {
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(10px);
       border-right: 1px solid rgba(99, 102, 241, 0.2);
       transition: width 0.3s ease;
-      overflow: hidden;
+      overflow: visible;
       position: relative;
     }
   
-    /* Enhanced dropdowns */
+    /* Dropdowns */
     .dropdown-menu {
       position: absolute;
       background: white;
@@ -131,28 +126,49 @@
       background: rgba(99, 102, 241, 0.1);
       color: #6366F1;
     }
-    /* Position the model dropdown above its button */
     .model-dropdown {
       bottom: 100%;
       left: 0;
       margin-bottom: 0.5rem;
     }
-    /* Position the avatar dropdown to the left of the avatar button and bring it ahead of the prompt */
-    .avatar-dropdown {
-      right: 100%;
-      top: 0;
-      margin-right: 0.5rem;
-      z-index: 2000;
+    .chat-dropdown {
+      left: 100% !important;
+      top: 0 !important;
+      right: auto !important;
+      z-index: 4000 !important;
     }
   
-    /* Enhanced textarea */
+    /* Navbar Left Options Animation */
+    #navLeftArea {
+      position: relative;
+      overflow: hidden;
+    }
+    #logo {
+      transition: opacity 0.5s ease;
+    }
+    #navOptions {
+      position: absolute;
+      left: 0;
+      top: 0;
+      display: flex;
+      gap: 0.5rem; /* Reduced spacing */
+      opacity: 0;
+      transform: translateX(-100%);
+      transition: all 0.5s ease;
+    }
+    #navOptions.active {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  
+    /* Textarea */
     .textarea-bordered {
       background: white;
       border: 1px solid rgba(99, 102, 241, 0.2);
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
   
-    /* Custom scrollbar */
+    /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 8px;
     }
@@ -171,10 +187,10 @@
       transition: opacity 0.5s ease-out;
     }
     
-    /* Sidebar specific styles */
+    /* Sidebar Specific */
     .sidebar {
       transition: width 0.3s ease;
-      overflow: hidden;
+      overflow: visible;
       position: relative;
     }
     .sidebar-expanded {
@@ -192,46 +208,44 @@
       display: flex !important;
     }
     
-    /* Ensure dropdown appears correctly */
     .dropdown-content {
       position: absolute;
-      right: 0;
-      top: 100%;
       z-index: 1000;
       min-width: 200px;
     }
-    /* Ensure full visibility of dropdown */
-    .dropdown-end .dropdown-content {
-      right: 0;
-      left: auto;
-    }
-    
-    /* --- NEW CSS ADJUSTMENTS --- */
-    /* 1. Keep collapsed sidebar buttons at the top */
+  
     .sidebar-collapsed-content {
       top: 1rem;
       left: 50%;
       transform: translateX(-50%);
     }
-    
-    /* 2. Clip the chat sessions list so that hover backgrounds are confined within the rounded box */
     .menu.bg-base-200 {
       clip-path: inset(0 round 0.375rem);
     }
-    
-    /* 3. Constrain the dropdown inside the sidebar */
     .sidebar .dropdown-content {
       max-width: 260px;
     }
-    /* --- END OF NEW CSS ADJUSTMENTS --- */
     
-    /* --- NEW INLINE RENAME STYLES --- */
+    /* Inline Rename Styles */
     .chat-title-form input {
       font-size: 0.875rem;
       padding: 0.25rem;
       border: 1px solid #ccc;
       border-radius: 0.25rem;
       width: 100%;
+    }
+  
+    /* Tooltip Overrides */
+    .tooltip {
+      z-index: 3000 !important;
+    }
+    .tooltip:before,
+    .tooltip:after {
+      background-color: rgba(0, 0, 0, 0.85) !important;
+      color: #fff !important;
+      font-size: 0.875rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.25rem;
     }
   </style>
 </head>
@@ -251,34 +265,29 @@
 
   <!-- Navbar -->
   <div class="navbar bg-base-100 bg-opacity-80 backdrop-blur-md shadow-lg">
-    <div class="flex-1">
-      <a class="btn btn-ghost normal-case text-2xl text-primary">
+    <!-- Left Area: Contains the Logo and (hidden) Options -->
+    <div class="flex-1 relative" id="navLeftArea">
+      <a id="logo" class="btn btn-ghost normal-case text-2xl text-primary">
         Prompt2Pic
         <i class="fas fa-camera-retro ml-2 text-secondary"></i>
       </a>
+      <div id="navOptions" class="flex items-center">
+        <a id="changePassword" class="btn btn-ghost text-primary">
+          Change Password <i class="fas fa-lock ml-1"></i>
+        </a>
+        <a id="logout" class="btn btn-ghost text-primary" href="{% url 'authentication:logout' %}">
+          Logout <i class="fas fa-sign-out-alt ml-1"></i>
+        </a>
+      </div>
     </div>
+    <!-- Right Area: Avatar -->
     <div class="flex-none gap-2">
-      <!-- Avatar Dropdown using a relative container -->
       <div class="relative inline-block text-left">
         <button id="avatarBtn" class="btn btn-ghost btn-circle avatar">
           <div class="w-10 rounded-full">
             <img src="https://api.dicebear.com/6.x/initials/svg?seed={{ request.user.username }}" alt="User Avatar" />
           </div>
         </button>
-        <div id="avatarDropdown" class="dropdown-menu hidden avatar-dropdown">
-          <ul>
-            <li>
-              <a class="flex items-center gap-2" href="#">
-                <i class="fas fa-key"></i> Change Password
-              </a>
-            </li>
-            <li>
-              <a class="flex items-center gap-2" href="{% url 'authentication:logout' %}">
-                <i class="fas fa-sign-out-alt"></i> Logout
-              </a>
-            </li>
-          </ul>
-        </div>
       </div>
     </div>
   </div>
@@ -294,8 +303,7 @@
           </button>
         </div>
 
-        <a href="{% url 'image_generation:create_chat' %}" 
-           class="btn btn-primary w-full mb-4 flex items-center gap-2">
+        <a href="{% url 'image_generation:create_chat' %}" class="btn btn-primary w-full mb-4 flex items-center gap-2">
           <i class="fas fa-plus"></i>
           <span>New Chat</span>
         </a>
@@ -305,11 +313,9 @@
           <li class="relative w-full max-w-full hover:bg-primary/10 {% if active_chat.id == chat.id %}bg-primary/10{% endif %}">
             <div class="flex items-center justify-between w-full p-3">
               <div class="flex-1 mx-2 truncate min-w-0">
-                <!-- Chat title wrapped in an anchor for chat selection -->
                 <a href="?chat_id={{ chat.id }}" id="chat-title-{{ chat.id }}" class="chat-title-text">
                   {{ chat.title }}
                 </a>
-                <!-- Inline rename form (hidden by default) -->
                 <form class="inline-block hidden chat-title-form" id="chat-form-{{ chat.id }}" method="post" action="{% url 'image_generation:rename_chat' chat.id %}">
                   {% csrf_token %}
                   <input type="text" name="title" value="{{ chat.title }}"
@@ -317,18 +323,15 @@
                          onblur="disableAndSubmit(this.form);" />
                 </form>
               </div>
-              <!-- Date with flex-shrink-0 -->
               <span class="text-xs text-gray-400 flex-shrink-0">
                 {{ chat.created_at|date:"M d" }}
               </span>
-              <!-- Dropdown container for three dots -->
               <div class="dropdown dropdown-end flex-none w-8 text-right flex-shrink-0">
                 <div tabindex="0" role="button" class="btn btn-ghost btn-xs m-1">
                   <i class="fas fa-ellipsis-v"></i>
                 </div>
-                <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52">
+                <ul tabindex="0" class="dropdown-content menu chat-dropdown p-2 shadow bg-base-100 rounded-box w-52">
                   <li>
-                    <!-- When Rename is clicked, show the inline renaming form -->
                     <a onclick="showRenameForm('{{ chat.id }}')">
                       <i class="fas fa-pencil-alt mr-2"></i>Rename
                     </a>
@@ -336,8 +339,7 @@
                   <li>
                     <form method="post" action="{% url 'image_generation:delete_chat' chat.id %}">
                       {% csrf_token %}
-                      <button type="submit" class="w-full text-left text-error" 
-                              onclick="return confirm('Delete this chat?')">
+                      <button type="submit" class="w-full text-left text-error" onclick="return confirm('Delete this chat?')">
                         <i class="fas fa-trash-alt mr-2"></i>Delete
                       </button>
                     </form>
@@ -350,24 +352,18 @@
         </ul>
       </div>
 
-      <!-- Collapsed Sidebar Toggle (visible only when collapsed) -->
       <div class="sidebar-collapsed-content hidden absolute top-4 left-1/2 -translate-x-1/2 flex-col items-center gap-2">
-        <a href="{% url 'image_generation:create_chat' %}" 
-           class="btn btn-circle btn-primary btn-sm tooltip tooltip-right" 
-           data-tip="New Chat">
-          <i class="fas fa-plus"></i>
+        <a href="{% url 'image_generation:create_chat' %}" class="btn btn-circle btn-primary btn-sm tooltip tooltip-right" data-tip="New Chat">
+          <i class="fas fa-comment-dots fa-2x"></i>
         </a>
-        <button id="sidebarToggleCollapsedBtn" 
-                class="btn btn-circle btn-sm btn-ghost tooltip tooltip-right" 
-                data-tip="Expand">
+        <button id="sidebarToggleCollapsedBtn" class="btn btn-circle btn-sm btn-ghost tooltip tooltip-right" data-tip="Expand">
           <i class="fas fa-angle-right"></i>
         </button>
       </div>
     </aside>
 
-    <!-- Main Chat Area with richer gradient background -->
+    <!-- Main Chat Area -->
     <main class="flex-1 flex flex-col main-chat-area">
-      <!-- Alerts/Messages Section -->
       {% if messages %}
         <div id="messagesContainer" class="p-4">
           {% for message in messages %}
@@ -376,11 +372,9 @@
         </div>
       {% endif %}
 
-      <!-- Chat Messages -->
       <div class="messages-container">
         {% for message in active_chat.messages.all %}
           <div class="mb-8">
-            <!-- User Prompt (Right side) -->
             <div class="chat chat-end mb-2">
               <div class="chat-image avatar">
                 <div class="w-10 rounded-full">
@@ -391,7 +385,6 @@
                 <p>{{ message.user_prompt }}</p>
               </div>
             </div>
-            <!-- Agent Response (Left side) -->
             <div class="chat chat-start">
               <div class="chat-image avatar">
                 <div class="w-10 rounded-full">
@@ -421,26 +414,17 @@
         {% endfor %}
       </div>
 
-      <!-- Prompt Input Area -->
       <div class="prompt-container">
         <form method="POST" action="{% url 'image_generation:generate_image' %}" id="generateForm" class="w-full">
           {% csrf_token %}
           <div class="flex flex-col gap-4">
             <div class="flex gap-4 items-end">
               <div class="flex-1">
-                <textarea 
-                  name="prompt" 
-                  id="promptInput"
-                  class="textarea textarea-bordered w-full resize-y" 
-                  rows="4"
-                  placeholder="Describe the image you want to create...">{{ prompt_input }}</textarea>
+                <textarea name="prompt" id="promptInput" class="textarea textarea-bordered w-full resize-y" rows="4" placeholder="Describe the image you want to create...">{{ prompt_input }}</textarea>
               </div>
               <div class="flex-shrink-0 flex flex-col gap-2 relative">
-                <!-- Model Selection Dropdown -->
                 <div class="relative">
-                  <button type="button" 
-                          id="modelSelectBtn"
-                          class="btn btn-secondary btn-sm w-full flex items-center justify-between gap-2">
+                  <button type="button" id="modelSelectBtn" class="btn btn-secondary btn-sm w-full flex items-center justify-between gap-2">
                     <i class="fas fa-robot"></i>
                     <span id="selected-model-text" class="truncate">
                       {% if selected_model %}{{ selected_model.name }}{% else %}Select Model{% endif %}
@@ -450,8 +434,7 @@
                   <div id="modelDropdown" class="dropdown-menu model-dropdown hidden">
                     <ul>
                       {% for model in models %}
-                        <li class="flex items-center gap-2"
-                            onclick="selectModel('{{ model.id }}', '{{ model.name }}')">
+                        <li class="flex items-center gap-2" onclick="selectModel('{{ model.id }}', '{{ model.name }}')">
                           <i class="fas fa-robot text-primary"></i>
                           <span>{{ model.name }}</span>
                         </li>
@@ -459,10 +442,7 @@
                     </ul>
                   </div>
                 </div>
-                <button type="submit" 
-                        id="generateBtn" 
-                        class="btn btn-primary btn-sm" 
-                        disabled>
+                <button type="submit" id="generateBtn" class="btn btn-primary btn-sm" disabled>
                   Generate
                   <i class="fas fa-wand-magic-sparkles ml-2"></i>
                 </button>
@@ -487,10 +467,9 @@
       document.getElementById('loadingOverlay').classList.remove('hidden');
     });
 
-    // Handle prompt input and button state
+    // Prompt input button state
     const promptInput = document.getElementById('promptInput');
     const generateBtn = document.getElementById('generateBtn');
-
     promptInput.addEventListener('input', function() {
       generateBtn.disabled = this.value.trim().length === 0;
     });
@@ -502,15 +481,13 @@
         setTimeout(() => {
           alerts.forEach(alert => {
             alert.style.opacity = '0';
-            setTimeout(() => {
-              alert.remove();
-            }, 500);
+            setTimeout(() => { alert.remove(); }, 500);
           });
         }, 3000);
       }
     });
 
-    // Model (Agent) Dropdown Functions
+    // Model Dropdown Functions
     function toggleModelDropdown() {
       const dropdown = document.getElementById('modelDropdown');
       dropdown.classList.toggle('hidden');
@@ -520,82 +497,79 @@
       document.getElementById('selected-model-text').textContent = modelName;
       document.getElementById('modelDropdown').classList.add('hidden');
     }
-    // Attach click event listener for model selection button
     document.getElementById('modelSelectBtn').addEventListener('click', function(e) {
       e.stopPropagation();
       toggleModelDropdown();
     });
 
-    // Avatar Dropdown Functions
-    document.getElementById('avatarBtn').addEventListener('click', function(e) {
+    // Navbar Options Toggle via Avatar Click
+    const avatarBtn = document.getElementById('avatarBtn');
+    const navOptions = document.getElementById('navOptions');
+    const logo = document.getElementById('logo');
+
+    function toggleNavOptions() {
+      if (navOptions.classList.contains('active')) {
+        navOptions.classList.remove('active');
+        logo.style.opacity = 1;
+      } else {
+        navOptions.classList.add('active');
+        logo.style.opacity = 0;
+      }
+    }
+
+    avatarBtn.addEventListener('click', function(e) {
       e.stopPropagation();
-      const avatarDropdown = document.getElementById('avatarDropdown');
-      avatarDropdown.classList.toggle('hidden');
+      toggleNavOptions();
     });
-    // Hide dropdowns when clicking outside
+
     document.addEventListener('click', function(e) {
+      if (!document.getElementById('navLeftArea').contains(e.target)) {
+        navOptions.classList.remove('active');
+        logo.style.opacity = 1;
+      }
       const modelDropdown = document.getElementById('modelDropdown');
       if (!modelDropdown.contains(e.target)) {
         modelDropdown.classList.add('hidden');
       }
-      const avatarDropdown = document.getElementById('avatarDropdown');
-      if (!document.getElementById('avatarBtn').contains(e.target)) {
-        avatarDropdown.classList.add('hidden');
-      }
     });
 
-    // Sidebar Toggle Functionality
+    // Sidebar Toggle Functions
     function toggleSidebar() {
       const sidebar = document.getElementById('chatHistorySidebar');
       const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
       const sidebarToggleCollapsedBtn = document.getElementById('sidebarToggleCollapsedBtn');
-
       if (sidebar.classList.contains('sidebar-expanded')) {
-        // Collapse sidebar
         sidebar.classList.remove('sidebar-expanded');
         sidebar.classList.add('sidebar-collapsed');
-        
-        // Update toggle button icons
         sidebarToggleBtn.innerHTML = '<i class="fas fa-angle-right"></i>';
         if (sidebarToggleCollapsedBtn) {
           sidebarToggleCollapsedBtn.innerHTML = '<i class="fas fa-angle-right"></i>';
         }
-        
-        // Hide expanded content, show collapsed content
         sidebar.querySelector('.sidebar-content').style.display = 'none';
         sidebar.querySelector('.sidebar-collapsed-content').classList.remove('hidden');
       } else {
-        // Expand sidebar
         sidebar.classList.remove('sidebar-collapsed');
         sidebar.classList.add('sidebar-expanded');
-        
-        // Update toggle button icons
         sidebarToggleBtn.innerHTML = '<i class="fas fa-angle-left"></i>';
         if (sidebarToggleCollapsedBtn) {
           sidebarToggleCollapsedBtn.innerHTML = '<i class="fas fa-angle-left"></i>';
         }
-        
-        // Show expanded content, hide collapsed content
         sidebar.querySelector('.sidebar-content').style.display = 'block';
         sidebar.querySelector('.sidebar-collapsed-content').classList.add('hidden');
       }
     }
-
-    // Attach event listeners to the sidebar toggle buttons
     document.getElementById('sidebarToggleBtn').addEventListener('click', toggleSidebar);
-    if(document.getElementById('sidebarToggleCollapsedBtn')){
+    if (document.getElementById('sidebarToggleCollapsedBtn')) {
       document.getElementById('sidebarToggleCollapsedBtn').addEventListener('click', toggleSidebar);
     }
 
     // Inline Rename Functions
     function showRenameForm(chatId) {
-      // Hide the static text (the anchor) and show the inline form
       const titleText = document.getElementById('chat-title-' + chatId);
       const titleForm = document.getElementById('chat-form-' + chatId);
       if (titleText && titleForm) {
         titleText.classList.add('hidden');
         titleForm.classList.remove('hidden');
-        // Focus the input field and select the text
         const input = titleForm.querySelector('input[name="title"]');
         if (input) {
           input.focus();
@@ -604,12 +578,10 @@
       }
     }
     function disableAndSubmit(form) {
-      // Disable all form inputs to prevent duplicate submission
       const inputs = form.querySelectorAll('input, button, select, textarea');
       inputs.forEach(input => input.disabled = true);
       form.submit();
     }
-    
   </script>
 </body>
 </html>
