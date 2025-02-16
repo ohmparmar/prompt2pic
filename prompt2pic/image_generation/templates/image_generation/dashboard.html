@@ -964,180 +964,71 @@
         form.submit();
       }
 
-      /* Change Password Modal Logic */
-      const changePasswordLink = document.getElementById("changePassword");
-      const changePasswordModal = document.getElementById(
-        "changePasswordModal"
-      );
-      const closeModal = document.getElementById("closeModal");
-      const newPasswordInput = document.getElementById("newPassword");
-      const confirmPasswordInput = document.getElementById("confirmPassword");
-      const newPasswordError = document.getElementById("newPasswordError");
-      const confirmPasswordError = document.getElementById(
-        "confirmPasswordError"
-      );
-      const changePasswordSubmit = document.getElementById(
-        "changePasswordSubmit"
-      );
-      const toggleNewPassword = document.getElementById("toggleNewPassword");
-      const toggleConfirmPassword = document.getElementById(
-        "toggleConfirmPassword"
-      );
+      // Prevent event propagation for dropdowns
+      document.querySelectorAll(".dropdown-content").forEach((dropdown) => {
+        dropdown.addEventListener("click", function (e) {
+          e.stopPropagation();
+        });
+      });
 
-      // Regular expression for validation: one capital, one number, one special char, min 6 chars
-      const passwordRegex =
-        /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{6,}$/;
-      function openChangePasswordModal() {
-        const modal = document.getElementById("changePasswordModal");
-        modal.classList.remove("hidden");
-        modal.classList.add("flex");
-
-        // Reset form
-        document.getElementById("changePasswordForm").reset();
-        document.getElementById("changePasswordSubmit").disabled = true;
-
-        // Hide error messages
-        document
-          .getElementById("newPasswordError")
-          .classList.remove("opacity-100");
-        document
-          .getElementById("confirmPasswordError")
-          .classList.remove("opacity-100");
-      }
-
-      // Modal Close Function
-      function closeChangePasswordModal() {
-        const modal = document.getElementById("changePasswordModal");
-        modal.classList.remove("flex");
-        modal.classList.add("hidden");
-      }
-
-      // Event Listeners
+      // Enhanced Change Password Modal Handling
       document
         .getElementById("changePassword")
-        .addEventListener("click", openChangePasswordModal);
-      document
-        .getElementById("closeModal")
-        .addEventListener("click", closeChangePasswordModal);
-      document
-        .getElementById("closeModalBtn")
-        .addEventListener("click", closeChangePasswordModal);
-
-      // Close modal when clicking outside
-      document
-        .getElementById("changePasswordModal")
         .addEventListener("click", function (e) {
-          if (e.target === this) {
-            closeChangePasswordModal();
-          }
-        });
-      function validateNewPassword() {
-        const value = newPasswordInput.value;
-        if (!passwordRegex.test(value)) {
-          newPasswordError.classList.add("show");
-          return false;
-        } else {
-          newPasswordError.classList.remove("show");
-          return true;
-        }
-      }
-
-      function validateConfirmPassword() {
-        if (confirmPasswordInput.value !== newPasswordInput.value) {
-          confirmPasswordError.classList.add("show");
-          return false;
-        } else {
-          confirmPasswordError.classList.remove("show");
-          return true;
-        }
-      }
-
-      function checkFormValidity() {
-        const validNew = validateNewPassword();
-        const validConfirm = validateConfirmPassword();
-        changePasswordSubmit.disabled = !(validNew && validConfirm);
-      }
-
-      newPasswordInput.addEventListener("input", checkFormValidity);
-      confirmPasswordInput.addEventListener("input", checkFormValidity);
-
-      // Toggle password visibility
-      toggleNewPassword.addEventListener("click", function () {
-        if (newPasswordInput.type === "password") {
-          newPasswordInput.type = "text";
-          toggleNewPassword.innerHTML = '<i class="fas fa-eye-slash"></i>';
-        } else {
-          newPasswordInput.type = "password";
-          toggleNewPassword.innerHTML = '<i class="fas fa-eye"></i>';
-        }
-      });
-      toggleConfirmPassword.addEventListener("click", function () {
-        if (confirmPasswordInput.type === "password") {
-          confirmPasswordInput.type = "text";
-          toggleConfirmPassword.innerHTML = '<i class="fas fa-eye-slash"></i>';
-        } else {
-          confirmPasswordInput.type = "password";
-          toggleConfirmPassword.innerHTML = '<i class="fas fa-eye"></i>';
-        }
-      });
-
-      // Show modal
-      changePasswordLink.addEventListener("click", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        changePasswordModal.classList.add("active");
-      });
-
-      // Hide modal
-      closeModal.addEventListener("click", function () {
-        changePasswordModal.classList.remove("active");
-      });
-
-      // Hide modal on outside click
-      window.addEventListener("click", function (e) {
-        if (e.target === changePasswordModal) {
-          changePasswordModal.classList.remove("active");
-        }
-      });
-
-      let currentChatId = null;
-      const deleteModal = document.getElementById("deleteModal");
-      const deleteButtons = document.querySelectorAll(".delete-btn");
-      const cancelDelete = document.getElementById("cancelDelete");
-      const confirmDelete = document.getElementById("confirmDelete");
-
-      deleteButtons.forEach((button) => {
-        button.addEventListener("click", (e) => {
           e.preventDefault();
           e.stopPropagation();
-          currentChatId = button.dataset.chatId;
-          console.log("Delete button clicked for chat ID:", currentChatId); // Debugging log
-          deleteModal.classList.add("active");
+          const modal = document.getElementById("changePasswordModal");
+          modal.classList.remove("hidden");
+          modal.classList.add("flex");
+        });
+
+      // Delete Chat Modal Handling
+      document.addEventListener("DOMContentLoaded", function () {
+        const deleteButtons = document.querySelectorAll(".delete-btn");
+        const deleteModal = document.getElementById("deleteModal");
+        const cancelDelete = document.getElementById("cancelDelete");
+        const confirmDelete = document.getElementById("confirmDelete");
+
+        let currentDeleteForm = null;
+
+        deleteButtons.forEach((button) => {
+          button.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Find the closest form
+            currentDeleteForm = this.closest("form");
+
+            // Show delete confirmation modal
+            deleteModal.classList.add("active");
+          });
+        });
+
+        cancelDelete.addEventListener("click", function () {
+          deleteModal.classList.remove("active");
+          currentDeleteForm = null;
+        });
+
+        confirmDelete.addEventListener("click", function () {
+          if (currentDeleteForm) {
+            currentDeleteForm.submit();
+          }
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener("click", function (e) {
+          if (e.target === deleteModal) {
+            deleteModal.classList.remove("active");
+            currentDeleteForm = null;
+          }
         });
       });
 
-      cancelDelete.addEventListener("click", () => {
-        deleteModal.classList.remove("active");
-        currentChatId = null;
-      });
-
-      confirmDelete.addEventListener("click", () => {
-        console.log("Confirm delete clicked"); // Debugging log
-        if (currentChatId) {
-          const form = document.getElementById(`delete-form-${currentChatId}`);
-          console.log("Submitting delete form for chat ID:", currentChatId); // Debugging log
-          form.submit();
-        }
-        deleteModal.classList.remove("active");
-        currentChatId = null;
-      });
-
-      // Close modal when clicking outside
-      window.addEventListener("click", (e) => {
-        if (e.target === deleteModal) {
-          deleteModal.classList.remove("active");
-          currentChatId = null;
-        }
+      // Prevent dropdown from closing when clicking inside
+      document.querySelectorAll(".dropdown-content").forEach((dropdown) => {
+        dropdown.addEventListener("click", function (e) {
+          e.stopPropagation();
+        });
       });
     </script>
   </body>
