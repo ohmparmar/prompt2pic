@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from diffusers import StableDiffusionPipeline
 import torch
-from .models import Chat, Agent,ChatMessage
+from .models import Chat, Agent, ChatMessage
 from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
 import openai
@@ -17,45 +17,49 @@ from django.core.files.base import ContentFile
 from io import BytesIO
 import requests
 import json
-
-
+import re
+from django.contrib.auth.decorators import login_required
 
 
 client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)  # Explicitly passing API key
 
+
 def dashboard(request):
     if not request.user.is_authenticated:
-        return redirect('authentication:login')
-    
+        return redirect("authentication:login")
+
     try:
-        chat_id = request.GET.get('chat_id')
+        chat_id = request.GET.get("chat_id")
         active_chat = Chat.objects.get(id=chat_id, user=request.user)
+
     except (ObjectDoesNotExist, ValueError):
         active_chat = Chat.objects.filter(user=request.user).first()
 
     context = {
-        'history': Chat.objects.filter(user=request.user).order_by('-created_at'),
-        'models': Agent.objects.filter(is_available=True),
-        'active_chat': active_chat,
-        'error': messages.get_messages(request),
-        'prompt_input': request.POST.get('prompt', ''),
-        'selected_model': Agent.objects.filter(id=request.POST.get('model')).first()
+        "history": Chat.objects.filter(user=request.user).order_by("-created_at"),
+        "models": Agent.objects.filter(is_available=True),
+        "active_chat": active_chat,
+        "error": messages.get_messages(request),
+        "prompt_input": request.POST.get("prompt", ""),
+        "selected_model": Agent.objects.filter(id=request.POST.get("model")).first(),
     }
 
-    return render(request, 'image_generation/dashboard.html', context)
+    return render(request, "image_generation/dashboard.html", context)
 
 
 def guest_dashboard(request):
     # if request.user.is_authenticated:
     #     return render(request, 'image_generation/dashboard.html')
-    return render(request, 'image_generation/guest_user_dashboard.html')
+    return render(request, "image_generation/guest_user_dashboard.html")
 
 
 # Initialize your model once when the server starts (optional but recommended)
 # You can do this in a module-level variable so that it’s not reloaded on every request.
 MODEL_ID = "CompVis/stable-diffusion-v1-4"  # or any other compatible model
 device = "cuda" if torch.cuda.is_available() else "cpu"
-pipe = StableDiffusionPipeline.from_pretrained(MODEL_ID, torch_dtype=torch.float16 if device == "cuda" else torch.float32)
+pipe = StableDiffusionPipeline.from_pretrained(
+    MODEL_ID, torch_dtype=torch.float16 if device == "cuda" else torch.float32
+)
 pipe = pipe.to(device)
 
 # def generate_image(request):
@@ -71,7 +75,7 @@ pipe = pipe.to(device)
 #             if not prompt:
 #                 messages.error(request, 'Please enter a prompt')
 #                 return redirect('image_generation:dashboard')
-                
+
 #             if not model_id:
 #                 messages.error(request, 'Please select a model')
 #                 return redirect('image_generation:dashboard')
@@ -205,59 +209,60 @@ pipe = pipe.to(device)
 #     return redirect('image_generation:dashboard')
 
 
-
-
-
-
 def generate_image(request):
     if not request.user.is_authenticated:
-        return redirect('authentication:login')
+        return redirect("authentication:login")
 
-    if request.method == 'POST':
+    if request.method == "POST":
         try:
-            prompt = request.POST.get('prompt', '').strip()
-            model_id = request.POST.get('model')
+            prompt = request.POST.get("prompt", "").strip()
+            model_id = request.POST.get("model")
 
             if not prompt:
-                messages.error(request, 'Please enter a prompt')
-                return redirect('image_generation:dashboard')
+                messages.error(request, "Please enter a prompt")
+                return redirect("image_generation:dashboard")
 
             if not model_id:
-                messages.error(request, 'Please select a model')
-                return redirect('image_generation:dashboard')
+                messages.error(request, "Please select a model")
+                return redirect("image_generation:dashboard")
 
             # Get selected model
             try:
                 model = Agent.objects.get(id=model_id, is_available=True)
             except ObjectDoesNotExist:
-                messages.error(request, 'Selected model is not available')
-                return redirect('image_generation:dashboard')
+                messages.error(request, "Selected model is not available")
+                return redirect("image_generation:dashboard")
 
             # Generate image using the selected model
             generated_image = None
-            print("model.name.lower()",model.name.lower())
+            print("model.name.lower()", model.name.lower())
 
             if model.name.lower() == "chat-gpt":
                 print("inside chat-gpt")
                 response = client.images.generate(
-                            model="dall-e-2",  # or "dall-e-3"
-                            prompt=prompt,
-                            n=1,
-                            size="1024x1024"
-                            )
+                    model="dall-e-2",  # or "dall-e-3"
+                    prompt=prompt,
+                    n=1,
+                    size="1024x1024",
+                )
 
                 image_url = response.data[0].url
-                print("image_url",image_url)
+                print("image_url", image_url)
                 response_content = requests.get(image_url).content
-                print("response_content",response_content)
-                generated_image = ContentFile(response_content, name=f"{uuid.uuid4()}.png")
+                print("response_content", response_content)
+                generated_image = ContentFile(
+                    response_content, name=f"{uuid.uuid4()}.png"
+                )
             elif model.name.lower() == "stability-ai":
-                print("Using Stability AI API for image generation", settings.STABILITYAI_API_KEY)
+                print(
+                    "Using Stability AI API for image generation",
+                    settings.STABILITYAI_API_KEY,
+                )
                 url = "https://api.stability.ai/v2beta/stable-image/generate/ultra"
-    
+
                 headers = {
                     "Authorization": f"Bearer {settings.STABILITYAI_API_KEY}",
-                    "Accept": "image/*"
+                    "Accept": "image/*",
                 }
 
                 # Match --form parameters from cURL
@@ -266,94 +271,131 @@ def generate_image(request):
                     "output_format": (None, "png"),
                     "width": (None, "1024"),
                     "height": (None, "1024"),
-                    "samples": (None, "1")
+                    "samples": (None, "1"),
                 }
 
                 response = requests.post(url, headers=headers, files=files)
 
                 if response.status_code == 200:
-                    generated_image = ContentFile(response.content, name=f"{uuid.uuid4()}.png")
+                    generated_image = ContentFile(
+                        response.content, name=f"{uuid.uuid4()}.png"
+                    )
                 else:
-                    print("response",response)
+                    print("response", response)
                     error_message = response.json().get("message", "Unknown error")
                     messages.error(request, f"Stability AI Error: {error_message}")
-                    return redirect('image_generation:dashboard')
+                    return redirect("image_generation:dashboard")
             else:
                 result = pipe(prompt)
                 generated_image = result.images[0]
                 img_io = BytesIO()
-                generated_image.save(img_io, format='PNG')
-                generated_image = ContentFile(img_io.getvalue(), name=f"{uuid.uuid4()}.png")
+                generated_image.save(img_io, format="PNG")
+                generated_image = ContentFile(
+                    img_io.getvalue(), name=f"{uuid.uuid4()}.png"
+                )
 
             # Store image in chat history
             active_chat, _ = Chat.objects.get_or_create(
                 user=request.user,
-                defaults={"title": prompt[:50] + ('...' if len(prompt) > 50 else '')}
+                defaults={"title": prompt[:50] + ("..." if len(prompt) > 50 else "")},
             )
 
             chat_message = ChatMessage.objects.create(
                 chat=active_chat,
                 user_prompt=prompt,
                 agent=model,
-                image_generated=generated_image
+                image_generated=generated_image,
             )
 
-            return redirect(f'{reverse("image_generation:dashboard")}?chat_id={active_chat.id}')
+            return redirect(
+                f'{reverse("image_generation:dashboard")}?chat_id={active_chat.id}'
+            )
 
         except Exception as e:
-            print (str(e))
-            messages.error(request, f'Error generating image: {str(e)}')
-            return redirect('image_generation:dashboard')
+            print(str(e))
+            messages.error(request, f"Error generating image: {str(e)}")
+            return redirect("image_generation:dashboard")
 
-    return redirect('image_generation:dashboard')
-
+    return redirect("image_generation:dashboard")
 
 
 # views.py
 from django.db import transaction
 
+
 def create_chat(request):
     if not request.user.is_authenticated:
-        return redirect('authentication:login')
-    
+        return redirect("authentication:login")
+
     with transaction.atomic():
         # Create new chat with default title
-        new_chat = Chat.objects.create(
-            user=request.user,
-            title="New Chat"
-        )
-    
+        new_chat = Chat.objects.create(user=request.user, title="New Chat")
+
     return redirect(f'{reverse("image_generation:dashboard")}?chat_id={new_chat.id}')
 
 
 def delete_chat(request, chat_id):
     if not request.user.is_authenticated:
-        return redirect('authentication:login')
-    
+        return redirect("authentication:login")
+
     try:
         chat = Chat.objects.get(id=chat_id, user=request.user)
         chat.delete()
-        messages.success(request, 'Chat deleted successfully')
+        messages.success(request, "Chat deleted successfully")
     except ObjectDoesNotExist:
-        messages.error(request, 'Chat not found')
-    
-    return redirect('image_generation:dashboard')
+        messages.error(request, "Chat not found")
+
+    return redirect("image_generation:dashboard")
 
 
 def rename_chat(request, chat_id):
     if not request.user.is_authenticated:
-        return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=401)
-    
-    if request.method == 'POST':
+        return JsonResponse({"status": "error", "message": "Unauthorized"}, status=401)
+
+    if request.method == "POST":
         try:
             chat = Chat.objects.get(id=chat_id, user=request.user)
-            new_title = json.loads(request.body).get('title')
-            if new_title:
-                chat.title = new_title[:50]
-                chat.save()
-                return JsonResponse({'status': 'success'})
+            new_title = request.POST.get("title", "")[:50]  # Get title or empty string
+            chat.title = new_title or f"Chat {chat.id}"  # Set default if empty
+            chat.save()
+            return redirect("image_generation:dashboard")
+        except Chat.DoesNotExist:
+            return JsonResponse(
+                {"status": "error", "message": "Chat not found"}, status=404
+            )
         except Exception as e:
-            print(e)    
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=400) 
-    
-    return JsonResponse({'status': 'error'}, status=400)
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+
+    return JsonResponse({"status": "error", "message": "Invalid method"}, status=400)
+
+
+PASSWORD_REGEX = re.compile(
+    r'^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};\'":\\|,.<>/?]).{6,}$'
+)
+
+
+@login_required
+def change_password(request):
+    if request.method == "POST":
+        new_password = request.POST.get("new_password", "")
+        confirm_password = request.POST.get("confirm_password", "")
+
+        if not PASSWORD_REGEX.match(new_password):
+            messages.error(
+                request,
+                "Password must have one capital letter, one number, one special character, and be at least 6 characters long.",
+            )
+            return redirect("image_generation:dashboard")
+        if new_password != confirm_password:
+            messages.error(request, "Passwords do not match.")
+            return redirect("image_generation:dashboard")
+
+        # Update password and keep user logged in.
+        user = request.user
+        user.set_password(new_password)
+        user.save()
+        update_session_auth_hash(request, user)  # Important: keeps the user logged in
+        messages.success(request, "Password changed successfully.")
+        return redirect("image_generation:dashboard")
+
+    return render(request, "image_generation/change_password.html")

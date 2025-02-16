@@ -9,4 +9,6 @@ urlpatterns = [
     path('create-chat/', views.create_chat, name='create_chat'),
     path('delete-chat/<int:chat_id>/', views.delete_chat, name='delete_chat'),
     path('rename-chat/<int:chat_id>/', views.rename_chat, name='rename_chat'),
+    path('change-password/', views.change_password, name='change_password'),
+
 ]
