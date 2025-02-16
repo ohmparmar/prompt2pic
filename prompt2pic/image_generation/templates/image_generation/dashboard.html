@@ -376,6 +376,40 @@
       #deleteModal.active .modal-box {
         transform: translateY(0);
       }
+      .download-btn {
+        position: absolute;
+        bottom: 1rem;
+        right: 1rem;
+        background: linear-gradient(135deg, #6366f1, #818cf8);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        opacity: 0.9;
+    }
+
+    .download-btn:hover {
+        opacity: 1;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .download-btn i {
+        font-size: 1.2rem;
+    }
+
+    .image-container {
+        position: relative;
+        display: inline-block;
+        max-width: 100%;
+    }
     </style>
   </head>
   <body
@@ -459,13 +493,8 @@
     </div>
 
     <!-- Change Password Modal -->
-    <div
-      id="changePasswordModal"
-      class="modal fixed inset-0 z-[10000] hidden items-center justify-center bg-black bg-opacity-50 p-4"
-    >
-      <div
-        class="modal-box relative w-full max-w-md bg-white rounded-xl shadow-2xl border border-primary/10 transform transition-all duration-300 ease-in-out"
-      >
+    <div id="changePasswordModal" class="modal fixed inset-0 z-[10000] hidden items-center justify-center bg-black bg-opacity-50 p-4">
+      <div class="modal-box relative w-full max-w-md bg-white rounded-xl shadow-2xl border border-primary/10 transform transition-all duration-300 ease-in-out">
         <button
           id="closeModal"
           class="btn btn-sm btn-circle btn-ghost absolute top-4 right-4"
@@ -480,12 +509,7 @@
           </p>
         </div>
 
-        <form
-          id="changePasswordForm"
-          method="post"
-          action="{% url 'image_generation:change_password' %}"
-          class="space-y-4"
-        >
+        <form id="changePasswordForm" method="post" action="{% url 'image_generation:change_password' %}" class="space-y-4">
           {% csrf_token %}
           <div class="form-control relative">
             <label class="label" for="newPassword">
@@ -504,18 +528,21 @@
                 class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
                 id="toggleNewPassword"
               >
-                <i
-                  class="fas fa-eye-slash text-gray-400 hover:text-primary"
-                ></i>
+                <i class="fas fa-eye-slash text-gray-400 hover:text-primary"></i>
               </span>
             </div>
-            <p
-              id="newPasswordError"
-              class="text-error text-xs mt-1 opacity-0 transition-opacity duration-300"
-            >
-              Password must have one capital letter, one number, one special
-              character, and be at least 6 characters long.
-            </p>
+            <div class="password-strength">
+              <div class="strength-bar"></div>
+              <div class="strength-bar"></div>
+              <div class="strength-bar"></div>
+              <div class="strength-bar"></div>
+            </div>
+            <ul class="validation-list">
+              <li data-validation="length">At least 8 characters</li>
+              <li data-validation="uppercase">One uppercase letter</li>
+              <li data-validation="number">One number</li>
+              <li data-validation="special">One special character</li>
+            </ul>
           </div>
 
           <div class="form-control relative">
@@ -535,17 +562,10 @@
                 class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
                 id="toggleConfirmPassword"
               >
-                <i
-                  class="fas fa-eye-slash text-gray-400 hover:text-primary"
-                ></i>
+                <i class="fas fa-eye-slash text-gray-400 hover:text-primary"></i>
               </span>
             </div>
-            <p
-              id="confirmPasswordError"
-              class="text-error text-xs mt-1 opacity-0 transition-opacity duration-300"
-            >
-              Passwords do not match.
-            </p>
+            <p id="confirmError" class="text-error text-xs mt-1 hidden">Passwords do not match</p>
           </div>
 
           <div class="modal-action mt-6 flex justify-center space-x-4">
@@ -724,11 +744,19 @@
               <div class="chat-bubble chat-bubble-secondary">
                 {% if message.image_generated %}
                 <!-- Removed float-animation, added shadow -->
-                <img
-                  src="{{ message.image_generated.url }}"
-                  class="max-w-sm rounded-lg shadow-lg"
-                  alt="Generated image"
-                />
+                <div class="image-container">
+                  <img
+                      src="{{ message.image_generated.url }}"
+                      class="max-w-sm rounded-lg shadow-lg"
+                      alt="Generated image"
+                  />
+                  <button 
+                      class="download-btn"
+                      onclick="downloadImage('{{ message.image_generated.url }}', 'Prompt2Pic-{{ message.id }}.png')"
+                  >
+                      <i class="fas fa-download"></i>
+                  </button>
+              </div>
                 {% else %}
                 <p>No image generated.</p>
                 {% endif %}
@@ -960,7 +988,6 @@
         }
       }
       function disableAndSubmit(form) {
-        // Remove the input disabling logic completely
         form.submit();
       }
 
@@ -970,19 +997,6 @@
           e.stopPropagation();
         });
       });
-
-      // Enhanced Change Password Modal Handling
-      document
-        .getElementById("changePassword")
-        .addEventListener("click", function (e) {
-          e.preventDefault();
-          e.stopPropagation();
-          const modal = document.getElementById("changePasswordModal");
-          modal.classList.remove("hidden");
-          modal.classList.add("flex");
-        });
-
-      // Delete Chat Modal Handling
       document.addEventListener("DOMContentLoaded", function () {
         const deleteButtons = document.querySelectorAll(".delete-btn");
         const deleteModal = document.getElementById("deleteModal");
@@ -995,41 +1009,116 @@
           button.addEventListener("click", function (e) {
             e.preventDefault();
             e.stopPropagation();
-
-            // Find the closest form
             currentDeleteForm = this.closest("form");
-
-            // Show delete confirmation modal
             deleteModal.classList.add("active");
           });
         });
 
-        cancelDelete.addEventListener("click", function () {
-          deleteModal.classList.remove("active");
-          currentDeleteForm = null;
+        cancelDelete.addEventListener("click", () => deleteModal.classList.remove("active"));
+        confirmDelete.addEventListener("click", () => {
+          if (currentDeleteForm) currentDeleteForm.submit();
         });
 
-        confirmDelete.addEventListener("click", function () {
-          if (currentDeleteForm) {
-            currentDeleteForm.submit();
-          }
+        window.addEventListener("click", (e) => {
+          if (e.target === deleteModal) deleteModal.classList.remove("active");
         });
+      });
 
-        // Close modal when clicking outside
-        window.addEventListener("click", function (e) {
-          if (e.target === deleteModal) {
-            deleteModal.classList.remove("active");
-            currentDeleteForm = null;
+      // Password Modal Handling
+      const changePasswordModal = document.getElementById("changePasswordModal");
+      const toggleNewPassword = document.getElementById("toggleNewPassword");
+      const toggleConfirmPassword = document.getElementById("toggleConfirmPassword");
+      const newPassword = document.getElementById("newPassword");
+      const confirmPassword = document.getElementById("confirmPassword");
+      const submitBtn = document.getElementById("changePasswordSubmit");
+
+      // Toggle password visibility
+      [toggleNewPassword, toggleConfirmPassword].forEach((toggle) => {
+        toggle.addEventListener("click", (e) => {
+          const input = e.target.closest("div").querySelector("input");
+          const icon = e.target.querySelector("i");
+          if (input.type === "password") {
+            input.type = "text";
+            icon.classList.replace("fa-eye-slash", "fa-eye");
+          } else {
+            input.type = "password";
+            icon.classList.replace("fa-eye", "fa-eye-slash");
           }
         });
       });
 
-      // Prevent dropdown from closing when clicking inside
-      document.querySelectorAll(".dropdown-content").forEach((dropdown) => {
-        dropdown.addEventListener("click", function (e) {
-          e.stopPropagation();
+      // Password validation
+      function checkPasswordStrength(password) {
+        const strength = {
+          length: password.length >= 8,
+          uppercase: /[A-Z]/.test(password),
+          number: /\d/.test(password),
+          special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+        };
+        return strength;
+      }
+
+      function updateStrengthIndicator(strength) {
+        const bars = document.querySelectorAll(".strength-bar");
+        const validations = Object.values(strength).filter(Boolean).length;
+        bars.forEach((bar, index) => {
+          bar.classList.toggle("active", index < validations);
+        });
+
+        // Update validation list
+        document.querySelectorAll(".validation-list li").forEach(li => {
+          const type = li.dataset.validation;
+          li.classList.toggle("valid", strength[type]);
+        });
+      }
+
+      function validateForm() {
+        const password = newPassword.value;
+        const confirm = confirmPassword.value;
+        const strength = checkPasswordStrength(password);
+        const isValid = Object.values(strength).every(Boolean) && password === confirm;
+        
+        submitBtn.disabled = !isValid;
+        document.getElementById("confirmError").classList.toggle("hidden", password === confirm);
+      }
+
+      newPassword.addEventListener("input", () => {
+        const strength = checkPasswordStrength(newPassword.value);
+        updateStrengthIndicator(strength);
+        validateForm();
+      });
+
+      confirmPassword.addEventListener("input", validateForm);
+
+      // Modal show/hide
+      document.getElementById("changePassword").addEventListener("click", (e) => {
+        e.preventDefault();
+        changePasswordModal.classList.remove("hidden");
+        changePasswordModal.classList.add("flex");
+      });
+
+      [document.getElementById("closeModal"), document.getElementById("closeModalBtn")].forEach(btn => {
+        btn.addEventListener("click", () => {
+          changePasswordModal.classList.add("hidden");
+          changePasswordModal.classList.remove("flex");
         });
       });
+
+      // Prevent modal close when clicking inside
+      changePasswordModal.querySelector('.modal-box').addEventListener('click', e => e.stopPropagation());
+      function downloadImage(url, filename) {
+        // Create a temporary anchor element
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename || 'Prompt2Pic-image.png';
+        
+        // Append to the document and trigger click
+        document.body.appendChild(link);
+        link.click();
+        
+        // Clean up
+        document.body.removeChild(link);
+    }
     </script>
   </body>
 </html>

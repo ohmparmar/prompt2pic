@@ -47,11 +47,40 @@ def dashboard(request):
     return render(request, "image_generation/dashboard.html", context)
 
 
-def guest_dashboard(request):
-    # if request.user.is_authenticated:
-    #     return render(request, 'image_generation/dashboard.html')
-    return render(request, "image_generation/guest_user_dashboard.html")
+# def guest_dashboard(request):
+#     # if request.user.is_authenticated:
+#     #     return render(request, 'image_generation/dashboard.html')
+#     return render(request, "image_generation/guest_user_dashboard.html")
 
+def guest_dashboard(request):
+    generated_image = None
+    
+    if request.method == 'POST':
+        prompt = request.POST.get('prompt', '')
+        
+        # Show loader during generation
+        MODEL_ID = "CompVis/stable-diffusion-v1-4"
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        
+        # Load model (consider caching this in production)
+        pipe = StableDiffusionPipeline.from_pretrained(
+            MODEL_ID, 
+            torch_dtype=torch.float16 if device == "cuda" else torch.float32
+        )
+        pipe = pipe.to(device)
+        
+        # Generate image
+        result = pipe(prompt)
+        generated_image = result.images[0]
+        img_io = BytesIO()
+        generated_image.save(img_io, format="PNG")
+        generated_image = ContentFile(
+            img_io.getvalue(), name=f"{uuid.uuid4()}.png"
+        )
+
+    return render(request, "image_generation/guest_user_dashboard.html", {
+        'generated_image': generated_image
+    })
 
 # Initialize your model once when the server starts (optional but recommended)
 # You can do this in a module-level variable so that it’s not reloaded on every request.
