@@ -18,7 +18,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Initialise environment variables
 env = environ.Env()
-environ.Env.read_env(BASE_DIR / '.env')
+environ.Env.read_env(BASE_DIR / ".env")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "authentication",
     "image_generation",
-    "tailwind"
+    "tailwind",
 ]
 
 MIDDLEWARE = [
@@ -81,13 +81,13 @@ WSGI_APPLICATION = "prompt2pic.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': env('DATABASE_NAME'),  # Replace with your database name
-        'USER': env('DATABASE_USER'),  # Replace with your database user
-        'PASSWORD': env('DATABASE_PASSWORD'),  # Replace with your database password
-        'HOST': env('DATABASE_HOST'),  # Or your database host
-        'PORT': env('DATABASE_PORT'),  # Or your database port
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": env("DATABASE_NAME"),  # Replace with your database name
+        "USER": env("DATABASE_USER"),  # Replace with your database user
+        "PASSWORD": env("DATABASE_PASSWORD"),  # Replace with your database password
+        "HOST": env("DATABASE_HOST"),  # Or your database host
+        "PORT": env("DATABASE_PORT"),  # Or your database port
     }
 }
 
@@ -129,13 +129,13 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = env('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-AUTH_USER_MODEL = 'authentication.CustomUser'
+EMAIL_HOST_USER = env("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+AUTH_USER_MODEL = "authentication.CustomUser"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -144,8 +144,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 MEDIA_ROOT = BASE_DIR / "media"
-MEDIA_URL = '/media/'
+MEDIA_URL = "/media/"
 
-MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
-OPENAI_API_KEY = env('OPENAI_API_KEY')
-STABILITYAI_API_KEY = env('STABILITYAI_API_KEY')
+MESSAGE_STORAGE = "django.contrib.messages.storage.session.SessionStorage"
+OPENAI_API_KEY = env("OPENAI_API_KEY")
+STABILITYAI_API_KEY = env("STABILITYAI_API_KEY")
+LOGIN_URL = "/auth/login/"

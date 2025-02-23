@@ -19,7 +19,7 @@ import requests
 import json
 import re
 from django.contrib.auth.decorators import login_required
-
+from django.contrib.auth import update_session_auth_hash
 
 client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)  # Explicitly passing API key
 
@@ -268,10 +268,8 @@ pipe = pipe.to(device)
 #     return redirect('image_generation:dashboard')
 
 
+@login_required
 def generate_image(request):
-    if not request.user.is_authenticated:
-        return redirect("authentication:login")
-
     if request.method == "POST":
         try:
             prompt = request.POST.get("prompt", "").strip()
@@ -440,20 +438,22 @@ def change_password(request):
         confirm_password = request.POST.get("confirm_password", "")
 
         if not PASSWORD_REGEX.match(new_password):
-            messages.error(
-                request,
-                "Password must have one capital letter, one number, one special character, and be at least 6 characters long.",
+            error = "Password must have one capital letter, one number, one special character, and be at least 6 characters long."
+            return render(
+                request, "image_generation/change_password.html", {"error": error}
             )
-            return redirect("image_generation:dashboard")
-        if new_password != confirm_password:
-            messages.error(request, "Passwords do not match.")
-            return redirect("image_generation:dashboard")
 
-        # Update password and keep user logged in.
+        if new_password != confirm_password:
+            error = "Passwords do not match."
+            return render(
+                request, "image_generation/change_password.html", {"error": error}
+            )
+
+        # Update password and keep user logged in
         user = request.user
         user.set_password(new_password)
         user.save()
-        update_session_auth_hash(request, user)  # Important: keeps the user logged in
+        update_session_auth_hash(request, user)
         messages.success(request, "Password changed successfully.")
         return redirect("image_generation:dashboard")
 
