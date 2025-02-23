@@ -52,35 +52,65 @@ def dashboard(request):
 #     #     return render(request, 'image_generation/dashboard.html')
 #     return render(request, "image_generation/guest_user_dashboard.html")
 
+
+import os
+import uuid
+from io import BytesIO
+from django.conf import settings
+from django.core.files.base import ContentFile
+from django.shortcuts import render
+import torch
+from diffusers import StableDiffusionPipeline
+
+
 def guest_dashboard(request):
-    generated_image = None
-    
-    if request.method == 'POST':
-        prompt = request.POST.get('prompt', '')
-        
+    generated_image_url = None
+
+    if request.method == "POST":
+        prompt = request.POST.get("prompt", "")
+
         # Show loader during generation
         MODEL_ID = "CompVis/stable-diffusion-v1-4"
         device = "cuda" if torch.cuda.is_available() else "cpu"
-        
+
         # Load model (consider caching this in production)
         pipe = StableDiffusionPipeline.from_pretrained(
-            MODEL_ID, 
-            torch_dtype=torch.float16 if device == "cuda" else torch.float32
+            MODEL_ID, torch_dtype=torch.float16 if device == "cuda" else torch.float32
         )
         pipe = pipe.to(device)
-        
+
         # Generate image
         result = pipe(prompt)
         generated_image = result.images[0]
+
+        # Save image to BytesIO
         img_io = BytesIO()
         generated_image.save(img_io, format="PNG")
-        generated_image = ContentFile(
-            img_io.getvalue(), name=f"{uuid.uuid4()}.png"
+        img_io.seek(0)  # Move back to the start of the stream
+
+        # Generate a unique filename
+        filename = f"{uuid.uuid4()}.png"
+
+        # Construct the path for saving the file in media/generated_images
+        save_dir = os.path.join(settings.MEDIA_ROOT, "generated_images")
+        os.makedirs(save_dir, exist_ok=True)  # Ensure directory exists
+        file_path = os.path.join(save_dir, filename)
+
+        # Write file to disk
+        with open(file_path, "wb") as f:
+            f.write(img_io.getvalue())
+
+        # Construct the URL to access this image
+        generated_image_url = os.path.join(
+            settings.MEDIA_URL, "generated_images", filename
         )
 
-    return render(request, "image_generation/guest_user_dashboard.html", {
-        'generated_image': generated_image
-    })
+    return render(
+        request,
+        "image_generation/guest_user_dashboard.html",
+        {"generated_image": generated_image_url},
+    )
+
 
 # Initialize your model once when the server starts (optional but recommended)
 # You can do this in a module-level variable so that it’s not reloaded on every request.
