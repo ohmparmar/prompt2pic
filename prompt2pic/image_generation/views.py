@@ -16,17 +16,16 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from io import BytesIO
 import requests
-import json
 import re
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import update_session_auth_hash
+import os
 
 client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)  # Explicitly passing API key
 
 
+@login_required
 def dashboard(request):
-    if not request.user.is_authenticated:
-        return redirect("authentication:login")
 
     try:
         chat_id = request.GET.get("chat_id")
@@ -45,22 +44,6 @@ def dashboard(request):
     }
 
     return render(request, "image_generation/dashboard.html", context)
-
-
-# def guest_dashboard(request):
-#     # if request.user.is_authenticated:
-#     #     return render(request, 'image_generation/dashboard.html')
-#     return render(request, "image_generation/guest_user_dashboard.html")
-
-
-import os
-import uuid
-from io import BytesIO
-from django.conf import settings
-from django.core.files.base import ContentFile
-from django.shortcuts import render
-import torch
-from diffusers import StableDiffusionPipeline
 
 
 def guest_dashboard(request):
@@ -120,152 +103,6 @@ pipe = StableDiffusionPipeline.from_pretrained(
     MODEL_ID, torch_dtype=torch.float16 if device == "cuda" else torch.float32
 )
 pipe = pipe.to(device)
-
-# def generate_image(request):
-#     if not request.user.is_authenticated:
-#         return redirect('authentication:login')
-
-#     if request.method == 'POST':
-#         try:
-#             prompt = request.POST.get('prompt', '').strip()
-#             model_id = request.POST.get('model')
-
-#             # Validate inputs
-#             if not prompt:
-#                 messages.error(request, 'Please enter a prompt')
-#                 return redirect('image_generation:dashboard')
-
-#             if not model_id:
-#                 messages.error(request, 'Please select a model')
-#                 return redirect('image_generation:dashboard')
-
-#             # Check for bad words
-#             bad_words = ['nsfw', 'violent', 'explicit']  # Customize as needed
-#             if any(word in prompt.lower() for word in bad_words):
-#                 messages.error(request, 'Prompt contains inappropriate content')
-#                 return redirect('image_generation:dashboard')
-
-#             # Get selected model
-#             try:
-#                 model = Agent.objects.get(id=model_id, is_available=True)
-#             except ObjectDoesNotExist:
-#                 messages.error(request, 'Selected model is not available')
-#                 return redirect('image_generation:dashboard')
-
-#             # Create or get active chat and generate image inside a transaction
-#             with transaction.atomic():
-#                 active_chat = Chat.objects.filter(user=request.user).first()
-#                 if not active_chat:
-#                     active_chat = Chat.objects.create(
-#                         user=request.user,
-#                         title=prompt[:50] + ('...' if len(prompt) > 50 else '')
-#                     )
-
-#                 # Generate the image using Stable Diffusion
-#                 try:
-#                     result = pipe(prompt)
-#                     generated_image = result.images[0]
-#                 except Exception as e:
-#                     messages.error(request, f'Image generation failed: {str(e)}')
-#                     return redirect('image_generation:dashboard')
-
-#                 # Save the generated image to the media directory
-#                 filename = f"{uuid.uuid4()}.png"
-#                 media_dir = os.path.join("media", "generated_images")
-#                 os.makedirs(media_dir, exist_ok=True)
-#                 image_path = os.path.join(media_dir, filename)
-#                 generated_image.save(image_path)
-
-#                 # Optionally, store a relative path (or use Django's FileField handling)
-#                 relative_image_path = os.path.join('generated_images', filename)
-
-#                 # Create chat message with the image path
-#                 ChatMessage.objects.create(
-#                     chat=active_chat,
-#                     user_prompt=prompt,
-#                     agent=model,
-#                     image_generated=relative_image_path  # Store the relative path
-#                 )
-
-#             return redirect(f'{reverse("image_generation:dashboard")}?chat_id={active_chat.id}')
-
-#         except Exception as e:
-#             messages.error(request, f'Error generating image: {str(e)}')
-#             return redirect('image_generation:dashboard')
-
-#     return redirect('image_generation:dashboard')
-
-
-# def generate_image(request):
-#     if not request.user.is_authenticated:
-#         return redirect('authentication:login')
-
-#     if request.method == 'POST':
-#         try:
-#             prompt = request.POST.get('prompt', '').strip()
-#             model_id = request.POST.get('model')
-
-#             if not prompt:
-#                 messages.error(request, 'Please enter a prompt')
-#                 return redirect('image_generation:dashboard')
-
-#             if not model_id:
-#                 messages.error(request, 'Please select a model')
-#                 return redirect('image_generation:dashboard')
-
-#             # Get selected model
-#             try:
-#                 model = Agent.objects.get(id=model_id, is_available=True)
-#             except ObjectDoesNotExist:
-#                 messages.error(request, 'Selected model is not available')
-#                 return redirect('image_generation:dashboard')
-
-#             # Generate image using the selected model
-#             image_url = None
-#             if model.name.lower() == "chat-gpt":
-#                 # Call OpenAI's API for image generation
-#                 response = openai.Image.create(
-#                     prompt=prompt,
-#                     n=1,
-#                     size="1024x1024"
-#                 )
-#                 image_url = response["data"][0]["url"]
-
-#             else:
-#                 # Use Stable Diffusion
-#                 result = pipe(prompt)
-#                 generated_image = result.images[0]
-
-#                 filename = f"{uuid.uuid4()}.png"
-#                 media_dir = os.path.join(settings.BASE_DIR,  'image_generation','static', 'image_generation','images')
-#                 os.makedirs(media_dir, exist_ok=True)
-#                 image_path = os.path.join(media_dir, filename)
-#                 generated_image.save(image_path)
-
-#                 image_url = f'/static/image_generation/images/{filename}'
-
-#             # Store image in chat history
-#             active_chat = Chat.objects.filter(user=request.user).first()
-#             if not active_chat:
-#                 active_chat = Chat.objects.create(
-#                     user=request.user,
-#                     title=prompt[:50] + ('...' if len(prompt) > 50 else '')
-#                 )
-
-#             ChatMessage.objects.create(
-#                 chat=active_chat,
-#                 user_prompt=prompt,
-#                 agent=model,
-#                 image_generated=image_url
-#             )
-
-#             return redirect(f'{reverse("image_generation:dashboard")}?chat_id={active_chat.id}')
-
-#         except Exception as e:
-#             messages.error(request, f'Error generating image: {str(e)}')
-#             return redirect('image_generation:dashboard')
-
-#     return redirect('image_generation:dashboard')
 
 
 @login_required
@@ -380,6 +217,7 @@ def generate_image(request):
 from django.db import transaction
 
 
+@login_required
 def create_chat(request):
     if not request.user.is_authenticated:
         return redirect("authentication:login")
@@ -391,6 +229,7 @@ def create_chat(request):
     return redirect(f'{reverse("image_generation:dashboard")}?chat_id={new_chat.id}')
 
 
+@login_required
 def delete_chat(request, chat_id):
     if not request.user.is_authenticated:
         return redirect("authentication:login")
@@ -405,6 +244,7 @@ def delete_chat(request, chat_id):
     return redirect("image_generation:dashboard")
 
 
+@login_required
 def rename_chat(request, chat_id):
     if not request.user.is_authenticated:
         return JsonResponse({"status": "error", "message": "Unauthorized"}, status=401)
