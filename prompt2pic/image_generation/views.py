@@ -378,3 +378,53 @@ def change_password(request):
 
 def plans_view(request):
     return render(request, 'image_generation/plans.html')  # Adjust the path as necessary
+
+
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import stripe
+
+stripe.api_key = settings.STRIPE_SECRET_KEY  # Ensure you have your secret key set
+
+@csrf_exempt
+def create_payment_intent(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        plan = data.get('plan')
+
+        # Create a payment intent based on the plan
+        # You may want to set the amount based on the plan selected
+        if plan == 'weekly':
+            amount = 500  # Amount in cents
+        elif plan == 'monthly':
+            amount = 1500
+        elif plan == 'annual':
+            amount = 9900
+        else:
+            return JsonResponse({'error': 'Invalid plan'}, status=400)
+
+        try:
+            # Create a new Checkout Session
+            checkout_session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=[
+                    {
+                        'price_data': {
+                            'currency': 'usd',
+                            'product_data': {
+                                'name': f'{plan.capitalize()} Plan',
+                            },
+                            'unit_amount': amount,
+                        },
+                        'quantity': 1,
+                    },
+                ],
+                mode='payment',
+                success_url='http://127.0.0.1:8000/image/dashboard/',  # Replace with your success URL
+                cancel_url='http://127.0.0.1:8000/image/plans/',  # Replace with your cancel URL
+            )
+            return JsonResponse({'id': checkout_session.id})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)

@@ -12,5 +12,7 @@ urlpatterns = [
     path("rename-chat/<int:chat_id>/", views.rename_chat, name="rename_chat"),
     path("change-password/", views.change_password, name="change_password"),
     path('plans/', views.plans_view, name='plans'),  # Add this line
+    path('create-payment-intent/', views.create_payment_intent, name='create_payment_intent'),  # Add this line
+
 
 ]
