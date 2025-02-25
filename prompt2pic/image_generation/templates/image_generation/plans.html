@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Plans - Prompt2Pic</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        .plan-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .plan-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        .benefit-icon {
+            font-size: 2rem;
+            color: #6366f1;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold text-white text-center mb-8">Choose Your Plan</h1>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 justify-items-center">
+            <div class="card plan-card bg-base-100 shadow-xl p-6 text-center">
+                <h2 class="text-2xl font-bold text-primary">Weekly Plan</h2>
+                <p class="text-lg text-gray-700">$5</p>
+                <div class="flex items-center mb-4 justify-center">
+                    <i class="fas fa-clock benefit-icon"></i>
+                    <p class="ml-2">Perfect for short-term projects!</p>
+                </div>
+                <button class="btn btn-primary mt-4" onclick="pay('weekly')">Subscribe Now</button>
+            </div>
+            <div class="card plan-card bg-base-100 shadow-xl p-6 text-center">
+                <h2 class="text-2xl font-bold text-primary">Monthly Plan</h2>
+                <p class="text-lg text-gray-700">$15</p>
+                <div class="flex items-center mb-4 justify-center">
+                    <i class="fas fa-calendar-alt benefit-icon"></i>
+                    <p class="ml-2">Ideal for ongoing projects!</p>
+                </div>
+                <button class="btn btn-primary mt-4" onclick="pay('monthly')">Subscribe Now</button>
+            </div>
+            <div class="card plan-card bg-base-100 shadow-xl p-6 text-center">
+                <h2 class="text-2xl font-bold text-primary">Annual Plan</h2>
+                <p class="text-lg text-gray-700">$99</p>
+                <div class="flex items-center mb-4 justify-center">
+                    <i class="fas fa-star benefit-icon"></i>
+                    <p class="ml-2">Best value for long-term users!</p>
+                </div>
+                <button class="btn btn-primary mt-4" onclick="pay('annual')">Subscribe Now</button>
+            </div>
+        </div>
+        <div class="mt-8 text-center text-white">
+            <h2 class="text-2xl font-bold">Why Choose Us?</h2>
+            <p class="mt-4">Unlock premium features and enhance your creative experience with our advanced AI models!</p>
+        </div>
+    </div>
+
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        const stripe = Stripe('YOUR_STRIPE_PUBLIC_KEY'); // Replace with your Stripe public key
+
+        function pay(plan) {
+            fetch('/create-payment-intent', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ plan }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error(data.error);
+                } else {
+                    return stripe.redirectToCheckout({ sessionId: data.id });
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>

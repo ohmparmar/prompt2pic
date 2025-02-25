@@ -373,3 +373,8 @@ def change_password(request):
         return redirect("image_generation:dashboard")
 
     return render(request, "image_generation/change_password.html")
+
+
+
+def plans_view(request):
+    return render(request, 'image_generation/plans.html')  # Adjust the path as necessary
