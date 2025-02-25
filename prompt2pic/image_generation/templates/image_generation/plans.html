@@ -155,39 +155,67 @@
             <p class="mt-4 text-lg">Unlock premium features and enhance your creative experience with our advanced AI models!</p>
         </div>
     </div>
-
     <script src="https://js.stripe.com/v3/"></script>
     <script>
-        let stripe;
-        let stripeInitialized = false;
-
-        document.addEventListener('DOMContentLoaded', function() {
-            stripe = Stripe('sk_test_51QwSWdL05RboHoHGndmL3eTEDkrf9Rm2pQdkqyKr5CrCNcxtgaubBSo6MOGSYZy6JOjW1eYoSkTGG5qEnZ4NRCoR00elj8RQ8U');
-            stripeInitialized = true;
-            const buttons = document.querySelectorAll('.btn-primary');
-            buttons.forEach(button => button.disabled = false);
-        });
-
+        // Initialize Stripe with your publishable key
+        const stripe = Stripe('pk_test_51QwSWdL05RboHoHG5RrbmE7bO8vE6hU8wG8YpZJqQe5XvYvL8vXvYvL8vXvYvL8vXvYvL8vXvYvL8vXvYvL8'); // Replace with your actual Stripe Publishable Key
+    
+        // Function to handle payment
         function pay(plan) {
-            if (!stripeInitialized) {
-                console.error('Stripe is not initialized yet.');
-                return;
-            }
-
+            // Show a loading state (optional)
+            const button = event.target;
+            button.disabled = true;
+            button.textContent = 'Processing...';
+    
+            // Make a POST request to your backend to create a Checkout Session
             fetch('/image/create-payment-intent/', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ plan }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Include CSRF token if CSRF protection is enforced
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body: JSON.stringify({ plan: plan }),
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.error) {
-                    console.error(data.error);
+                    console.error('Error from server:', data.error);
+                    alert('Something went wrong. Please try again.');
+                    button.disabled = false;
+                    button.textContent = 'Subscribe Now';
                 } else {
+                    // Redirect to Stripe Checkout
                     return stripe.redirectToCheckout({ sessionId: data.id });
                 }
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again later.');
+                button.disabled = false;
+                button.textContent = 'Subscribe Now';
+            });
+        }
+    
+        // Helper function to get CSRF token from cookies (required for Django POST requests)
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
         }
     </script>
 </body>
