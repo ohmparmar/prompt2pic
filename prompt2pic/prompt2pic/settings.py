@@ -150,3 +150,5 @@ MESSAGE_STORAGE = "django.contrib.messages.storage.session.SessionStorage"
 OPENAI_API_KEY = env("OPENAI_API_KEY")
 STABILITYAI_API_KEY = env("STABILITYAI_API_KEY")
 LOGIN_URL = "/auth/login/"
+IMAGEPIG_API_KEY = env("IMAGEPIG_API_KEY")
+HUGGING_FACE_API_KEY = env("HUGGING_FACE_API_KEY")

@@ -20,6 +20,9 @@ import re
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import update_session_auth_hash
 import os
+import json
+from imagepig import ImagePig
+imagepig = ImagePig(settings.IMAGEPIG_API_KEY)
 
 client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)  # Explicitly passing API key
 
@@ -103,6 +106,12 @@ pipe = StableDiffusionPipeline.from_pretrained(
     MODEL_ID, torch_dtype=torch.float16 if device == "cuda" else torch.float32
 )
 pipe = pipe.to(device)
+# Load the model once (e.g., at server startup, not in the view itself)
+# pipe = StableDiffusionXLPipeline.from_pretrained(
+#     "stabilityai/stable-diffusion-xl-base-1.0",
+#     torch_dtype=torch.float16
+# )
+# pipe = pipe.to("cuda")  # M
 
 
 @login_required
@@ -111,7 +120,7 @@ def generate_image(request):
         try:
             prompt = request.POST.get("prompt", "").strip()
             model_id = request.POST.get("model")
-
+            chat_id = request.POST.get("chat_id")
             if not prompt:
                 messages.error(request, "Please enter a prompt")
                 return redirect("image_generation:dashboard")
@@ -126,7 +135,14 @@ def generate_image(request):
             except ObjectDoesNotExist:
                 messages.error(request, "Selected model is not available")
                 return redirect("image_generation:dashboard")
-
+            if chat_id:
+                try:
+                    active_chat = Chat.objects.get(id=chat_id, user=request.user)
+                except Chat.DoesNotExist:
+                    active_chat = Chat.objects.create(
+                        user=request.user,
+                        title=prompt[:50] + ("..." if len(prompt) > 50 else "")
+                    )
             # Generate image using the selected model
             generated_image = None
             print("model.name.lower()", model.name.lower())
@@ -143,15 +159,12 @@ def generate_image(request):
                 image_url = response.data[0].url
                 print("image_url", image_url)
                 response_content = requests.get(image_url).content
-                print("response_content", response_content)
                 generated_image = ContentFile(
                     response_content, name=f"{uuid.uuid4()}.png"
                 )
+
             elif model.name.lower() == "stability-ai":
-                print(
-                    "Using Stability AI API for image generation",
-                    settings.STABILITYAI_API_KEY,
-                )
+                print("Using Stability AI API for image generation")
                 url = "https://api.stability.ai/v2beta/stable-image/generate/ultra"
 
                 headers = {
@@ -159,7 +172,6 @@ def generate_image(request):
                     "Accept": "image/*",
                 }
 
-                # Match --form parameters from cURL
                 files = {
                     "prompt": (None, prompt),
                     "output_format": (None, "png"),
@@ -175,10 +187,68 @@ def generate_image(request):
                         response.content, name=f"{uuid.uuid4()}.png"
                     )
                 else:
-                    print("response", response)
                     error_message = response.json().get("message", "Unknown error")
                     messages.error(request, f"Stability AI Error: {error_message}")
                     return redirect("image_generation:dashboard")
+
+            elif model.name.lower() == "image-pig":
+                print("Using ImagePig API")
+                result = imagepig.default(prompt)
+
+                # Define media folder path
+                media_folder = "generated_images"
+                media_path = os.path.join(settings.MEDIA_ROOT, media_folder)
+                # Generate a unique filename
+                filename = f"{uuid.uuid4()}.png"
+                image_path = os.path.join(media_path, filename)
+
+                # Save image to media folder
+                result.save(image_path)
+
+                # Convert saved file into a Django `ContentFile`
+                with open(image_path, "rb") as img_file:
+                    generated_image = ContentFile(img_file.read(), name=filename)
+            elif model.name.lower() == "ai-girl":
+                print("Using ai-girl.site API for image generation")
+                url = "https://ai-girl.site/api/workerai"
+                payload = json.dumps({"prompt": prompt})  # Convert dict to JSON string
+                headers = {
+                    'accept': '*/*',
+                    'accept-language': 'en-GB,en;q=0.9',
+                    'content-type': 'text/plain;charset=UTF-8',
+                    'origin': 'https://ai-girl.site',
+                    'priority': 'u=1, i',
+                    'referer': 'https://ai-girl.site/',
+                    'sec-ch-ua': '"Not(A:Brand";v="99", "Google Chrome";v="133", "Chromium";v="133"',
+                    'sec-ch-ua-mobile': '?0',
+                    'sec-ch-ua-platform': '"Windows"',
+                    'sec-fetch-dest': 'empty',
+                    'sec-fetch-mode': 'cors',
+                    'sec-fetch-site': 'same-origin',
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36'
+                }
+                response = requests.post(url, headers=headers, data=payload)
+                
+                if response.status_code == 200:
+                    # Assuming the response is image binary data
+                    generated_image = ContentFile(
+                        response.content, name=f"{uuid.uuid4()}.png"
+                    )
+                else:
+                    error_message = response.text or "Unknown error from ai-girl API"
+                    messages.error(request, f"ai-girl API Error: {error_message}")
+                    return redirect("image_generation:dashboard")
+            elif model.name.lower() == "hugging-face":
+                print("Using Hugging Face Inference API")
+                API_URL = "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5"
+                headers = {"Authorization": f"Bearer {settings.HUGGING_FACE_API_KEY}"}
+                response = requests.post(API_URL, headers=headers, json={"inputs": prompt})
+                print(response)
+                print(response.content)
+                if response.status_code == 200:
+                    generated_image = ContentFile(
+                        response.content, name=f"{uuid.uuid4()}.png"
+                    )
             else:
                 result = pipe(prompt)
                 generated_image = result.images[0]
@@ -187,12 +257,17 @@ def generate_image(request):
                 generated_image = ContentFile(
                     img_io.getvalue(), name=f"{uuid.uuid4()}.png"
                 )
+                # print("Using Stable Diffusion XL locally")
+                # result = pipe(prompt)  # Generate the image
+                # generated_image = result.images[0]  # Get the first image
+                # img_io = BytesIO()
+                # generated_image.save(img_io, format="PNG")
+                # generated_image = ContentFile(
+                #     img_io.getvalue(), name=f"{uuid.uuid4()}.png"
+                # )
 
             # Store image in chat history
-            active_chat, _ = Chat.objects.get_or_create(
-                user=request.user,
-                defaults={"title": prompt[:50] + ("..." if len(prompt) > 50 else "")},
-            )
+            
 
             chat_message = ChatMessage.objects.create(
                 chat=active_chat,
