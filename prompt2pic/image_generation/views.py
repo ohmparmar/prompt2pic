@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from diffusers import StableDiffusionPipeline
 import torch
-from .models import Chat, Agent, ChatMessage
+from .models import Chat, Agent, ChatMessage, Transaction, Subscription
 from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
 import openai
@@ -22,6 +22,9 @@ from django.contrib.auth import update_session_auth_hash
 import os
 import json
 from imagepig import ImagePig
+from django.utils import timezone
+from datetime import timedelta
+
 imagepig = ImagePig(settings.IMAGEPIG_API_KEY)
 
 client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)  # Explicitly passing API key
@@ -99,7 +102,7 @@ def guest_dashboard(request):
 
 
 # Initialize your model once when the server starts (optional but recommended)
-# You can do this in a module-level variable so that it’s not reloaded on every request.
+# You can do this in a module-level variable so that it's not reloaded on every request.
 MODEL_ID = "CompVis/stable-diffusion-v1-4"  # or any other compatible model
 device = "cuda" if torch.cuda.is_available() else "cpu"
 pipe = StableDiffusionPipeline.from_pretrained(
@@ -141,7 +144,7 @@ def generate_image(request):
                 except Chat.DoesNotExist:
                     active_chat = Chat.objects.create(
                         user=request.user,
-                        title=prompt[:50] + ("..." if len(prompt) > 50 else "")
+                        title=prompt[:50] + ("..." if len(prompt) > 50 else ""),
                     )
             # Generate image using the selected model
             generated_image = None
@@ -213,22 +216,22 @@ def generate_image(request):
                 url = "https://ai-girl.site/api/workerai"
                 payload = json.dumps({"prompt": prompt})  # Convert dict to JSON string
                 headers = {
-                    'accept': '*/*',
-                    'accept-language': 'en-GB,en;q=0.9',
-                    'content-type': 'text/plain;charset=UTF-8',
-                    'origin': 'https://ai-girl.site',
-                    'priority': 'u=1, i',
-                    'referer': 'https://ai-girl.site/',
-                    'sec-ch-ua': '"Not(A:Brand";v="99", "Google Chrome";v="133", "Chromium";v="133"',
-                    'sec-ch-ua-mobile': '?0',
-                    'sec-ch-ua-platform': '"Windows"',
-                    'sec-fetch-dest': 'empty',
-                    'sec-fetch-mode': 'cors',
-                    'sec-fetch-site': 'same-origin',
-                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36'
+                    "accept": "*/*",
+                    "accept-language": "en-GB,en;q=0.9",
+                    "content-type": "text/plain;charset=UTF-8",
+                    "origin": "https://ai-girl.site",
+                    "priority": "u=1, i",
+                    "referer": "https://ai-girl.site/",
+                    "sec-ch-ua": '"Not(A:Brand";v="99", "Google Chrome";v="133", "Chromium";v="133"',
+                    "sec-ch-ua-mobile": "?0",
+                    "sec-ch-ua-platform": '"Windows"',
+                    "sec-fetch-dest": "empty",
+                    "sec-fetch-mode": "cors",
+                    "sec-fetch-site": "same-origin",
+                    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
                 }
                 response = requests.post(url, headers=headers, data=payload)
-                
+
                 if response.status_code == 200:
                     # Assuming the response is image binary data
                     generated_image = ContentFile(
@@ -242,7 +245,9 @@ def generate_image(request):
                 print("Using Hugging Face Inference API")
                 API_URL = "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5"
                 headers = {"Authorization": f"Bearer {settings.HUGGING_FACE_API_KEY}"}
-                response = requests.post(API_URL, headers=headers, json={"inputs": prompt})
+                response = requests.post(
+                    API_URL, headers=headers, json={"inputs": prompt}
+                )
                 print(response)
                 print(response.content)
                 if response.status_code == 200:
@@ -267,7 +272,6 @@ def generate_image(request):
                 # )
 
             # Store image in chat history
-            
 
             chat_message = ChatMessage.objects.create(
                 chat=active_chat,
@@ -375,9 +379,10 @@ def change_password(request):
     return render(request, "image_generation/change_password.html")
 
 
-
 def plans_view(request):
-    return render(request, 'image_generation/plans.html')  # Adjust the path as necessary
+    return render(
+        request, "image_generation/plans.html"
+    )  # Adjust the path as necessary
 
 
 from django.views.decorators.csrf import csrf_exempt
@@ -386,45 +391,46 @@ import stripe
 
 stripe.api_key = settings.STRIPE_SECRET_KEY  # Ensure you have your secret key set
 
+
 @csrf_exempt
 def create_payment_intent(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        plan = data.get('plan')
+    if request.user.is_authenticated:
+        # Create a payment intent with Stripe
+        # Assuming you have a function to create a payment intent
+        payment_intent = create_stripe_payment_intent()  # Implement this function
+        return JsonResponse({"clientSecret": payment_intent["client_secret"]})
+    else:
+        return redirect("authentication:signup")  # Redirect to signup if not logged in
 
-        # Create a payment intent based on the plan
-        # You may want to set the amount based on the plan selected
-        if plan == 'weekly':
-            amount = 500  # Amount in cents
-        elif plan == 'monthly':
-            amount = 1500
-        elif plan == 'annual':
-            amount = 9900
-        else:
-            return JsonResponse({'error': 'Invalid plan'}, status=400)
 
-        try:
-            # Create a new Checkout Session
-            checkout_session = stripe.checkout.Session.create(
-                payment_method_types=['card'],
-                line_items=[
-                    {
-                        'price_data': {
-                            'currency': 'usd',
-                            'product_data': {
-                                'name': f'{plan.capitalize()} Plan',
-                            },
-                            'unit_amount': amount,
-                        },
-                        'quantity': 1,
-                    },
-                ],
-                mode='payment',
-                success_url='http://127.0.0.1:8000/image/dashboard/',  # Replace with your success URL
-                cancel_url='http://127.0.0.1:8000/image/plans/',  # Replace with your cancel URL
-            )
-            return JsonResponse({'id': checkout_session.id})
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
+def payment_success(request):
+    # Handle successful payment
+    user = request.user
+    amount_paid = request.POST.get("amount")  # Get the amount from the request
+    transaction_id = request.POST.get(
+        "transaction_id"
+    )  # Get the transaction ID from Stripe
+    plan_type = request.POST.get("plan_type")  # Get the plan type from the request
 
-    return JsonResponse({'error': 'Invalid request method'}, status=405)
+    # Create a transaction record
+    transaction = Transaction.objects.create(
+        user=user, amount_paid=amount_paid, transaction_id=transaction_id
+    )
+
+    # Calculate end date based on plan type
+    if plan_type == "monthly":
+        end_date = timezone.now() + timedelta(days=30)
+    elif plan_type == "annual":
+        end_date = timezone.now() + timedelta(days=365)
+    else:
+        end_date = timezone.now()  # Default to now if plan type is unknown
+
+    # Create a subscription record
+    Subscription.objects.create(
+        user=user,
+        transaction=transaction,
+        plan_type=plan_type,
+        end_date=end_date,  # Set the calculated end date
+    )
+
+    return redirect("image_generation:dashboard")  # Redirect to dashboard after payment
