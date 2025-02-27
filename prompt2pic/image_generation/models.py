@@ -85,5 +85,8 @@ class Subscription(models.Model):
     start_date = models.DateTimeField(auto_now_add=True)
     end_date = models.DateTimeField()  # New field for subscription end date
 
+    def is_active(self):
+        return self.end_date >= timezone.now()
+
     def __str__(self):
         return f"{self.plan_type} subscription for {self.user.username}"

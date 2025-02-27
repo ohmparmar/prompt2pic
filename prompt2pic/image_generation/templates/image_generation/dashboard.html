@@ -19,41 +19,20 @@
     <style>
       /* Animations */
       @keyframes float {
-        0% {
-          transform: translateY(0px);
-        }
-        50% {
-          transform: translateY(-10px);
-        }
-        100% {
-          transform: translateY(0px);
-        }
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
       }
-      .float-animation {
-        animation: float 6s ease-in-out infinite;
-      }
+      .float-animation { animation: float 6s ease-in-out infinite; }
 
       @keyframes pulse-ring {
-        0% {
-          transform: scale(0.33);
-          opacity: 1;
-        }
-        80%,
-        100% {
-          transform: scale(1.5);
-          opacity: 0;
-        }
+        0% { transform: scale(0.33); opacity: 1; }
+        80%, 100% { transform: scale(1.5); opacity: 0; }
       }
       @keyframes pulse-dot {
-        0% {
-          transform: scale(0.8);
-        }
-        50% {
-          transform: scale(1.2);
-        }
-        100% {
-          transform: scale(0.8);
-        }
+        0% { transform: scale(0.8); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(0.8); }
       }
       .loader-ring {
         position: absolute;
@@ -70,31 +49,18 @@
         height: 150px;
         background: linear-gradient(45deg, #6366f1, #818cf8);
         border-radius: 50%;
-        animation: pulse-dot 1.25s cubic-bezier(0.455, 0.03, 0.515, 0.955) -0.4s
-          infinite;
+        animation: pulse-dot 1.25s cubic-bezier(0.455, 0.03, 0.515, 0.955) -0.4s infinite;
         box-shadow: 0 0 30px rgba(99, 102, 241, 0.8);
       }
 
       /* Dropdown Animation */
       @keyframes dropdownSlideIn {
-        0% {
-          opacity: 0;
-          transform: translateY(10px) scale(0.95);
-        }
-        100% {
-          opacity: 1;
-          transform: translateY(0) scale(1);
-        }
+        0% { opacity: 0; transform: translateY(10px) scale(0.95); }
+        100% { opacity: 1; transform: translateY(0) scale(1); }
       }
       @keyframes dropdownSlideOut {
-        0% {
-          opacity: 1;
-          transform: translateY(0) scale(1);
-        }
-        100% {
-          opacity: 0;
-          transform: translateY(10px) scale(0.95);
-        }
+        0% { opacity: 1; transform: translateY(0) scale(1); }
+        100% { opacity: 0; transform: translateY(10px) scale(0.95); }
       }
       .small-model-dropdown {
         position: absolute;
@@ -120,21 +86,11 @@
         animation: dropdownSlideOut 0.3s ease-out forwards;
         pointer-events: none;
       }
-      .small-model-dropdown.hidden:not(.animating) {
-        display: none;
-      }
+      .small-model-dropdown.hidden:not(.animating) { display: none; }
 
       /* Layout Classes */
-      .chat-container {
-        height: calc(100vh - 64px - 4rem);
-        display: flex;
-        flex-direction: column;
-      }
-      .messages-container {
-        flex-grow: 1;
-        overflow-y: auto;
-        padding: 1rem;
-      }
+      .chat-container { height: calc(100vh - 64px - 4rem); display: flex; flex-direction: column; }
+      .messages-container { flex-grow: 1; overflow-y: auto; padding: 1rem; }
       .prompt-container {
         position: sticky;
         bottom: 0;
@@ -159,18 +115,10 @@
       }
 
       /* Sidebar Styles */
-      .sidebar-expanded {
-        width: 16rem;
-        transition: width 0.3s ease;
-      }
-      .sidebar-collapsed {
-        width: 3.5rem;
-        transition: width 0.3s ease;
-      }
+      .sidebar-expanded { width: 16rem; transition: width 0.3s ease; }
+      .sidebar-collapsed { width: 3.5rem; transition: width 0.3s ease; }
       .sidebar-collapsed .sidebar-content,
-      .sidebar-collapsed .sidebar-title {
-        display: none;
-      }
+      .sidebar-collapsed .sidebar-title { display: none; }
       .sidebar {
         background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(10px);
@@ -181,49 +129,33 @@
       }
 
       /* Dropdowns */
-      .dropdown-menu ul {
-        padding: 0.5rem;
-      }
+      .dropdown-menu ul { padding: 0.5rem; }
       .dropdown-menu ul li {
         padding: 0.5rem 1rem;
         border-radius: 0.375rem;
-        cursor: pointer; /* Ensure pointer cursor */
+        cursor: pointer;
         transition: all 0.2s ease;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
       .dropdown-menu ul li:hover {
-        background: #6366f1; /* Rich purple color */
-        color: white; /* White text for contrast */
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); /* Stronger shadow */
-        transform: translateX(2px); /* Subtle shift */
-        text-decoration: none; /* Remove underline */
+        background: #6366f1;
+        color: white;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        transform: translateX(2px);
+        text-decoration: none;
       }
       .dropdown-menu ul li:hover .fa-robot,
-      .dropdown-menu ul li:hover .fa-lock {
-        color: white; /* Ensure icons turn white on hover */
-      }
-      .chat-dropdown {
-        top: 110% !important;
-        right: 0 !important;
-        left: auto !important;
-        z-index: 9999 !important;
-      }
+      .dropdown-menu ul li:hover .fa-lock { color: white; }
+      .chat-dropdown { top: 110% !important; right: 0 !important; left: auto !important; z-index: 9999 !important; }
 
       /* Gold Lock for Paid Models */
-      .paid-model .fa-lock {
-        color: #ffd700; /* Gold color */
-      }
+      .paid-model .fa-lock { color: #ffd700; }
 
       /* Navbar Left Options Animation */
-      #navLeftArea {
-        position: relative;
-        overflow: hidden;
-      }
-      #logo {
-        transition: opacity 0.5s ease;
-      }
+      #navLeftArea { position: relative; overflow: hidden; }
+      #logo { transition: opacity 0.5s ease; }
       #navOptions {
         position: absolute;
         left: 0;
@@ -234,10 +166,7 @@
         transform: translateX(-100%);
         transition: all 0.5s ease;
       }
-      #navOptions.active {
-        opacity: 1;
-        transform: translateX(0);
-      }
+      #navOptions.active { opacity: 1; transform: translateX(0); }
 
       /* Textarea */
       .textarea-bordered {
@@ -252,71 +181,28 @@
       }
 
       /* Buttons */
-      .btn {
-        transition: all 0.3s ease;
-      }
-      .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      }
-      .btn-primary {
-        background: linear-gradient(135deg, #6366f1, #818cf8);
-      }
-      .btn-secondary {
-        background: linear-gradient(135deg, #8b5cf6, #a78bfa);
-      }
+      .btn { transition: all 0.3s ease; }
+      .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+      .btn-primary { background: linear-gradient(135deg, #6366f1, #818cf8); }
+      .btn-secondary { background: linear-gradient(135deg, #8b5cf6, #a78bfa); }
 
       /* Custom Scrollbar */
-      ::-webkit-scrollbar {
-        width: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: rgba(99, 102, 241, 0.1);
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #818cf8;
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #6366f1;
-      }
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-track { background: rgba(99, 102, 241, 0.1); }
+      ::-webkit-scrollbar-thumb { background: #818cf8; border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
 
-      .alert-fade {
-        transition: opacity 0.5s ease-out;
-      }
+      .alert-fade { transition: opacity 0.5s ease-out; }
 
       /* Sidebar Specific */
-      .sidebar-expanded {
-        width: 280px;
-      }
-      .sidebar-collapsed {
-        width: 64px;
-      }
-      .sidebar-collapsed .sidebar-content {
-        opacity: 0;
-        visibility: hidden;
-        width: 0;
-      }
-      .sidebar-collapsed .sidebar-collapsed-content {
-        display: flex !important;
-      }
-      .dropdown-content {
-        position: absolute;
-        z-index: 1000;
-        min-width: 200px;
-        overflow: visible;
-      }
-      .sidebar-collapsed-content {
-        top: 1rem;
-        left: 50%;
-        transform: translateX(-50%);
-      }
-      .menu.bg-base-200 {
-        overflow: visible !important;
-      }
-      .sidebar .dropdown-content {
-        max-width: 260px;
-      }
+      .sidebar-expanded { width: 280px; }
+      .sidebar-collapsed { width: 64px; }
+      .sidebar-collapsed .sidebar-content { opacity: 0; visibility: hidden; width: 0; }
+      .sidebar-collapsed .sidebar-collapsed-content { display: flex !important; }
+      .dropdown-content { position: absolute; z-index: 1000; min-width: 200px; overflow: visible; }
+      .sidebar-collapsed-content { top: 1rem; left: 50%; transform: translateX(-50%); }
+      .menu.bg-base-200 { overflow: visible !important; }
+      .sidebar .dropdown-content { max-width: 260px; }
 
       /* Inline Rename Styles */
       .chat-title-form input {
@@ -328,9 +214,7 @@
       }
 
       /* Tooltip Overrides */
-      .tooltip {
-        z-index: 3000 !important;
-      }
+      .tooltip { z-index: 3000 !important; }
       .tooltip:before,
       .tooltip:after {
         background-color: rgba(0, 0, 0, 0.85) !important;
@@ -358,14 +242,7 @@
         justify-content: center;
         animation: fadeIn 0.3s ease;
       }
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-        }
-        to {
-          opacity: 1;
-        }
-      }
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
       .modal-box {
         background: white;
         padding: 2rem;
@@ -376,9 +253,7 @@
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         transition: transform 0.3s ease;
       }
-      .modal-box.active {
-        transform: scale(1);
-      }
+      .modal-box.active { transform: scale(1); }
       .modal-box .close-btn {
         position: absolute;
         top: 0.5rem;
@@ -390,9 +265,7 @@
         color: #6366f1;
         transition: color 0.2s ease;
       }
-      .modal-box .close-btn:hover {
-        color: #818cf8;
-      }
+      .modal-box .close-btn:hover { color: #818cf8; }
 
       /* Download Button */
       .download-btn {
@@ -418,67 +291,36 @@
         transform: translateY(-2px);
         box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
       }
-      .download-btn i {
-        font-size: 1.2rem;
-      }
-      .image-container {
-        position: relative;
-        display: inline-block;
-        max-width: 100%;
-      }
+      .download-btn i { font-size: 1.2rem; }
+      .image-container { position: relative; display: inline-block; max-width: 100%; }
     </style>
   </head>
-  <body
-    class="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 overflow-hidden"
-  >
+  <body class="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 overflow-hidden">
     <!-- Loading Overlay -->
-    <div
-      id="loadingOverlay"
-      class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center backdrop-blur-sm"
-    >
+    <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center backdrop-blur-sm">
       <div class="relative flex flex-col items-center">
         <div class="loader-ring"></div>
         <div class="loader-dot"></div>
-        <div class="text-white text-xl mt-40 font-bold">
-          Generating Your Image
-        </div>
-        <div class="text-white text-sm mt-2">
-          Please wait while we create something amazing...
-        </div>
-        <div class="mt-4">
-          <span class="loading loading-dots loading-lg text-primary"></span>
-        </div>
+        <div class="text-white text-xl mt-40 font-bold">Generating Your Image</div>
+        <div class="text-white text-sm mt-2">Please wait while we create something amazing...</div>
+        <div class="mt-4"><span class="loading loading-dots loading-lg text-primary"></span></div>
       </div>
     </div>
 
     <!-- Navbar -->
     <div class="navbar bg-base-100 bg-opacity-80 backdrop-blur-md shadow-lg">
       <div class="flex-1 relative" id="navLeftArea">
-        <a id="logo" class="btn btn-ghost normal-case text-2xl text-primary"
-          >Prompt2Pic <i class="fas fa-camera-retro ml-2 text-secondary"></i
-        ></a>
+        <a id="logo" class="btn btn-ghost normal-case text-2xl text-primary">Prompt2Pic <i class="fas fa-camera-retro ml-2 text-secondary"></i></a>
         <div id="navOptions" class="flex items-center">
-          <a
-            href="{% url 'image_generation:change_password' %}"
-            class="btn btn-ghost text-primary"
-            >Change Password <i class="fas fa-lock ml-1"></i
-          ></a>
-          <a
-            id="logout"
-            class="btn btn-ghost text-primary"
-            href="{% url 'authentication:logout' %}"
-            >Logout <i class="fas fa-sign-out-alt ml-1"></i
-          ></a>
+          <a href="{% url 'image_generation:change_password' %}" class="btn btn-ghost text-primary">Change Password <i class="fas fa-lock ml-1"></i></a>
+          <a id="logout" class="btn btn-ghost text-primary" href="{% url 'authentication:logout' %}">Logout <i class="fas fa-sign-out-alt ml-1"></i></a>
         </div>
       </div>
       <div class="flex-none gap-2">
         <div class="relative inline-block text-left">
           <button id="avatarBtn" class="btn btn-ghost btn-circle avatar">
             <div class="w-10 rounded-full">
-              <img
-                src="https://api.dicebear.com/6.x/initials/svg?seed={{ request.user.username }}"
-                alt="User Avatar"
-              />
+              <img src="https://api.dicebear.com/6.x/initials/svg?seed={{ request.user.username }}" alt="User Avatar" />
             </div>
           </button>
         </div>
@@ -486,52 +328,22 @@
     </div>
 
     <!-- Change Password Modal -->
-    <div
-      id="changePasswordModal"
-      class="modal fixed inset-0 z-[10000] hidden items-center justify-center bg-black bg-opacity-50 p-4"
-    >
-      <div
-        class="modal-box relative w-full max-w-md bg-white rounded-xl shadow-2xl border border-primary/10 transform transition-all duration-300 ease-in-out"
-      >
-        <button
-          id="closeModal"
-          class="btn btn-sm btn-circle btn-ghost absolute top-4 right-4"
-        >
+    <div id="changePasswordModal" class="modal fixed inset-0 z-[10000] hidden items-center justify-center bg-black bg-opacity-50 p-4">
+      <div class="modal-box relative w-full max-w-md bg-white rounded-xl shadow-2xl border border-primary/10 transform transition-all duration-300 ease-in-out">
+        <button id="closeModal" class="btn btn-sm btn-circle btn-ghost absolute top-4 right-4">
           <i class="fas fa-times text-gray-500 hover:text-primary"></i>
         </button>
         <div class="text-center mb-6">
           <h3 class="text-2xl font-bold text-primary mb-2">Change Password</h3>
-          <p class="text-sm text-gray-500">
-            Secure your account with a strong password
-          </p>
+          <p class="text-sm text-gray-500">Secure your account with a strong password</p>
         </div>
-        <form
-          id="changePasswordForm"
-          method="post"
-          action="{% url 'image_generation:change_password' %}"
-          class="space-y-4"
-        >
+        <form id="changePasswordForm" method="post" action="{% url 'image_generation:change_password' %}" class="space-y-4">
           {% csrf_token %}
           <div class="form-control relative">
-            <label class="label" for="newPassword"
-              ><span class="label-text font-semibold">New Password</span></label
-            >
+            <label class="label" for="newPassword"><span class="label-text font-semibold">New Password</span></label>
             <div class="relative">
-              <input
-                type="password"
-                id="newPassword"
-                name="new_password"
-                placeholder="Enter new password"
-                class="input input-bordered w-full pr-10 border-primary/30 focus:border-primary focus:ring-2 focus:ring-primary/20"
-                required
-              />
-              <span
-                class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
-                id="toggleNewPassword"
-                ><i
-                  class="fas fa-eye-slash text-gray-400 hover:text-primary"
-                ></i
-              ></span>
+              <input type="password" id="newPassword" name="new_password" placeholder="Enter new password" class="input input-bordered w-full pr-10 border-primary/30 focus:border-primary focus:ring-2 focus:ring-primary/20" required />
+              <span class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer" id="toggleNewPassword"><i class="fas fa-eye-slash text-gray-400 hover:text-primary"></i></span>
             </div>
             <div class="password-strength">
               <div class="strength-bar"></div>
@@ -547,48 +359,16 @@
             </ul>
           </div>
           <div class="form-control relative">
-            <label class="label" for="confirmPassword"
-              ><span class="label-text font-semibold"
-                >Confirm New Password</span
-              ></label
-            >
+            <label class="label" for="confirmPassword"><span class="label-text font-semibold">Confirm New Password</span></label>
             <div class="relative">
-              <input
-                type="password"
-                id="confirmPassword"
-                name="confirm_password"
-                placeholder="Confirm new password"
-                class="input input-bordered w-full pr-10 border-primary/30 focus:border-primary focus:ring-2 focus:ring-primary/20"
-                required
-              />
-              <span
-                class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
-                id="toggleConfirmPassword"
-                ><i
-                  class="fas fa-eye-slash text-gray-400 hover:text-primary"
-                ></i
-              ></span>
+              <input type="password" id="confirmPassword" name="confirm_password" placeholder="Confirm new password" class="input input-bordered w-full pr-10 border-primary/30 focus:border-primary focus:ring-2 focus:ring-primary/20" required />
+              <span class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer" id="toggleConfirmPassword"><i class="fas fa-eye-slash text-gray-400 hover:text-primary"></i></span>
             </div>
-            <p id="confirmError" class="text-error text-xs mt-1 hidden">
-              Passwords do not match
-            </p>
+            <p id="confirmError" class="text-error text-xs mt-1 hidden">Passwords do not match</p>
           </div>
           <div class="modal-action mt-6 flex justify-center space-x-4">
-            <button
-              type="button"
-              id="closeModalBtn"
-              class="btn btn-outline btn-primary"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              id="changePasswordSubmit"
-              class="btn btn-primary"
-              disabled
-            >
-              Change Password <i class="fas fa-lock ml-2"></i>
-            </button>
+            <button type="button" id="closeModalBtn" class="btn btn-outline btn-primary">Cancel</button>
+            <button type="submit" id="changePasswordSubmit" class="btn btn-primary" disabled>Change Password <i class="fas fa-lock ml-2"></i></button>
           </div>
         </form>
       </div>
@@ -596,86 +376,33 @@
 
     <div class="flex h-[calc(100vh-64px)]">
       <!-- Sidebar (Chat History) -->
-      <aside
-        id="chatHistorySidebar"
-        class="bg-base-100 shadow-xl p-4 flex-shrink-0 sidebar sidebar-expanded"
-      >
+      <aside id="chatHistorySidebar" class="bg-base-100 shadow-xl p-4 flex-shrink-0 sidebar sidebar-expanded">
         <div class="sidebar-content">
           <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-bold text-primary sidebar-title">
-              Chat Sessions
-            </h2>
-            <button id="sidebarToggleBtn" class="btn btn-sm btn-ghost">
-              <i class="fas fa-angle-left"></i>
-            </button>
+            <h2 class="text-2xl font-bold text-primary sidebar-title">Chat Sessions</h2>
+            <button id="sidebarToggleBtn" class="btn btn-sm btn-ghost"><i class="fas fa-angle-left"></i></button>
           </div>
-          <a
-            href="{% url 'image_generation:create_chat' %}"
-            class="btn btn-primary w-full mb-4 flex items-center gap-2"
-            ><i class="fas fa-comment-dots"></i><span>New Chat</span></a
-          >
+          <a href="{% url 'image_generation:create_chat' %}" class="btn btn-primary w-full mb-4 flex items-center gap-2"><i class="fas fa-comment-dots"></i><span>New Chat</span></a>
           <ul class="menu bg-base-200 w-full rounded-box">
             {% for chat in history %}
-            <li
-              class="relative w-full max-w-full hover:bg-primary/10 {% if active_chat.id == chat.id %}bg-primary/10{% endif %}"
-            >
+            <li class="relative w-full max-w-full hover:bg-primary/10 {% if active_chat.id == chat.id %}bg-primary/10{% endif %}">
               <div class="flex items-center justify-between w-full p-3">
                 <div class="flex-1 mx-2 truncate min-w-0">
-                  <a
-                    href="?chat_id={{ chat.id }}"
-                    id="chat-title-{{ chat.id }}"
-                    class="chat-title-text flex items-center"
-                    ><i class="fas fa-comment-alt text-primary mr-2"></i
-                    ><span>{{ chat.title }}</span></a
-                  >
-                  <form
-                    class="inline-block hidden chat-title-form"
-                    id="chat-form-{{ chat.id }}"
-                    method="post"
-                    action="{% url 'image_generation:rename_chat' chat.id %}"
-                  >
+                  <a href="?chat_id={{ chat.id }}" id="chat-title-{{ chat.id }}" class="chat-title-text flex items-center"><i class="fas fa-comment-alt text-primary mr-2"></i><span>{{ chat.title }}</span></a>
+                  <form class="inline-block hidden chat-title-form" id="chat-form-{{ chat.id }}" method="post" action="{% url 'image_generation:rename_chat' chat.id %}">
                     {% csrf_token %}
-                    <input
-                      type="text"
-                      name="title"
-                      value="{{ chat.title }}"
-                      onkeydown="if(event.key==='Enter'){ disableAndSubmit(this.form); }"
-                      onblur="disableAndSubmit(this.form);"
-                    />
+                    <input type="text" name="title" value="{{ chat.title }}" onkeydown="if(event.key==='Enter'){ disableAndSubmit(this.form); }" onblur="disableAndSubmit(this.form);" />
                   </form>
                 </div>
-                <span class="text-xs text-gray-400 flex-shrink-0"
-                  >{{ chat.created_at|date:"M d" }}</span
-                >
-                <div
-                  class="dropdown dropdown-end flex-none w-8 text-right flex-shrink-0"
-                >
-                  <label tabindex="0" class="btn btn-ghost btn-xs m-1"
-                    ><i class="fas fa-ellipsis-v"></i
-                  ></label>
-                  <ul
-                    tabindex="0"
-                    class="dropdown-content menu chat-dropdown p-2 shadow bg-base-100 rounded-box w-52"
-                  >
+                <span class="text-xs text-gray-400 flex-shrink-0">{{ chat.created_at|date:"M d" }}</span>
+                <div class="dropdown dropdown-end flex-none w-8 text-right flex-shrink-0">
+                  <label tabindex="0" class="btn btn-ghost btn-xs m-1"><i class="fas fa-ellipsis-v"></i></label>
+                  <ul tabindex="0" class="dropdown-content menu chat-dropdown p-2 shadow bg-base-100 rounded-box w-52">
+                    <li><a onclick="showRenameForm('{{ chat.id }}')"><i class="fas fa-pencil-alt mr-2"></i>Rename</a></li>
                     <li>
-                      <a onclick="showRenameForm('{{ chat.id }}')"
-                        ><i class="fas fa-pencil-alt mr-2"></i>Rename</a
-                      >
-                    </li>
-                    <li>
-                      <form
-                        method="post"
-                        action="{% url 'image_generation:delete_chat' chat.id %}"
-                        id="delete-form-{{ chat.id }}"
-                      >
+                      <form method="post" action="{% url 'image_generation:delete_chat' chat.id %}" id="delete-form-{{ chat.id }}">
                         {% csrf_token %}
-                        <button
-                          type="button"
-                          class="w-full text-left text-error delete-btn"
-                          data-chat-id="{{ chat.id }}"
-                        >
-                          <i class="fas fa-trash-alt mr-2"></i>Delete
-                        </button>
+                        <button type="button" class="w-full text-left text-error delete-btn" data-chat-id="{{ chat.id }}"><i class="fas fa-trash-alt mr-2"></i>Delete</button>
                       </form>
                     </li>
                   </ul>
@@ -685,22 +412,9 @@
             {% endfor %}
           </ul>
         </div>
-        <div
-          class="sidebar-collapsed-content hidden absolute top-4 left-1/2 -translate-x-1/2 flex-col items-center gap-2"
-        >
-          <a
-            href="{% url 'image_generation:create_chat' %}"
-            class="btn btn-circle btn-primary btn-sm tooltip tooltip-right"
-            data-tip="New Chat"
-            ><i class="fas fa-comment-dots fa-2x"></i
-          ></a>
-          <button
-            id="sidebarToggleCollapsedBtn"
-            class="btn btn-circle btn-sm btn-ghost tooltip tooltip-right"
-            data-tip="Expand"
-          >
-            <i class="fas fa-angle-right"></i>
-          </button>
+        <div class="sidebar-collapsed-content hidden absolute top-4 left-1/2 -translate-x-1/2 flex-col items-center gap-2">
+          <a href="{% url 'image_generation:create_chat' %}" class="btn btn-circle btn-primary btn-sm tooltip tooltip-right" data-tip="New Chat"><i class="fas fa-comment-dots fa-2x"></i></a>
+          <button id="sidebarToggleCollapsedBtn" class="btn btn-circle btn-sm btn-ghost tooltip tooltip-right" data-tip="Expand"><i class="fas fa-angle-right"></i></button>
         </div>
       </aside>
 
@@ -719,37 +433,22 @@
             <div class="chat chat-end mb-2">
               <div class="chat-image avatar">
                 <div class="w-10 rounded-full">
-                  <img
-                    src="https://api.dicebear.com/6.x/initials/svg?seed={{ request.user.username }}"
-                    alt="User"
-                  />
+                  <img src="https://api.dicebear.com/6.x/initials/svg?seed={{ request.user.username }}" alt="User" />
                 </div>
               </div>
-              <div class="chat-bubble chat-bubble-primary">
-                <p>{{ message.user_prompt }}</p>
-              </div>
+              <div class="chat-bubble chat-bubble-primary"><p>{{ message.user_prompt }}</p></div>
             </div>
             <div class="chat chat-start">
               <div class="chat-image avatar">
                 <div class="w-10 rounded-full">
-                  <img
-                    src="https://api.dicebear.com/6.x/bottts/svg?seed=AI"
-                    alt="AI"
-                  />
+                  <img src="https://api.dicebear.com/6.x/bottts/svg?seed=AI" alt="AI" />
                 </div>
               </div>
               <div class="chat-bubble chat-bubble-secondary">
                 {% if message.image_generated %}
                 <div class="image-container">
-                  <img
-                    src="{{ message.image_generated.url }}"
-                    class="max-w-sm rounded-lg shadow-lg"
-                    alt="Generated image"
-                  />
-                  <button
-                    class="download-btn"
-                    onclick="downloadImage('{{ message.image_generated.url }}', 'Prompt2Pic-{{ message.id }}.png')"
-                  >
+                  <img src="{{ message.image_generated.url }}" class="max-w-sm rounded-lg shadow-lg" alt="Generated image" />
+                  <button class="download-btn" onclick="downloadImage('{{ message.image_generated.url }}', 'Prompt2Pic-{{ message.id }}.png')">
                     <i class="fas fa-download"></i>
                   </button>
                 </div>
@@ -759,10 +458,7 @@
               </div>
             </div>
             <div class="chat-footer opacity-50 text-xs mt-1">
-              {{ message.created_at|timesince }} ago {% if message.agent %}<span
-                class="ml-2"
-                >via {{ message.agent.name }}</span
-              >{% endif %}
+              {{ message.created_at|timesince }} ago {% if message.agent %}<span class="ml-2">via {{ message.agent.name }}</span>{% endif %}
             </div>
           </div>
           {% empty %}
@@ -773,97 +469,43 @@
           {% endfor %}
         </div>
         <div class="prompt-container">
-          <form
-            method="POST"
-            action="{% url 'image_generation:generate_image' %}"
-            id="generateForm"
-            class="w-full"
-          >
+          <form method="POST" action="{% url 'image_generation:generate_image' %}" id="generateForm" class="w-full">
             {% csrf_token %}
             <div class="flex flex-col gap-4">
               <!-- Prompt Textarea with Integrated Buttons -->
               <div class="relative">
-                <textarea
-                  name="prompt"
-                  id="promptInput"
-                  class="textarea textarea-bordered w-full resize-y pr-28"
-                  rows="4"
-                  placeholder="Describe the image you want to create..."
-                >
-{{ prompt_input }}</textarea
-                >
+                <textarea name="prompt" id="promptInput" class="textarea textarea-bordered w-full resize-y pr-28" rows="4" placeholder="Describe the image you want to create...">{{ prompt_input }}</textarea>
                 <div class="absolute bottom-3 right-3 flex items-center gap-2">
-                  <button
-                    type="submit"
-                    id="generateBtn"
-                    class="btn btn-primary btn-sm px-2 py-1"
-                    disabled
-                  >
-                    <i class="fas fa-wand-magic-sparkles"></i>
-                  </button>
+                  <button type="submit" id="generateBtn" class="btn btn-primary btn-sm px-2 py-1" disabled><i class="fas fa-wand-magic-sparkles"></i></button>
                   <div class="relative">
-                    <button
-                      type="button"
-                      id="smallModelSelectBtn"
-                      class="btn btn-secondary btn-sm px-3 py-1 flex items-center gap-1"
-                    >
+                    <button type="button" id="smallModelSelectBtn" class="btn btn-secondary btn-sm px-3 py-1 flex items-center gap-1">
                       <i class="fas fa-robot text-xs"></i>
-                      <span
-                        id="small-selected-model-text"
-                        class="truncate max-w-[80px] text-xs"
-                        >{% if selected_model %}{{ selected_model.name }}{% else
-                        %}Model{% endif %}</span
-                      >
+                      <span id="small-selected-model-text" class="truncate max-w-[80px] text-xs">{% if selected_model %}{{ selected_model.name }}{% else %}Model{% endif %}</span>
                       <i class="fas fa-chevron-down text-xs"></i>
                     </button>
-                    <div
-                      id="smallModelDropdown"
-                      class="small-model-dropdown hidden"
-                    >
+                    <div id="smallModelDropdown" class="small-model-dropdown hidden">
                       <ul>
-                        {% for model in models %} {% if model.is_paid %}
-                        <li
-                          class="flex items-center gap-2 paid-model"
-                          data-url="{% url 'image_generation:plans' %}"
-                        >
+                        {% for model in models %}
+                        {% if model.is_paid and not has_subscribed %}
+                        <li class="flex items-center gap-2 paid-model" data-url="{% url 'image_generation:plans' %}">
                           <i class="fas fa-robot text-primary"></i>
-                          <span
-                            class="flex-1 truncate tooltip"
-                            data-tip="{{ model.name }}"
-                            >{{ model.name }}</span
-                          >
+                          <span class="flex-1 truncate tooltip" data-tip="{{ model.name }}">{{ model.name }}</span>
                           <i class="fas fa-lock ml-2 text-gray-500"></i>
                         </li>
                         {% else %}
-                        <li
-                          class="flex items-center gap-2"
-                          onclick="selectModel('{{ model.id }}', '{{ model.name }}')"
-                        >
+                        <li class="flex items-center gap-2" onclick="selectModel('{{ model.id }}', '{{ model.name }}')">
                           <i class="fas fa-robot text-primary"></i>
-                          <span
-                            class="flex-1 truncate tooltip"
-                            data-tip="{{ model.name }}"
-                            >{{ model.name }}</span
-                          >
+                          <span class="flex-1 truncate tooltip" data-tip="{{ model.name }}">{{ model.name }}</span>
                         </li>
-                        {% endif %} {% endfor %}
+                        {% endif %}
+                        {% endfor %}
                       </ul>
                     </div>
                   </div>
                 </div>
               </div>
-              <input
-                type="hidden"
-                id="model-input"
-                name="model"
-                value="{{ selected_model.id }}"
-              />
-              <input
-                type="hidden"
-                id="chat-id-input"
-                name="chat_id"
-                value="{{ active_chat.id }}"
-              />
+              <input type="hidden" id="model-input" name="model" value="{{ selected_model.id }}" />
+              <input type="hidden" id="chat-id-input" name="chat_id" value="{{ active_chat.id }}" />
             </div>
           </form>
         </div>
@@ -876,11 +518,9 @@
 
     <script>
       // Handle form submission and loading state
-      document
-        .getElementById("generateForm")
-        .addEventListener("submit", function (e) {
-          document.getElementById("loadingOverlay").classList.remove("hidden");
-        });
+      document.getElementById("generateForm").addEventListener("submit", function (e) {
+        document.getElementById("loadingOverlay").classList.remove("hidden");
+      });
 
       // Prompt input and model selection button state
       const promptInput = document.getElementById("promptInput");
@@ -888,8 +528,7 @@
 
       function updateGenerateButtonState() {
         const prompt = promptInput.value.trim();
-        const modelSelected =
-          document.getElementById("model-input").value !== "";
+        const modelSelected = document.getElementById("model-input").value !== "";
         generateBtn.disabled = prompt === "" || !modelSelected;
       }
 
@@ -926,18 +565,15 @@
 
       function selectModel(modelId, modelName) {
         document.getElementById("model-input").value = modelId;
-        document.getElementById("small-selected-model-text").textContent =
-          modelName;
+        document.getElementById("small-selected-model-text").textContent = modelName;
         toggleSmallModelDropdown(); // Close small dropdown
         updateGenerateButtonState();
       }
 
-      document
-        .getElementById("smallModelSelectBtn")
-        .addEventListener("click", function (e) {
-          e.stopPropagation();
-          toggleSmallModelDropdown();
-        });
+      document.getElementById("smallModelSelectBtn").addEventListener("click", function (e) {
+        e.stopPropagation();
+        toggleSmallModelDropdown();
+      });
 
       // Call initially to set the correct state
       updateGenerateButtonState();
@@ -965,15 +601,9 @@
           navOptions.classList.remove("active");
           logo.style.opacity = 1;
         }
-        const smallModelDropdown =
-          document.getElementById("smallModelDropdown");
-        const smallModelSelectBtn = document.getElementById(
-          "smallModelSelectBtn"
-        );
-        if (
-          !smallModelDropdown.contains(e.target) &&
-          !smallModelSelectBtn.contains(e.target)
-        ) {
+        const smallModelDropdown = document.getElementById("smallModelDropdown");
+        const smallModelSelectBtn = document.getElementById("smallModelSelectBtn");
+        if (!smallModelDropdown.contains(e.target) && !smallModelSelectBtn.contains(e.target)) {
           smallModelDropdown.classList.remove("visible");
           smallModelDropdown.classList.add("hidden");
         }
@@ -983,40 +613,26 @@
       function toggleSidebar() {
         const sidebar = document.getElementById("chatHistorySidebar");
         const sidebarToggleBtn = document.getElementById("sidebarToggleBtn");
-        const sidebarToggleCollapsedBtn = document.getElementById(
-          "sidebarToggleCollapsedBtn"
-        );
+        const sidebarToggleCollapsedBtn = document.getElementById("sidebarToggleCollapsedBtn");
         if (sidebar.classList.contains("sidebar-expanded")) {
           sidebar.classList.remove("sidebar-expanded");
           sidebar.classList.add("sidebar-collapsed");
           sidebarToggleBtn.innerHTML = '<i class="fas fa-angle-right"></i>';
-          if (sidebarToggleCollapsedBtn)
-            sidebarToggleCollapsedBtn.innerHTML =
-              '<i class="fas fa-angle-right"></i>';
+          if (sidebarToggleCollapsedBtn) sidebarToggleCollapsedBtn.innerHTML = '<i class="fas fa-angle-right"></i>';
           sidebar.querySelector(".sidebar-content").style.display = "none";
-          sidebar
-            .querySelector(".sidebar-collapsed-content")
-            .classList.remove("hidden");
+          sidebar.querySelector(".sidebar-collapsed-content").classList.remove("hidden");
         } else {
           sidebar.classList.remove("sidebar-collapsed");
           sidebar.classList.add("sidebar-expanded");
           sidebarToggleBtn.innerHTML = '<i class="fas fa-angle-left"></i>';
-          if (sidebarToggleCollapsedBtn)
-            sidebarToggleCollapsedBtn.innerHTML =
-              '<i class="fas fa-angle-left"></i>';
+          if (sidebarToggleCollapsedBtn) sidebarToggleCollapsedBtn.innerHTML = '<i class="fas fa-angle-left"></i>';
           sidebar.querySelector(".sidebar-content").style.display = "block";
-          sidebar
-            .querySelector(".sidebar-collapsed-content")
-            .classList.add("hidden");
+          sidebar.querySelector(".sidebar-collapsed-content").classList.add("hidden");
         }
       }
-      document
-        .getElementById("sidebarToggleBtn")
-        .addEventListener("click", toggleSidebar);
+      document.getElementById("sidebarToggleBtn").addEventListener("click", toggleSidebar);
       if (document.getElementById("sidebarToggleCollapsedBtn")) {
-        document
-          .getElementById("sidebarToggleCollapsedBtn")
-          .addEventListener("click", toggleSidebar);
+        document.getElementById("sidebarToggleCollapsedBtn").addEventListener("click", toggleSidebar);
       }
 
       // Inline Rename Functions
@@ -1044,14 +660,12 @@
           button.addEventListener("click", function (e) {
             e.preventDefault();
             e.stopPropagation();
-            const confirmed = confirm(
-              "Are you sure you want to delete this chat session?\nThis action cannot be undone."
-            );
+            const confirmed = confirm("Are you sure you want to delete this chat session?\nThis action cannot be undone.");
             if (confirmed) this.closest("form").submit();
           });
         });
 
-        // Handle clicks on paid models
+        // Handle clicks on paid models (only redirect if not subscribed)
         const paidModelItems = document.querySelectorAll(".paid-model");
         paidModelItems.forEach((item) => {
           item.addEventListener("click", function (e) {
@@ -1063,13 +677,9 @@
       });
 
       // Password Modal Handling
-      const changePasswordModal = document.getElementById(
-        "changePasswordModal"
-      );
+      const changePasswordModal = document.getElementById("changePasswordModal");
       const toggleNewPassword = document.getElementById("toggleNewPassword");
-      const toggleConfirmPassword = document.getElementById(
-        "toggleConfirmPassword"
-      );
+      const toggleConfirmPassword = document.getElementById("toggleConfirmPassword");
       const newPassword = document.getElementById("newPassword");
       const confirmPassword = document.getElementById("confirmPassword");
       const submitBtn = document.getElementById("changePasswordSubmit");
@@ -1100,9 +710,7 @@
       function updateStrengthIndicator(strength) {
         const bars = document.querySelectorAll(".strength-bar");
         const validations = Object.values(strength).filter(Boolean).length;
-        bars.forEach((bar, index) =>
-          bar.classList.toggle("active", index < validations)
-        );
+        bars.forEach((bar, index) => bar.classList.toggle("active", index < validations));
         document.querySelectorAll(".validation-list li").forEach((li) => {
           const type = li.dataset.validation;
           li.classList.toggle("valid", strength[type]);
@@ -1113,12 +721,9 @@
         const password = newPassword.value;
         const confirm = confirmPassword.value;
         const strength = checkPasswordStrength(password);
-        const isValid =
-          Object.values(strength).every(Boolean) && password === confirm;
+        const isValid = Object.values(strength).every(Boolean) && password === confirm;
         submitBtn.disabled = !isValid;
-        document
-          .getElementById("confirmError")
-          .classList.toggle("hidden", password === confirm);
+        document.getElementById("confirmError").classList.toggle("hidden", password === confirm);
       }
 
       newPassword.addEventListener("input", () => {
@@ -1128,27 +733,20 @@
       });
       confirmPassword.addEventListener("input", validateForm);
 
-      document
-        .getElementById("changePassword")
-        ?.addEventListener("click", (e) => {
-          e.preventDefault();
-          changePasswordModal.classList.remove("hidden");
-          changePasswordModal.classList.add("flex");
-        });
+      document.getElementById("changePassword")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        changePasswordModal.classList.remove("hidden");
+        changePasswordModal.classList.add("flex");
+      });
 
-      [
-        document.getElementById("closeModal"),
-        document.getElementById("closeModalBtn"),
-      ].forEach((btn) => {
+      [document.getElementById("closeModal"), document.getElementById("closeModalBtn")].forEach((btn) => {
         btn.addEventListener("click", () => {
           changePasswordModal.classList.add("hidden");
           changePasswordModal.classList.remove("flex");
         });
       });
 
-      changePasswordModal
-        .querySelector(".modal-box")
-        .addEventListener("click", (e) => e.stopPropagation());
+      changePasswordModal.querySelector(".modal-box").addEventListener("click", (e) => e.stopPropagation());
 
       function downloadImage(url, filename) {
         const link = document.createElement("a");

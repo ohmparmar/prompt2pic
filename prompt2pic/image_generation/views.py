@@ -44,6 +44,16 @@ def dashboard(request):
     except (ObjectDoesNotExist, ValueError):
         active_chat = Chat.objects.filter(user=request.user).first()
 
+    # Check if user has an active subscription for paid models
+    has_active_subscription = Subscription.objects.filter(
+        user=request.user,
+        end_date__gte=timezone.now()
+    ).exists()
+    if has_active_subscription:
+        has_subscribed = True  # All available models
+    else:
+        has_subscribed = False  # Only free models
+
     context = {
         "history": Chat.objects.filter(user=request.user).order_by("-created_at"),
         "models": Agent.objects.filter(is_available=True),
@@ -51,11 +61,10 @@ def dashboard(request):
         "error": messages.get_messages(request),
         "prompt_input": request.POST.get("prompt", ""),
         "selected_model": Agent.objects.filter(id=request.POST.get("model")).first(),
+        "has_subscribed": has_subscribed
     }
 
     return render(request, "image_generation/dashboard.html", context)
-
-
 def guest_dashboard(request):
     generated_image_url = None
 
