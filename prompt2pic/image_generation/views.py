@@ -24,10 +24,14 @@ import json
 from imagepig import ImagePig
 from django.utils import timezone
 from datetime import timedelta
+import stripe
+from django.views.decorators.csrf import csrf_exempt  # Add this import
 
 imagepig = ImagePig(settings.IMAGEPIG_API_KEY)
 
 client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)  # Explicitly passing API key
+
+stripe.api_key = settings.STRIPE_SECRET_KEY  # Ensure you have your secret key set
 
 
 @login_required
@@ -380,57 +384,114 @@ def change_password(request):
 
 
 def plans_view(request):
+    context = {
+        "login": 0,
+    }
+    if request.user.is_authenticated:
+        context["login"] = 1
     return render(
-        request, "image_generation/plans.html"
+        request, "image_generation/plans.html", context
     )  # Adjust the path as necessary
 
 
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
-import stripe
+def create_stripe_payment_intent():
+    # Create a payment intent with Stripe
+    try:
+        payment_intent = stripe.PaymentIntent.create(
+            amount=1000,  # Amount in cents (e.g., $10.00)
+            currency="usd",  # Currency code
+            payment_method_types=["card"],  # Specify payment method types
+        )
+        return payment_intent
+    except Exception as e:
+        print(f"Error creating payment intent: {str(e)}")
+        return None  # Handle error appropriately
 
-stripe.api_key = settings.STRIPE_SECRET_KEY  # Ensure you have your secret key set
 
 
-@csrf_exempt
+
+@csrf_exempt  # Assuming this decorator is still in use
 def create_payment_intent(request):
-    if request.user.is_authenticated:
-        # Create a payment intent with Stripe
-        # Assuming you have a function to create a payment intent
-        payment_intent = create_stripe_payment_intent()  # Implement this function
-        return JsonResponse({"clientSecret": payment_intent["client_secret"]})
-    else:
-        return redirect("authentication:signup")  # Redirect to signup if not logged in
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "User not authenticated"}, status=401)
 
+    plan = request.POST.get("plan")
+    # Set up Stripe session (adjust parameters as per your setup)
+    session = stripe.checkout.Session.create(
+        payment_method_types=["card"],
+        line_items=[{
+            "price_data": {
+                "currency": "usd",
+                "product_data": {
+                    "name": f"{plan} Plan",
+                },
+                "unit_amount": 1000,  # Example amount in cents, adjust accordingly
+            },
+            "quantity": 1,
+        }],
+        mode="payment",
+        success_url=request.build_absolute_uri(reverse("image_generation:payment_success")),
+        cancel_url=request.build_absolute_uri(reverse("image_generation:plans")),
+        metadata={"plan": plan},
+    )
+    print(f"Created Stripe session with success_url: {session.success_url}")
+    # Return the session URL instead of the session ID
+    return JsonResponse({"url": session.url})
 
 def payment_success(request):
-    # Handle successful payment
-    user = request.user
-    amount_paid = request.POST.get("amount")  # Get the amount from the request
-    transaction_id = request.POST.get(
-        "transaction_id"
-    )  # Get the transaction ID from Stripe
-    plan_type = request.POST.get("plan_type")  # Get the plan type from the request
+    print("-------------------",request.GET)
+    session_id = request.GET.get("session_id")
+    print(session_id)
+    if not session_id:
+        return redirect("image_generation:plans")  # Redirect if no session ID is provided
 
-    # Create a transaction record
-    transaction = Transaction.objects.create(
-        user=user, amount_paid=amount_paid, transaction_id=transaction_id
-    )
+    try:
+        # Retrieve the session from Stripe using the session_id
+        session = stripe.checkout.Session.retrieve(session_id)
 
-    # Calculate end date based on plan type
-    if plan_type == "monthly":
-        end_date = timezone.now() + timedelta(days=30)
-    elif plan_type == "annual":
-        end_date = timezone.now() + timedelta(days=365)
-    else:
-        end_date = timezone.now()  # Default to now if plan type is unknown
+        # Check if the payment was successful
+        if session.payment_status == "paid":
+            user = request.user
+            amount_paid = session.amount_total / 100.0  # Convert cents to dollars
+            transaction_id = session.payment_intent  # Use the payment intent ID as the transaction ID
+            plan_type = session.metadata.get("plan")  # Retrieve plan type from metadata
 
-    # Create a subscription record
-    Subscription.objects.create(
-        user=user,
-        transaction=transaction,
-        plan_type=plan_type,
-        end_date=end_date,  # Set the calculated end date
-    )
+            if not plan_type:
+                return render(request, "image_generation/payment_error.html", {"error": "Plan type not found in payment session."})
 
-    return redirect("image_generation:dashboard")  # Redirect to dashboard after payment
+            # Create a transaction record
+            transaction = Transaction.objects.create(
+                user=user,
+                amount_paid=amount_paid,
+                transaction_id=transaction_id
+            )
+
+            # Calculate end date based on plan type
+            if plan_type == "weekly":
+                end_date = timezone.now() + timedelta(days=7)
+            elif plan_type == "monthly":
+                end_date = timezone.now() + timedelta(days=30)
+            elif plan_type == "annual":
+                end_date = timezone.now() + timedelta(days=365)
+            else:
+                end_date = timezone.now()  # Default to now if plan type is unknown
+
+            # Create a subscription record
+            Subscription.objects.create(
+                user=user,
+                transaction=transaction,
+                plan_type=plan_type,
+                end_date=end_date
+            )
+
+            # Update user status to paid
+            user.is_paid = True  # Assuming 'is_paid' is a field in the CustomUser model
+            user.save()
+
+            return redirect("image_generation:dashboard")
+        else:
+            return render(request, "image_generation/payment_failed.html", {"message": "Payment not completed."})
+    except stripe.error.StripeError as e:
+        return render(request, "image_generation/payment_error.html", {"error": str(e)})
+    except Exception as e:
+        return render(request, "image_generation/payment_error.html", {"error": f"Unexpected error: {str(e)}"})
