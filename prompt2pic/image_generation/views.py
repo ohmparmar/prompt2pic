@@ -438,60 +438,88 @@ def create_payment_intent(request):
     # Return the session URL instead of the session ID
     return JsonResponse({"url": session.url})
 
+@login_required
 def payment_success(request):
-    print("-------------------",request.GET)
-    session_id = request.GET.get("session_id")
-    print(session_id)
-    if not session_id:
-        return redirect("image_generation:plans")  # Redirect if no session ID is provided
+    payment_intent_id = request.GET.get("payment_intent_id")
+    plan = request.GET.get("plan", "unknown")
+    amount = float(request.GET.get("amount", 0)) / 100
+
+    if not payment_intent_id:
+        return render(request, "image_generation/payment_error.html", {"error": "No payment intent provided."})
 
     try:
-        # Retrieve the session from Stripe using the session_id
-        session = stripe.checkout.Session.retrieve(session_id)
-
-        # Check if the payment was successful
-        if session.payment_status == "paid":
+        payment_intent = stripe.PaymentIntent.retrieve(payment_intent_id)
+        if payment_intent.status == "succeeded":
             user = request.user
-            amount_paid = session.amount_total / 100.0  # Convert cents to dollars
-            transaction_id = session.payment_intent  # Use the payment intent ID as the transaction ID
-            plan_type = session.metadata.get("plan")  # Retrieve plan type from metadata
-
-            if not plan_type:
-                return render(request, "image_generation/payment_error.html", {"error": "Plan type not found in payment session."})
-
-            # Create a transaction record
             transaction = Transaction.objects.create(
                 user=user,
-                amount_paid=amount_paid,
-                transaction_id=transaction_id
+                amount_paid=amount,
+                transaction_id=payment_intent_id,
             )
 
-            # Calculate end date based on plan type
-            if plan_type == "weekly":
+            if plan == "weekly":
                 end_date = timezone.now() + timedelta(days=7)
-            elif plan_type == "monthly":
+            elif plan == "monthly":
                 end_date = timezone.now() + timedelta(days=30)
-            elif plan_type == "annual":
+            elif plan == "annual":
                 end_date = timezone.now() + timedelta(days=365)
             else:
-                end_date = timezone.now()  # Default to now if plan type is unknown
+                end_date = timezone.now()
 
-            # Create a subscription record
             Subscription.objects.create(
                 user=user,
                 transaction=transaction,
-                plan_type=plan_type,
-                end_date=end_date
+                plan_type=plan,
+                end_date=end_date,
             )
 
-            # Update user status to paid
-            user.is_paid = True  # Assuming 'is_paid' is a field in the CustomUser model
+            user.is_paid = True
             user.save()
-
             return redirect("image_generation:dashboard")
         else:
-            return render(request, "image_generation/payment_failed.html", {"message": "Payment not completed."})
+            return render(request, "image_generation/payment_failed.html", {"message": "Payment did not succeed."})
     except stripe.error.StripeError as e:
         return render(request, "image_generation/payment_error.html", {"error": str(e)})
+@csrf_exempt
+def process_payment(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request method"}, status=405)
+
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "User not authenticated"}, status=401)
+
+    try:
+        data = json.loads(request.body)
+        payment_method_id = data.get("payment_method_id")
+        plan = data.get("plan")
+        amount = data.get("amount")
+
+        if not all([payment_method_id, plan, amount]):
+            return JsonResponse({"error": "Missing required fields"}, status=400)
+
+        # Create Payment Intent with only card payments allowed
+        payment_intent = stripe.PaymentIntent.create(
+            amount=amount,  # Amount in cents
+            currency="usd",
+            payment_method=payment_method_id,
+            payment_method_types=['card'],  # Restrict to card payments only
+            confirmation_method="manual",
+            confirm=True,
+            metadata={
+                "plan": plan,
+                "user_id": str(request.user.id),
+            },
+        )
+
+        # Check if payment succeeded
+        if payment_intent.status == "succeeded":
+            return JsonResponse({"success": True, "payment_intent_id": payment_intent.id})
+        else:
+            return JsonResponse({"error": "Payment failed: " + payment_intent.last_payment_error.get("message", "Unknown error") if payment_intent.last_payment_error else "Unknown error"}, status=400)
+
+    except stripe.error.CardError as e:
+        return JsonResponse({"error": f"Card error: {e.user_message}"}, status=400)
+    except stripe.error.StripeError as e:
+        return JsonResponse({"error": f"Stripe error: {str(e)}"}, status=500)
     except Exception as e:
-        return render(request, "image_generation/payment_error.html", {"error": f"Unexpected error: {str(e)}"})
+        return JsonResponse({"error": f"Unexpected error: {str(e)}"}, status=500)
