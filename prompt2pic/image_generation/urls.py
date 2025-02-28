@@ -11,14 +11,14 @@ urlpatterns = [
     path("delete-chat/<int:chat_id>/", views.delete_chat, name="delete_chat"),
     path("rename-chat/<int:chat_id>/", views.rename_chat, name="rename_chat"),
     path("change-password/", views.change_password, name="change_password"),
-    path("plans/", views.plans_view, name="plans"),  # Add this line
-    path(
-        "create-payment-intent/",
-        views.create_payment_intent,
-        name="create_payment_intent",
-    ),  # Add this line
-    path("payment-success/", views.payment_success, name="payment_success"),
-    path(
-        "process-payment/", views.process_payment, name="process_payment"
-    ),  # New endpoint
+    # path("plans/", views.plans_view, name="plans"),  # Add this line
+    # path(
+    #     "create-payment-intent/",
+    #     views.create_payment_intent,
+    #     name="create_payment_intent",
+    # ),  # Add this line
+    # path("payment-success/", views.payment_success, name="payment_success"),
+    # path(
+    #     "process-payment/", views.process_payment, name="process_payment"
+    # ),  # New endpoint
 ]

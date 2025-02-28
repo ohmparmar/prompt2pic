@@ -331,7 +331,7 @@
       </div>
     </div>
 
-    <!-- Navbar -->
+    {% comment %} <!-- Navbar -->
     <div class="navbar bg-base-100 bg-opacity-80 backdrop-blur-md shadow-lg">
       <div class="flex-1 relative" id="navLeftArea">
         <a id="logo" class="btn btn-ghost normal-case text-2xl text-primary">Prompt2Pic <i class="fas fa-camera-retro ml-2 text-secondary"></i></a>
@@ -349,8 +349,27 @@
           </button>
         </div>
       </div>
+    </div> {% endcomment %}
+<!-- Navbar -->
+<div class="navbar bg-base-100 bg-opacity-80 backdrop-blur-md shadow-lg">
+  <div class="flex-1 relative" id="navLeftArea">
+    <a id="logo" class="btn btn-ghost normal-case text-2xl text-primary">Prompt2Pic <i class="fas fa-camera-retro ml-2 text-secondary"></i></a>
+    <div id="navOptions" class="flex items-center">
+      <a href="{% url 'image_generation:change_password' %}" class="btn btn-ghost text-primary">Change Password <i class="fas fa-lock ml-1"></i></a>
+      <a href="{% url 'subscriptions:subscription_dashboard' %}" class="btn btn-ghost text-primary">View Subscription <i class="fas fa-star ml-1"></i></a>
+      <a id="logout" class="btn btn-ghost text-primary" href="{% url 'authentication:logout' %}">Logout <i class="fas fa-sign-out-alt ml-1"></i></a>
     </div>
-
+  </div>
+  <div class="flex-none gap-2">
+    <div class="relative inline-block text-left">
+      <button id="avatarBtn" class="btn btn-ghost btn-circle avatar">
+        <div class="w-10 rounded-full">
+          <img src="https://api.dicebear.com/6.x/initials/svg?seed={{ request.user.username }}" alt="User Avatar" />
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
     <!-- Change Password Modal -->
     <div id="changePasswordModal" class="modal fixed inset-0 z-[10000] hidden items-center justify-center bg-black bg-opacity-50 p-4">
       <div class="modal-box relative w-full max-w-md bg-white rounded-xl shadow-2xl border border-primary/10 transform transition-all duration-300 ease-in-out">
@@ -511,7 +530,7 @@
                       <ul>
                         {% for model in models %}
                         {% if model.is_paid and not has_subscribed %}
-                        <li class="flex items-center gap-2 paid-model" data-url="{% url 'image_generation:plans' %}">
+                        <li class="flex items-center gap-2 paid-model" data-url="{% url 'subscriptions:plans' %}">
                           <i class="fas fa-robot text-primary"></i>
                           <span class="flex-1 truncate tooltip" data-tip="{{ model.name }}">{{ model.name }}</span>
                           <i class="fas fa-lock ml-2 text-gray-500"></i>

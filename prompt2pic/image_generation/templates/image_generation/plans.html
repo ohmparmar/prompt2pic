@@ -177,7 +177,7 @@
           spinner.classList.add('hidden');
           button.childNodes[1].textContent = ' Pay Now';
         } else {
-          const response = await fetch('/image/process-payment/', {
+          const response = await fetch('/subscriptions/process-payment/', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -192,7 +192,7 @@
 
           const data = await response.json();
           if (data.success) {
-            window.location.href = `/image/payment-success/?payment_intent_id=${data.payment_intent_id}&plan=${currentPlan}&amount=${currentAmount}`;
+            window.location.href = `/subscriptions/payment-success/?payment_intent_id=${data.payment_intent_id}&plan=${currentPlan}&amount=${currentAmount}`;
           } else {
             document.getElementById('payment-result').textContent = data.error || 'Payment failed. Please try again.';
             button.disabled = false;

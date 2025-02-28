@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "authentication",
     "image_generation",
     "tailwind",
+    "subscriptions",
 ]
 
 MIDDLEWARE = [

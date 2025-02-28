@@ -34,6 +34,7 @@ urlpatterns = ([
     path("admin/", admin.site.urls),
     path('auth/', include('authentication.urls')),
     path('image/', include('image_generation.urls')),  # Include image generation URLs
+    path('subscriptions/', include('subscriptions.urls')),  # Include subscriptions URLs
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 )
