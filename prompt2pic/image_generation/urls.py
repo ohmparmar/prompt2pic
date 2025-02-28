@@ -18,5 +18,7 @@ urlpatterns = [
         name="create_payment_intent",
     ),  # Add this line
     path("payment-success/", views.payment_success, name="payment_success"),
-    path("process-payment/", views.process_payment, name="process_payment"),  # New endpoint
+    path(
+        "process-payment/", views.process_payment, name="process_payment"
+    ),  # New endpoint
 ]
