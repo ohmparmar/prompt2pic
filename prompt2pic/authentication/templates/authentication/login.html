@@ -36,20 +36,23 @@
                 </div>
             </form>
             {% if messages %}
-    <div id="message-box" class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg transition-opacity duration-500">
-        {% for message in messages %}
-            {{ message }}
-        {% endfor %}
-    </div>
-    <script>
-        setTimeout(function() {
-            document.getElementById('message-box').style.opacity = '0';
-            setTimeout(function() {
-                document.getElementById('message-box').style.display = 'none';
-            }, 500); // Fade out duration
-        }, 2000); // Message visible duration (2 seconds)
-    </script>
-{% endif %}
+            <div id="message-box" class="fixed top-5 left-1/2 transform -translate-x-1/2 text-white px-4 py-2 rounded-lg shadow-lg transition-opacity duration-500
+                {% for message in messages %}
+                    {% if message.tags == 'success' %}bg-green-500{% elif message.tags == 'error' %}bg-red-500{% endif %}
+                {% endfor %}">
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+            </div>
+            <script>
+                setTimeout(function() {
+                    document.getElementById('message-box').style.opacity = '0';
+                    setTimeout(function() {
+                        document.getElementById('message-box').style.display = 'none';
+                    }, 500); // Fade out duration
+                }, 2000); // Message visible duration (2 seconds)
+            </script>
+        {% endif %}
             <div class="divider">OR</div>
             <div class="text-center">
                 <a href="{% url 'authentication:forgot_password' %}" class="link link-hover">Forgot Password?</a>
