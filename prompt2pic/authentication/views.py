@@ -167,16 +167,20 @@ def login(request):
 
 
 def user_logout(request):
+    # Log the user out and clear authentication data
     logout(request)
-
+    
+    # Explicitly flush the entire session
+    request.session.flush()
+    
     # Clear any previous messages
     storage = get_messages(request)
     for _ in storage:
         pass  # This clears stored messages
 
+    # Add success message for logout
     messages.success(request, 'You have been logged out successfully.')
     return redirect('authentication:login')
-
 
 
 def forgot_password(request):

@@ -67,6 +67,8 @@ def dashboard(request):
     }
 
     return render(request, "image_generation/dashboard.html", context)
+
+@csrf_exempt  
 def guest_dashboard(request):
     generated_image_url = None
 
