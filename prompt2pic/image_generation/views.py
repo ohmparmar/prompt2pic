@@ -36,25 +36,53 @@ client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)  # Explicitly passing AP
 stripe.api_key = settings.STRIPE_SECRET_KEY  # Ensure you have your secret key set
 
 
+# @login_required
+# def dashboard(request):
+
+#     try:
+#         chat_id = request.GET.get("chat_id")
+#         active_chat = Chat.objects.get(id=chat_id, user=request.user)
+
+#     except (ObjectDoesNotExist, ValueError):
+#         active_chat = Chat.objects.filter(user=request.user).first()
+
+#     # Check if user has an active subscription for paid models
+#     has_active_subscription = Subscription.objects.filter(
+#         user=request.user,
+#         end_date__gte=timezone.now()
+#     ).exists()
+#     if has_active_subscription:
+#         has_subscribed = True  # All available models
+#     else:
+#         has_subscribed = False  # Only free models
+
+#     context = {
+#         "history": Chat.objects.filter(user=request.user).order_by("-created_at"),
+#         "models": Agent.objects.filter(is_available=True),
+#         "active_chat": active_chat,
+#         "error": messages.get_messages(request),
+#         "prompt_input": request.POST.get("prompt", ""),
+#         "selected_model": Agent.objects.filter(id=request.POST.get("model")).first(),
+#         "has_subscribed": has_subscribed
+#     }
+
+#     return render(request, "image_generation/dashboard.html", context)
 @login_required
-def dashboard(request):
-
-    try:
-        chat_id = request.GET.get("chat_id")
-        active_chat = Chat.objects.get(id=chat_id, user=request.user)
-
-    except (ObjectDoesNotExist, ValueError):
-        active_chat = Chat.objects.filter(user=request.user).first()
+def dashboard(request, chat_id=None):  # Add optional chat_id parameter
+    if chat_id:
+        try:
+            active_chat = Chat.objects.get(id=chat_id, user=request.user)
+        except ObjectDoesNotExist:
+            active_chat = None  # If chat doesn't exist, show no chat
+    else:
+        active_chat = None  # No chat selected by default
 
     # Check if user has an active subscription for paid models
     has_active_subscription = Subscription.objects.filter(
         user=request.user,
         end_date__gte=timezone.now()
     ).exists()
-    if has_active_subscription:
-        has_subscribed = True  # All available models
-    else:
-        has_subscribed = False  # Only free models
+    has_subscribed = has_active_subscription
 
     context = {
         "history": Chat.objects.filter(user=request.user).order_by("-created_at"),
@@ -67,7 +95,6 @@ def dashboard(request):
     }
 
     return render(request, "image_generation/dashboard.html", context)
-
 @csrf_exempt  
 def guest_dashboard(request):
     generated_image_url = None
@@ -296,10 +323,11 @@ def generate_image(request):
                 agent=model,
                 image_generated=generated_image,
             )
-
-            return redirect(
-                f'{reverse("image_generation:dashboard")}?chat_id={active_chat.id}'
-            )
+# In the success case, redirect to the dashboard with the chat ID
+            return redirect("image_generation:dashboard_with_chat", chat_id=active_chat.id)
+            # return redirect(
+            #     f'{reverse("image_generation:dashboard")}?chat_id={active_chat.id}'
+            # )
 
         except Exception as e:
             print(str(e))
@@ -319,12 +347,9 @@ def create_chat(request):
         return redirect("authentication:login")
 
     with transaction.atomic():
-        # Create new chat with default title
         new_chat = Chat.objects.create(user=request.user, title="New Chat")
 
-    return redirect(f'{reverse("image_generation:dashboard")}?chat_id={new_chat.id}')
-
-
+    return redirect("image_generation:dashboard_with_chat", chat_id=new_chat.id)
 @login_required
 def delete_chat(request, chat_id):
     if not request.user.is_authenticated:
@@ -337,9 +362,7 @@ def delete_chat(request, chat_id):
     except ObjectDoesNotExist:
         messages.error(request, "Chat not found")
 
-    return redirect("image_generation:dashboard")
-
-
+    return redirect("image_generation:dashboard")  # Redirect to base dashboard after deletion
 @login_required
 def rename_chat(request, chat_id):
     if not request.user.is_authenticated:
@@ -348,19 +371,16 @@ def rename_chat(request, chat_id):
     if request.method == "POST":
         try:
             chat = Chat.objects.get(id=chat_id, user=request.user)
-            new_title = request.POST.get("title", "")[:50]  # Get title or empty string
-            chat.title = new_title or f"Chat {chat.id}"  # Set default if empty
+            new_title = request.POST.get("title", "")[:50]
+            chat.title = new_title or f"Chat {chat.id}"
             chat.save()
-            return redirect("image_generation:dashboard")
+            return redirect("image_generation:dashboard_with_chat", chat_id=chat.id)
         except Chat.DoesNotExist:
-            return JsonResponse(
-                {"status": "error", "message": "Chat not found"}, status=404
-            )
+            return JsonResponse({"status": "error", "message": "Chat not found"}, status=404)
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=400)
 
     return JsonResponse({"status": "error", "message": "Invalid method"}, status=400)
-
 
 PASSWORD_REGEX = re.compile(
     r'^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};\'":\\|,.<>/?]).{6,}$'
@@ -395,144 +415,3 @@ def change_password(request):
 
     return render(request, "image_generation/change_password.html")
 
-
-# def plans_view(request):
-#     context = {
-#         "login": 0,
-#     }
-#     if request.user.is_authenticated:
-#         context["login"] = 1
-#     return render(
-#         request, "image_generation/plans.html", context
-#     )  # Adjust the path as necessary
-
-
-# def create_stripe_payment_intent():
-#     # Create a payment intent with Stripe
-#     try:
-#         payment_intent = stripe.PaymentIntent.create(
-#             amount=1000,  # Amount in cents (e.g., $10.00)
-#             currency="usd",  # Currency code
-#             payment_method_types=["card"],  # Specify payment method types
-#         )
-#         return payment_intent
-#     except Exception as e:
-#         print(f"Error creating payment intent: {str(e)}")
-#         return None  # Handle error appropriately
-
-
-
-
-# @csrf_exempt  # Assuming this decorator is still in use
-# def create_payment_intent(request):
-#     if not request.user.is_authenticated:
-#         return JsonResponse({"error": "User not authenticated"}, status=401)
-
-#     plan = request.POST.get("plan")
-#     # Set up Stripe session (adjust parameters as per your setup)
-#     session = stripe.checkout.Session.create(
-#         payment_method_types=["card"],
-#         line_items=[{
-#             "price_data": {
-#                 "currency": "usd",
-#                 "product_data": {
-#                     "name": f"{plan} Plan",
-#                 },
-#                 "unit_amount": 1000,  # Example amount in cents, adjust accordingly
-#             },
-#             "quantity": 1,
-#         }],
-#         mode="payment",
-#         success_url=request.build_absolute_uri(reverse("image_generation:payment_success")),
-#         cancel_url=request.build_absolute_uri(reverse("image_generation:plans")),
-#         metadata={"plan": plan},
-#     )
-#     print(f"Created Stripe session with success_url: {session.success_url}")
-#     # Return the session URL instead of the session ID
-#     return JsonResponse({"url": session.url})
-
-# @login_required
-# def payment_success(request):
-#     payment_intent_id = request.GET.get("payment_intent_id")
-#     plan = request.GET.get("plan", "unknown")
-#     amount = float(request.GET.get("amount", 0)) / 100
-
-#     if not payment_intent_id:
-#         return render(request, "image_generation/payment_error.html", {"error": "No payment intent provided."})
-
-#     try:
-#         payment_intent = stripe.PaymentIntent.retrieve(payment_intent_id)
-#         if payment_intent.status == "succeeded":
-#             user = request.user
-#             transaction = Transaction.objects.create(
-#                 user=user,
-#                 amount_paid=amount,
-#                 transaction_id=payment_intent_id,
-#             )
-
-#             if plan == "weekly":
-#                 end_date = timezone.now() + timedelta(days=7)
-#             elif plan == "monthly":
-#                 end_date = timezone.now() + timedelta(days=30)
-#             elif plan == "annual":
-#                 end_date = timezone.now() + timedelta(days=365)
-#             else:
-#                 end_date = timezone.now()
-
-#             Subscription.objects.create(
-#                 user=user,
-#                 transaction=transaction,
-#                 plan_type=plan,
-#                 end_date=end_date,
-#             )
-
-#             user.is_paid = True
-#             user.save()
-#             return redirect("image_generation:dashboard")
-#         else:
-#             return render(request, "image_generation/payment_failed.html", {"message": "Payment did not succeed."})
-#     except stripe.error.StripeError as e:
-#         return render(request, "image_generation/payment_error.html", {"error": str(e)})
-# @csrf_exempt
-# def process_payment(request):
-#     if request.method != "POST":
-#         return JsonResponse({"error": "Invalid request method"}, status=405)
-
-#     if not request.user.is_authenticated:
-#         return JsonResponse({"error": "User not authenticated"}, status=401)
-
-#     try:
-#         data = json.loads(request.body)
-#         payment_method_id = data.get("payment_method_id")
-#         plan = data.get("plan")
-#         amount = data.get("amount")
-
-#         if not all([payment_method_id, plan, amount]):
-#             return JsonResponse({"error": "Missing required fields"}, status=400)
-
-#         # Create Payment Intent with only card payments allowed
-#         payment_intent = stripe.PaymentIntent.create(
-#             amount=amount,  # Amount in cents
-#             currency="usd",
-#             payment_method=payment_method_id,
-#             payment_method_types=['card'],  # Restrict to card payments only
-#             confirmation_method="manual",
-#             confirm=True,
-#             metadata={
-#                 "plan": plan,
-#                 "user_id": str(request.user.id),
-#             },
-#         )
-
-#         # Check if payment succeeded
-#         if payment_intent.status == "succeeded":
-#             return JsonResponse({"success": True, "payment_intent_id": payment_intent.id})
-#         else:
-#             return JsonResponse({"error": "Payment failed: " + payment_intent.last_payment_error.get("message", "Unknown error") if payment_intent.last_payment_error else "Unknown error"}, status=400)
-
-#     except stripe.error.CardError as e:
-#         return JsonResponse({"error": f"Card error: {e.user_message}"}, status=400)
-#     except stripe.error.StripeError as e:
-#         return JsonResponse({"error": f"Stripe error: {str(e)}"}, status=500)
-#     except Exception as e:
-#         return JsonResponse({"error": f"Unexpected error: {str(e)}"}, status=500)

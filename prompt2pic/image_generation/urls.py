@@ -11,6 +11,7 @@ urlpatterns = [
     path("delete-chat/<int:chat_id>/", views.delete_chat, name="delete_chat"),
     path("rename-chat/<int:chat_id>/", views.rename_chat, name="rename_chat"),
     path("change-password/", views.change_password, name="change_password"),
+    path("dashboard/<int:chat_id>/", views.dashboard, name="dashboard_with_chat"),  # Chat selected
     # path("plans/", views.plans_view, name="plans"),  # Add this line
     # path(
     #     "create-payment-intent/",

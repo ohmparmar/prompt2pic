@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Payment Failed - Prompt2Pic</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom, #f4f4f4, #e0e0e0);
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 650px;
+            margin: 20px auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+        .header {
+            background: linear-gradient(135deg, #ef4444, #f97316, #facc15); /* Red to yellow gradient for warning */
+            color: white;
+            padding: 25px;
+            border-radius: 15px 15px 0 0;
+            text-align: center;
+        }
+        .header h2 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .failure-details {
+            background: #fef2f2; /* Light red background */
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            color: #991b1b; /* Dark red text */
+        }
+        .failure-details p {
+            margin: 12px 0;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .reason {
+            font-weight: bold;
+            color: #dc2626; /* Bright red */
+            word-wrap: break-word;
+            max-width: 80%;
+        }
+        .transaction-id {
+            font-family: 'Courier New', monospace;
+            color: #555;
+            background: #e5e7eb;
+            padding: 2px 8px;
+            border-radius: 5px;
+        }
+        .footer {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px dashed #ddd;
+        }
+        .footer a {
+            color: #9333ea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Payment Failed - Prompt2Pic</h2>
+        </div>
+        <p style="font-size: 16px; color: #555;">Hello {{ user.username }},</p>
+        <p style="font-size: 16px; color: #555;">We encountered an issue processing your payment.</p>
+        <div class="failure-details">
+            <p><span>Transaction ID:</span> <span class="transaction-id">{{ transaction_id }}</span></p>
+            <p><span>Reason:</span> <span class="reason">{{ reason }}</span></p>
+        </div>
+        <p style="font-size: 14px; color: #777;">Please try again or contact support for assistance.</p>
+        <div class="footer">
+            Need help? Contact us at 
+            <a href="mailto:support@prompt2pic.com">support@prompt2pic.com</a><br>
+            Powered by <a href="https://stripe.com" target="_blank">Stripe</a>
+        </div>
+    </div>
+</body>
+</html>

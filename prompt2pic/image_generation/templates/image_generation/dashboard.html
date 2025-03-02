@@ -431,7 +431,7 @@
             <li class="relative w-full max-w-full hover:bg-primary/10 {% if active_chat.id == chat.id %}bg-primary/10{% endif %}">
               <div class="flex items-center justify-between w-full p-3">
                 <div class="flex-1 mx-2 truncate min-w-0">
-                  <a href="?chat_id={{ chat.id }}" id="chat-title-{{ chat.id }}" class="chat-title-text flex items-center"><i class="fas fa-comment-alt text-primary mr-2"></i><span>{{ chat.title }}</span></a>
+                  <a href="{% url 'image_generation:dashboard_with_chat' chat.id %}" id="chat-title-{{ chat.id }}" class="chat-title-text flex items-center"><i class="fas fa-comment-alt text-primary mr-2"></i><span>{{ chat.title }}</span></a>
                   <form class="inline-block hidden chat-title-form" id="chat-form-{{ chat.id }}" method="post" action="{% url 'image_generation:rename_chat' chat.id %}">
                     {% csrf_token %}
                     <input type="text" name="title" value="{{ chat.title }}" onkeydown="if(event.key==='Enter'){ disableAndSubmit(this.form); }" onblur="disableAndSubmit(this.form);" />
@@ -471,45 +471,52 @@
         </div>
         {% endif %}
         <div class="messages-container">
-          {% for message in active_chat.messages.all %}
-          <div class="mb-8">
-            <div class="chat chat-end mb-2">
-              <div class="chat-image avatar">
-                <div class="w-10 rounded-full">
-                  <img src="https://api.dicebear.com/6.x/initials/svg?seed={{ request.user.username }}" alt="User" />
+          {% if active_chat %}
+            {% for message in active_chat.messages.all %}
+              <div class="mb-8">
+                <div class="chat chat-end mb-2">
+                  <div class="chat-image avatar">
+                    <div class="w-10 rounded-full">
+                      <img src="https://api.dicebear.com/6.x/initials/svg?seed={{ request.user.username }}" alt="User" />
+                    </div>
+                  </div>
+                  <div class="chat-bubble chat-bubble-primary"><p>{{ message.user_prompt }}</p></div>
+                </div>
+                <div class="chat chat-start">
+                  <div class="chat-image avatar">
+                    <div class="w-10 rounded-full">
+                      <img src="https://api.dicebear.com/6.x/bottts/svg?seed=AI" alt="AI" />
+                    </div>
+                  </div>
+                  <div class="chat-bubble chat-bubble-secondary">
+                    {% if message.image_generated %}
+                    <div class="image-container">
+                      <img src="{{ message.image_generated.url }}" class="max-w-sm rounded-lg shadow-lg" alt="Generated image" />
+                      <button class="download-btn" onclick="downloadImage('{{ message.image_generated.url }}', 'Prompt2Pic-{{ message.id }}.png')">
+                        <i class="fas fa-download"></i>
+                      </button>
+                    </div>
+                    {% else %}
+                    <p>No image generated.</p>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="chat-footer opacity-50 text-xs mt-1">
+                  {{ message.created_at|timesince }} ago {% if message.agent %}<span class="ml-2">via {{ message.agent.name }}</span>{% endif %}
                 </div>
               </div>
-              <div class="chat-bubble chat-bubble-primary"><p>{{ message.user_prompt }}</p></div>
-            </div>
-            <div class="chat chat-start">
-              <div class="chat-image avatar">
-                <div class="w-10 rounded-full">
-                  <img src="https://api.dicebear.com/6.x/bottts/svg?seed=AI" alt="AI" />
-                </div>
+            {% empty %}
+              <div class="text-center text-gray-300 mt-8">
+                <i class="fas fa-magic text-4xl mb-4"></i>
+                <p>No messages yet in this chat.</p>
               </div>
-              <div class="chat-bubble chat-bubble-secondary">
-                {% if message.image_generated %}
-                <div class="image-container">
-                  <img src="{{ message.image_generated.url }}" class="max-w-sm rounded-lg shadow-lg" alt="Generated image" />
-                  <button class="download-btn" onclick="downloadImage('{{ message.image_generated.url }}', 'Prompt2Pic-{{ message.id }}.png')">
-                    <i class="fas fa-download"></i>
-                  </button>
-                </div>
-                {% else %}
-                <p>No image generated.</p>
-                {% endif %}
-              </div>
+            {% endfor %}
+          {% else %}
+            <div class="text-center text-gray-300 mt-8">
+              <i class="fas fa-magic text-4xl mb-4"></i>
+              <p>Select a chat to view messages or start generating amazing images with AI!</p>
             </div>
-            <div class="chat-footer opacity-50 text-xs mt-1">
-              {{ message.created_at|timesince }} ago {% if message.agent %}<span class="ml-2">via {{ message.agent.name }}</span>{% endif %}
-            </div>
-          </div>
-          {% empty %}
-          <div class="text-center text-gray-300 mt-8">
-            <i class="fas fa-magic text-4xl mb-4"></i>
-            <p>Start generating amazing images with AI!</p>
-          </div>
-          {% endfor %}
+          {% endif %}
         </div>
         <div class="prompt-container">
           <form method="POST" action="{% url 'image_generation:generate_image' %}" id="generateForm" class="w-full">
@@ -548,7 +555,7 @@
                 </div>
               </div>
               <input type="hidden" id="model-input" name="model" value="{{ selected_model.id }}" />
-              <input type="hidden" id="chat-id-input" name="chat_id" value="{{ active_chat.id }}" />
+              <input type="hidden" id="chat-id-input" name="chat_id" value="{% if active_chat %}{{ active_chat.id }}{% endif %}" />
             </div>
           </form>
         </div>

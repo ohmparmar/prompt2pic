@@ -11,7 +11,10 @@ import stripe
 from django.utils import timezone
 from datetime import timedelta
 import json
-JsonResponse
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.conf import settings
+from django.contrib import messages
 
 @login_required
 def subscription_dashboard(request):
@@ -39,7 +42,7 @@ def plans_view(request):
     if request.user.is_authenticated:
         context["login"] = 1
     return render(
-        request, "image_generation/plans.html", context
+        request, "subscriptions/plans.html", context
     )  # Adjust the path as necessary
 
 
@@ -87,6 +90,9 @@ def create_payment_intent(request):
     # Return the session URL instead of the session ID
     return JsonResponse({"url": session.url})
 
+
+stripe.api_key = "sk_test_51QwSWdL05RboHoHGndmL3eTEDkrf9Rm2pQdkqyKr5CrCNcxtgaubBSo6MOGSYZy6JOjW1eYoSkTGG5qEnZ4NRCoR00elj8RQ8U"
+
 @login_required
 def payment_success(request):
     payment_intent_id = request.GET.get("payment_intent_id")
@@ -94,7 +100,7 @@ def payment_success(request):
     amount = float(request.GET.get("amount", 0)) / 100
 
     if not payment_intent_id:
-        return render(request, "image_generation/payment_error.html", {"error": "No payment intent provided."})
+        return render(request, "subscriptions/payment_error.html", {"error": "No payment intent provided."})
 
     try:
         payment_intent = stripe.PaymentIntent.retrieve(payment_intent_id)
@@ -119,16 +125,65 @@ def payment_success(request):
             Subscription.objects.create(
                 user=user,
                 transaction=transaction,
-                plan_type=plan,
+                plan_type=plan.capitalize(),
                 end_date=end_date,
             )
 
             user.is_paid = True
             user.save()
+
+            # Send success email
+            subject = "Prompt2Pic - Payment Receipt"
+            html_message = render_to_string('subscriptions/receipt_success.html', {
+                'amount': f"{amount:.2f}",
+                'plan_type': plan.capitalize(),
+                'transaction_id': payment_intent_id,
+                'user': user,
+            })
+            send_mail(
+                subject,
+                "Thank you for your payment! Here are your receipt details.",  # Plain text fallback
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                html_message=html_message,
+                fail_silently=False,
+            )
+            messages.success(request, 'Payment successful!')
+
             return redirect("image_generation:dashboard")
         else:
-            return render(request, "subscriptions/payment_failed.html", {"message": "Payment did not succeed."})
+            # Send failure email
+            subject = "Prompt2Pic - Payment Failed"
+            html_message = render_to_string('subscriptions/receipt_failed.html', {
+                'transaction_id': payment_intent_id,
+                'user': request.user,
+                'reason': "Payment did not succeed.",
+            })
+            send_mail(
+                subject,
+                "We encountered an issue processing your payment.",  # Plain text fallback
+                settings.DEFAULT_FROM_EMAIL,
+                [request.user.email],
+                html_message=html_message,
+                fail_silently=False,
+            )
+            return render(request, "subscriptions/receipt_failed.html", {"message": "Payment did not succeed."})
     except stripe.error.StripeError as e:
+        # Send failure email for Stripe error
+        subject = "Prompt2Pic - Payment Failed"
+        html_message = render_to_string('receipt_failed.html', {
+            'transaction_id': payment_intent_id or "Unknown",
+            'user': request.user,
+            'reason': str(e),
+        })
+        send_mail(
+            subject,
+            "We encountered an issue processing your payment.",  # Plain text fallback
+            settings.DEFAULT_FROM_EMAIL,
+            [request.user.email],
+            html_message=html_message,
+            fail_silently=False,
+        )
         return render(request, "subscriptions/payment_error.html", {"error": str(e)})
 @csrf_exempt
 def process_payment(request):
