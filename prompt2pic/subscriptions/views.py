@@ -22,11 +22,11 @@ def subscription_dashboard(request):
         "-start_date"
     )
     transactions = Transaction.objects.filter(user=request.user).order_by("-created_at")
-    print(subscriptions)    
     return render(
         request,
         "subscriptions/subscription_dashboard.html",
         {
+            "username":request.user.username,
             "subscriptions": subscriptions,
             "transactions": transactions,
         },
