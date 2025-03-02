@@ -190,9 +190,12 @@ def generate_image(request):
                         user=request.user,
                         title=prompt[:50] + ("..." if len(prompt) > 50 else ""),
                     )
-            # Generate image using the selected model
+            else:
+                 active_chat = Chat.objects.create(
+                        user=request.user,
+                        title=prompt[:50] + ("..." if len(prompt) > 50 else ""),
+                    )
             generated_image = None
-            print("model.name.lower()", model.name.lower())
 
             if model.name.lower() == "chat-gpt":
                 print("inside chat-gpt")
@@ -315,19 +318,14 @@ def generate_image(request):
                 #     img_io.getvalue(), name=f"{uuid.uuid4()}.png"
                 # )
 
-            # Store image in chat history
-
             chat_message = ChatMessage.objects.create(
                 chat=active_chat,
                 user_prompt=prompt,
                 agent=model,
                 image_generated=generated_image,
             )
-# In the success case, redirect to the dashboard with the chat ID
             return redirect("image_generation:dashboard_with_chat", chat_id=active_chat.id)
-            # return redirect(
-            #     f'{reverse("image_generation:dashboard")}?chat_id={active_chat.id}'
-            # )
+ 
 
         except Exception as e:
             print(str(e))
