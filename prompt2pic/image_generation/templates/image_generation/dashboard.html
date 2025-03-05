@@ -785,6 +785,17 @@
         form.submit();
       }
 
+      // Function to scroll to the bottom of the messages container
+      function scrollToBottom() {
+        const messagesContainer = document.querySelector(".messages-container");
+        if (messagesContainer) {
+          messagesContainer.scrollTo({
+            top: messagesContainer.scrollHeight,
+            behavior: "smooth"
+          });
+        }
+      }
+
       document.addEventListener("DOMContentLoaded", function () {
         const chatItems = document.querySelectorAll(".chat-item");
         const deleteItems = document.querySelectorAll(".delete-chat-item");
@@ -793,7 +804,12 @@
         const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
         let currentForm = null;
 
-        // Make entire chat item clickable
+        // Scroll to bottom on initial load if there's an active chat
+        if (document.querySelector(".messages-container").children.length > 0) {
+          scrollToBottom();
+        }
+
+        // Make entire chat item clickable and scroll to bottom
         chatItems.forEach((item) => {
           item.addEventListener("click", function (e) {
             const url = this.getAttribute("data-chat-url");
@@ -811,6 +827,7 @@
             }
 
             window.location.href = url;
+            // Note: scrollToBottom() will be triggered on page load after navigation
           });
         });
 
