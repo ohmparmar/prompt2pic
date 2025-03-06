@@ -516,7 +516,7 @@
                   <a href="{% url 'image_generation:dashboard_with_chat' chat.id %}" id="chat-title-{{ chat.id }}" class="chat-title-text flex items-center"><i class="fas fa-comment-alt text-primary mr-2"></i><span>{{ chat.title }}</span></a>
                   <form class="inline-block hidden chat-title-form" id="chat-form-{{ chat.id }}" method="post" action="{% url 'image_generation:rename_chat' chat.id %}">
                     {% csrf_token %}
-                    <input type="text" name="title" value="{{ chat.title }}" onkeydown="if(event.key==='Enter'){ disableAndSubmit(this.form); }" onblur="disableAndSubmit(this.form);" />
+                    <input type="text" name="title" value="{{ chat.title }}" />
                   </form>
                 </div>
                 <span class="text-xs text-gray-400 flex-shrink-0">{{ chat.created_at|date:"M d" }}</span>
@@ -781,9 +781,57 @@
           }
         }
       }
-      function disableAndSubmit(form) {
-        form.submit();
+
+      // Function to handle rename submission
+      function submitRenameForm(form) {
+        const formData = new FormData(form);
+        const chatId = form.id.replace('chat-form-', '');
+        fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            const titleSpan = document.querySelector(`#chat-title-${chatId} span`);
+            if (titleSpan) {
+              titleSpan.textContent = data.new_title;
+            }
+            const titleText = document.getElementById(`chat-title-${chatId}`);
+            const titleForm = document.getElementById(`chat-form-${chatId}`);
+            if (titleText && titleForm) {
+              titleText.classList.remove('hidden');
+              titleForm.classList.add('hidden');
+            }
+          } else {
+            alert(data.message || 'Error renaming chat');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred while renaming the chat');
+        });
       }
+
+      // Handle rename form submission via AJAX for both Enter and blur
+      document.querySelectorAll('.chat-title-form').forEach(form => {
+        // Handle Enter key submission
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          submitRenameForm(this);
+        });
+
+        // Handle blur (clicking outside)
+        const input = form.querySelector('input[name="title"]');
+        if (input) {
+          input.addEventListener('blur', function() {
+            submitRenameForm(form);
+          });
+        }
+      });
 
       // Function to scroll to the bottom of the messages container
       function scrollToBottom() {
@@ -901,7 +949,7 @@
           length: password.length >= 8,
           uppercase: /[A-Z]/.test(password),
           number: /\d/.test(password),
-          special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+          special: /[!@#$%^&*()_+\-=[\]{};\'":\\|,.<>/?]/.test(password),
         };
       }
 

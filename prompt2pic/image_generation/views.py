@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.contrib.auth import logout
 from django.contrib import messages
@@ -9,7 +9,6 @@ from django.shortcuts import render, redirect
 from diffusers import StableDiffusionPipeline
 import torch
 from .models import Chat, Agent, ChatMessage
-
 from subscriptions.models import Transaction, Subscription
 from django.urls import reverse
 from django.core.exceptions import ObjectDoesNotExist
@@ -66,6 +65,7 @@ stripe.api_key = settings.STRIPE_SECRET_KEY  # Ensure you have your secret key s
 #         "has_subscribed": has_subscribed
 #     }
 
+
 #     return render(request, "image_generation/dashboard.html", context)
 @login_required
 def dashboard(request, chat_id=None):  # Add optional chat_id parameter
@@ -79,8 +79,7 @@ def dashboard(request, chat_id=None):  # Add optional chat_id parameter
 
     # Check if user has an active subscription for paid models
     has_active_subscription = Subscription.objects.filter(
-        user=request.user,
-        end_date__gte=timezone.now()
+        user=request.user, end_date__gte=timezone.now()
     ).exists()
     has_subscribed = has_active_subscription
 
@@ -91,11 +90,13 @@ def dashboard(request, chat_id=None):  # Add optional chat_id parameter
         "error": messages.get_messages(request),
         "prompt_input": request.POST.get("prompt", ""),
         "selected_model": Agent.objects.filter(id=request.POST.get("model")).first(),
-        "has_subscribed": has_subscribed
+        "has_subscribed": has_subscribed,
     }
 
     return render(request, "image_generation/dashboard.html", context)
-@csrf_exempt  
+
+
+@csrf_exempt
 def guest_dashboard(request):
     generated_image_url = None
 
@@ -191,10 +192,10 @@ def generate_image(request):
                         title=prompt[:50] + ("..." if len(prompt) > 50 else ""),
                     )
             else:
-                 active_chat = Chat.objects.create(
-                        user=request.user,
-                        title=prompt[:50] + ("..." if len(prompt) > 50 else ""),
-                    )
+                active_chat = Chat.objects.create(
+                    user=request.user,
+                    title=prompt[:50] + ("..." if len(prompt) > 50 else ""),
+                )
             generated_image = None
 
             if model.name.lower() == "chat-gpt":
@@ -324,8 +325,9 @@ def generate_image(request):
                 agent=model,
                 image_generated=generated_image,
             )
-            return redirect("image_generation:dashboard_with_chat", chat_id=active_chat.id)
- 
+            return redirect(
+                "image_generation:dashboard_with_chat", chat_id=active_chat.id
+            )
 
         except Exception as e:
             print(str(e))
@@ -348,6 +350,8 @@ def create_chat(request):
         new_chat = Chat.objects.create(user=request.user, title="New Chat")
 
     return redirect("image_generation:dashboard_with_chat", chat_id=new_chat.id)
+
+
 @login_required
 def delete_chat(request, chat_id):
     if not request.user.is_authenticated:
@@ -360,25 +364,50 @@ def delete_chat(request, chat_id):
     except ObjectDoesNotExist:
         messages.error(request, "Chat not found")
 
-    return redirect("image_generation:dashboard")  # Redirect to base dashboard after deletion
-@login_required
-def rename_chat(request, chat_id):
-    if not request.user.is_authenticated:
-        return JsonResponse({"status": "error", "message": "Unauthorized"}, status=401)
+    return redirect(
+        "image_generation:dashboard"
+    )  # Redirect to base dashboard after deletion
 
+
+@login_required
+# def rename_chat(request, chat_id):
+#     if not request.user.is_authenticated:
+#         return JsonResponse({"status": "error", "message": "Unauthorized"}, status=401)
+
+#     if request.method == "POST":
+#         try:
+#             chat = Chat.objects.get(id=chat_id, user=request.user)
+#             new_title = request.POST.get("title", "")[:50]
+#             chat.title = new_title or f"Chat {chat.id}"
+#             chat.save()
+#             return redirect("image_generation:dashboard_with_chat", chat_id=chat.id)
+#         except Chat.DoesNotExist:
+#             return JsonResponse({"status": "error", "message": "Chat not found"}, status=404)
+#         except Exception as e:
+#             return JsonResponse({"status": "error", "message": str(e)}, status=400)
+
+
+#     return JsonResponse({"status": "error", "message": "Invalid method"}, status=400)
+def rename_chat(request, chat_id):
     if request.method == "POST":
         try:
-            chat = Chat.objects.get(id=chat_id, user=request.user)
+            chat = get_object_or_404(Chat, id=chat_id, user=request.user)
             new_title = request.POST.get("title", "")[:50]
             chat.title = new_title or f"Chat {chat.id}"
             chat.save()
-            return redirect("image_generation:dashboard_with_chat", chat_id=chat.id)
+            # Check if this is an AJAX request
+            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return JsonResponse({"status": "success", "new_title": chat.title})
+            else:
+                return redirect("image_generation:dashboard_with_chat", chat_id=chat.id)
         except Chat.DoesNotExist:
-            return JsonResponse({"status": "error", "message": "Chat not found"}, status=404)
+            return JsonResponse(
+                {"status": "error", "message": "Chat not found"}, status=404
+            )
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)}, status=400)
-
     return JsonResponse({"status": "error", "message": "Invalid method"}, status=400)
+
 
 PASSWORD_REGEX = re.compile(
     r'^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};\'":\\|,.<>/?]).{6,}$'
@@ -412,4 +441,3 @@ def change_password(request):
         return redirect("image_generation:dashboard")
 
     return render(request, "image_generation/change_password.html")
-
