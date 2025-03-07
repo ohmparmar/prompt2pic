@@ -54,83 +54,72 @@
         box-shadow: 0 0 30px rgba(99, 102, 241, 0.8);
       }
 
-      /* New Model Selection Animation Styles */
-      .model-selection-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.8);
-        backdrop-filter: blur(5px);
-        z-index: 20000;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-      }
-      .model-selection-overlay.active {
-        display: flex;
-        opacity: 1;
-      }
-      .model-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-        padding: 2rem;
-        max-width: 90%;
-        max-height: 80vh;
-        overflow-y: auto;
-      }
+      /* New Model Selection Animations */
       .model-card {
-        background: linear-gradient(135deg, #6366f1, #818cf8);
-        color: white;
-        padding: 1.5rem;
-        border-radius: 1rem;
-        text-align: center;
-        cursor: pointer;
         opacity: 0;
-        transform: scale(0.5) rotate(-15deg);
-        transition: transform 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-      }
-      .model-card:hover {
-        transform: scale(1.05) rotate(0deg);
-        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.6);
-      }
-      .model-card.paid {
-        background: linear-gradient(135deg, #f9fafb, #e5e7eb);
-        color: #374151;
-        border-left: 4px solid #ffd700;
-      }
-      .model-card.paid .fa-lock { color: #ffd700; }
-      .model-card.enter {
-        animation: modelEnter 0.5s ease-out forwards;
-      }
-      .model-card.exit {
-        animation: modelExit 0.5s ease-in forwards;
-      }
-      @keyframes modelEnter {
-        0% { opacity: 0; transform: scale(0.5) rotate(-15deg) translateY(50px); }
-        60% { opacity: 1; transform: scale(1.1) rotate(5deg) translateY(-10px); }
-        100% { opacity: 1; transform: scale(1) rotate(0deg) translateY(0); }
-      }
-      @keyframes modelExit {
-        0% { opacity: 1; transform: scale(1) rotate(0deg) translateY(0); }
-        100% { opacity: 0; transform: scale(0.5) rotate(15deg) translateY(50px); }
-      }
-      .model-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-      }
-      .model-icon {
-        font-size: 2rem;
-        margin-bottom: 0.5rem;
+        transition: transform 0.2s ease;
       }
 
-      /* Existing Styles (Abbreviated for Brevity) */
+      .model-card:hover {
+        transform: scale(1.05);
+      }
+
+      .model-card:nth-child(1) {
+        animation: fadeInUp 0.5s ease-out 0.1s both;
+      }
+
+      .model-card:nth-child(2) {
+        animation: rotateIn 0.5s ease-out 0.2s both;
+      }
+
+      .model-card:nth-child(3) {
+        animation: zoomIn 0.5s ease-out 0.3s both;
+      }
+
+      .model-card:nth-child(4) {
+        animation: slideInLeft 0.5s ease-out 0.4s both;
+      }
+
+      .model-card:nth-child(5) {
+        animation: slideInRight 0.5s ease-out 0.5s both;
+      }
+
+      /* Add more animations for additional models as needed */
+      @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes rotateIn {
+        from { opacity: 0; transform: rotate(-180deg); }
+        to { opacity: 1; transform: rotate(0); }
+      }
+
+      @keyframes zoomIn {
+        from { opacity: 0; transform: scale(0.5); }
+        to { opacity: 1; transform: scale(1); }
+      }
+
+      @keyframes slideInLeft {
+        from { opacity: 0; transform: translateX(-100%); }
+        to { opacity: 1; transform: translateX(0); }
+      }
+
+      @keyframes slideInRight {
+        from { opacity: 0; transform: translateX(100%); }
+        to { opacity: 1; transform: translateX(0); }
+      }
+
+      @keyframes shrinkOut {
+        from { opacity: 1; transform: scale(1); }
+        to { opacity: 0; transform: scale(0.5); }
+      }
+
+      .model-card.exit {
+        animation: shrinkOut 0.3s ease-in both;
+      }
+
+      /* Existing Styles (unchanged) */
       .chat-container { height: calc(100vh - 64px - 4rem); display: flex; flex-direction: column; }
       .messages-container { flex-grow: 1; overflow-y: auto; padding: 1rem; }
       .prompt-container {
@@ -143,6 +132,7 @@
         z-index: 10;
         box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
       }
+
       .chat-bubble-primary {
         background: linear-gradient(135deg, #6366f1, #818cf8) !important;
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -153,22 +143,237 @@
         border: 1px solid rgba(255, 255, 255, 0.1);
         color: white;
       }
+
       .sidebar-expanded { width: 16rem; transition: width 0.3s ease; }
       .sidebar-collapsed { width: 3.5rem; transition: width 0.3s ease; }
+      .sidebar-collapsed .sidebar-content,
+      .sidebar-collapsed .sidebar-title { display: none; }
       .sidebar {
         background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(10px);
         border-right: 1px solid rgba(99, 102, 241, 0.2);
         transition: width 0.3s ease;
+        overflow: visible;
+        position: relative;
       }
+
+      .paid-model .fa-lock { color: #ffd700; }
+
+      #navLeftArea { position: relative; overflow: hidden; }
+      #logo { transition: opacity 0.5s ease; }
+      #navOptions {
+        position: absolute;
+        left: 0;
+        top: 0;
+        display: flex;
+        gap: 0.5rem;
+        opacity: 0;
+        transform: translateX(-100%);
+        transition: all 0.5s ease;
+      }
+      #navOptions.active { opacity: 1; transform: translateX(0); }
+
+      .textarea-bordered {
+        background: white;
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      }
+      .textarea-bordered:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 8px rgba(99, 102, 241, 0.3);
+      }
+
       .btn { transition: all 0.3s ease; }
       .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
       .btn-primary { background: linear-gradient(135deg, #6366f1, #818cf8); }
       .btn-secondary { background: linear-gradient(135deg, #8b5cf6, #a78bfa); }
+
       ::-webkit-scrollbar { width: 8px; }
       ::-webkit-scrollbar-track { background: rgba(99, 102, 241, 0.1); }
       ::-webkit-scrollbar-thumb { background: #818cf8; border-radius: 4px; }
       ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+
+      .alert-fade { transition: opacity 0.5s ease-out; }
+
+      .sidebar-expanded { width: 280px; }
+      .sidebar-collapsed { width: 64px; }
+      .sidebar-collapsed .sidebar-content { opacity: 0; visibility: hidden; width: 0; }
+      .sidebar-collapsed .sidebar-collapsed-content { display: flex !important; }
+      .dropdown-content { position: absolute; z-index: 1000; min-width: 200px; overflow: visible; }
+      .sidebar-collapsed-content { top: 1rem; left: 50%; transform: translateX(-50%); }
+      .menu.bg-base-200 { overflow: visible !important; }
+      .sidebar .dropdown-content { max-width: 260px; }
+
+      .chat-title-form input {
+        font-size: 0.875rem;
+        padding: 0.25rem;
+        border: 1px solid #ccc;
+        border-radius: 0.25rem;
+        width: 100%;
+      }
+
+      .tooltip { z-index: 3000 !important; }
+      .tooltip:before,
+      .tooltip:after {
+        background-color: rgba(0, 0, 0, 0.85) !important;
+        color: #fff !important;
+        font-size: 0.875rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.25rem;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+        backdrop-filter: blur(5px);
+      }
+      .modal.active {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s ease;
+      }
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      .modal-box {
+        background: white;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        max-width: 90%;
+        width: 400px;
+        position: relative;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+      }
+      .modal-box.active { transform: scale(1); }
+      .modal-box .close-btn {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #6366f1;
+        transition: color 0.2s ease;
+      }
+      .modal-box .close-btn:hover { color: #818cf8; }
+
+      .download-btn {
+        position: absolute;
+        bottom: 1rem;
+        right: 1rem;
+        background: linear-gradient(135deg, #6366f1, #818cf8);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        opacity: 0.9;
+      }
+      .download-btn:hover {
+        opacity: 1;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+      }
+      .download-btn i { font-size: 1.2rem; }
+      .image-container { position: relative; display: inline-block; max-width: 100%; }
+      .delete-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        z-index: 10001;
+        backdrop-filter: blur(5px);
+      }
+      .delete-modal.active {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s ease;
+      }
+      .delete-modal-box {
+        background: white;
+        padding: 2rem;
+        border-radius: 1rem;
+        max-width: 90%;
+        width: 420px;
+        position: relative;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(239, 68, 68, 0.1);
+        transform: translateY(-20px);
+        transition: all 0.3s ease;
+      }
+      .delete-modal-box.active {
+        transform: translateY(0);
+      }
+      .delete-modal-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+      }
+      .delete-modal-header i {
+        font-size: 2.5rem;
+        color: #ef4444;
+        margin-bottom: 1rem;
+        animation: pulse-dot 1.5s ease-in-out infinite;
+      }
+      .delete-modal-header h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1f2937;
+      }
+      .delete-modal-header p {
+        color: #6b7280;
+        margin-top: 0.5rem;
+      }
+      .delete-modal-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+      }
+      .btn-delete-confirm {
+        background: linear-gradient(135deg, #ef4444, #f87171);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+      }
+      .btn-delete-confirm:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(239, 68, 68, 0.3);
+      }
+      .btn-delete-cancel {
+        background: linear-gradient(135deg, #6b7280, #9ca3af);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+      }
+      .btn-delete-cancel:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(107, 114, 128, 0.3);
+      }
+
+      .chat-item { cursor: pointer; }
+      .chat-item:hover { background: rgba(99, 102, 241, 0.1); }
     </style>
   </head>
   <body class="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 overflow-hidden">
@@ -183,21 +388,6 @@
       </div>
     </div>
 
-    <!-- Model Selection Overlay -->
-    <div id="modelSelectionOverlay" class="model-selection-overlay">
-      <div class="model-container" id="modelContainer">
-        {% for model in models %}
-        <div class="model-card {% if model.is_paid and not has_subscribed %}paid{% endif %}" data-model-id="{{ model.id }}" data-model-name="{{ model.name }}" {% if model.is_paid and not has_subscribed %}data-url="{% url 'subscriptions:plans' %}"{% endif %}>
-          <i class="fas fa-robot model-icon"></i>
-          <div class="model-title">{{ model.name }}</div>
-          {% if model.is_paid and not has_subscribed %}
-          <i class="fas fa-lock"></i>
-          {% endif %}
-        </div>
-        {% endfor %}
-      </div>
-    </div>
-
     <!-- Navbar -->
     <div class="navbar bg-base-100 bg-opacity-80 backdrop-blur-md shadow-lg">
       <div class="flex-1 relative" id="navLeftArea">
@@ -209,11 +399,74 @@
         </div>
       </div>
       <div class="flex-none gap-2">
-        <button id="avatarBtn" class="btn btn-ghost btn-circle avatar">
-          <div class="w-10 rounded-full">
-            <img src="https://api.dicebear.com/6.x/initials/svg?seed={{ request.user.username }}" alt="User Avatar" />
-          </div>
+        <div class="relative inline-block text-left">
+          <button id="avatarBtn" class="btn btn-ghost btn-circle avatar">
+            <div class="w-10 rounded-full">
+              <img src="https://api.dicebear.com/6.x/initials/svg?seed={{ request.user.username }}" alt="User Avatar" />
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="modal fixed inset-0 z-[10000] hidden items-center justify-center bg-black bg-opacity-50 p-4">
+      <div class="modal-box relative w-full max-w-md bg-white rounded-xl shadow-2xl border border-primary/10 transform transition-all duration-300 ease-in-out">
+        <button id="closeModal" class="btn btn-sm btn-circle btn-ghost absolute top-4 right-4">
+          <i class="fas fa-times text-gray-500 hover:text-primary"></i>
         </button>
+        <div class="text-center mb-6">
+          <h3 class="text-2xl font-bold text-primary mb-2">Change Password</h3>
+          <p class="text-sm text-gray-500">Secure your account with a strong password</p>
+        </div>
+        <form id="changePasswordForm" method="post" action="{% url 'image_generation:change_password' %}" class="space-y-4">
+          {% csrf_token %}
+          <div class="form-control relative">
+            <label class="label" for="newPassword"><span class="label-text font-semibold">New Password</span></label>
+            <div class="relative">
+              <input type="password" id="newPassword" name="new_password" placeholder="Enter new password" class="input input-bordered w-full pr-10 border-primary/30 focus:border-primary focus:ring-2 focus:ring-primary/20" required />
+              <span class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer" id="toggleNewPassword"><i class="fas fa-eye-slash text-gray-400 hover:text-primary"></i></span>
+            </div>
+            <div class="password-strength">
+              <div class="strength-bar"></div>
+              <div class="strength-bar"></div>
+              <div class="strength-bar"></div>
+              <div class="strength-bar"></div>
+            </div>
+            <ul class="validation-list">
+              <li data-validation="length">At least 8 characters</li>
+              <li data-validation="uppercase">One uppercase letter</li>
+              <li data-validation="number">One number</li>
+              <li data-validation="special">One special character</li>
+            </ul>
+          </div>
+          <div class="form-control relative">
+            <label class="label" for="confirmPassword"><span class="label-text font-semibold">Confirm New Password</span></label>
+            <div class="relative">
+              <input type="password" id="confirmPassword" name="confirm_password" placeholder="Confirm new password" class="input input-bordered w-full pr-10 border-primary/30 focus:border-primary focus:ring-2 focus:ring-primary/20" required />
+              <span class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer" id="toggleConfirmPassword"><i class="fas fa-eye-slash text-gray-400 hover:text-primary"></i></span>
+            </div>
+            <p id="confirmError" class="text-error text-xs mt-1 hidden">Passwords do not match</p>
+          </div>
+          <div class="modal-action mt-6 flex justify-center space-x-4">
+            <button type="button" id="closeModalBtn" class="btn btn-outline btn-primary">Cancel</button>
+            <button type="submit" id="changePasswordSubmit" class="btn btn-primary" disabled>Change Password <i class="fas fa-lock ml-2"></i></button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="deleteConfirmationModal" class="delete-modal">
+      <div class="delete-modal-box">
+        <div class="delete-modal-header">
+          <i class="fas fa-trash-alt"></i>
+          <h3>Delete Chat Session</h3>
+          <p>Are you sure you want to delete this chat? This action cannot be undone.</p>
+        </div>
+        <div class="delete-modal-actions">
+          <button class="btn-delete-cancel" id="cancelDeleteBtn">Cancel</button>
+          <button class="btn-delete-confirm" id="confirmDeleteBtn">Delete</button>
+        </div>
       </div>
     </div>
 
@@ -322,15 +575,18 @@
           <form method="POST" action="{% url 'image_generation:generate_image' %}" id="generateForm" class="w-full">
             {% csrf_token %}
             <div class="flex flex-col gap-4">
+              <!-- Prompt Textarea with Integrated Buttons -->
               <div class="relative">
                 <textarea name="prompt" id="promptInput" class="textarea textarea-bordered w-full resize-y pr-28" rows="4" placeholder="Describe the image you want to create...">{{ prompt_input }}</textarea>
                 <div class="absolute bottom-3 right-3 flex items-center gap-2">
                   <button type="submit" id="generateBtn" class="btn btn-primary btn-sm px-2 py-1" disabled><i class="fas fa-wand-magic-sparkles"></i></button>
-                  <button type="button" id="smallModelSelectBtn" class="btn btn-secondary btn-sm px-3 py-1 flex items-center gap-1">
-                    <i class="fas fa-robot text-xs"></i>
-                    <span id="small-selected-model-text" class="truncate max-w-[80px] text-xs">{% if selected_model %}{{ selected_model.name }}{% else %}Model{% endif %}</span>
-                    <i class="fas fa-chevron-down text-xs"></i>
-                  </button>
+                  <div class="relative">
+                    <button type="button" id="smallModelSelectBtn" class="btn btn-secondary btn-sm px-3 py-1 flex items-center gap-1">
+                      <i class="fas fa-robot text-xs"></i>
+                      <span id="small-selected-model-text" class="truncate max-w-[80px] text-xs">{% if selected_model %}{{ selected_model.name }}{% else %}Model{% endif %}</span>
+                      <i class="fas fa-chevron-down text-xs"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
               <input type="hidden" id="model-input" name="model" value="{{ selected_model.id }}" />
@@ -339,6 +595,23 @@
           </form>
         </div>
       </main>
+    </div>
+
+    <!-- Model Selection Interface -->
+    <div id="modelSelection" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden flex items-center justify-center">
+      <div class="grid grid-cols-3 gap-8 p-8">
+        {% for model in models %}
+        <div class="model-card {% if model.is_paid and not has_subscribed %}paid-model{% else %}select-model{% endif %}" data-model-id="{{ model.id }}" data-model-name="{{ model.name }}">
+          <div class="bg-white p-4 rounded-lg shadow-lg text-center cursor-pointer">
+            <i class="fas fa-robot text-4xl text-primary mb-2"></i>
+            <p class="text-lg font-semibold">{{ model.name }}</p>
+            {% if model.is_paid and not has_subscribed %}
+            <i class="fas fa-lock text-yellow-500 mt-2"></i>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
     </div>
 
     <footer class="footer footer-center p-4 bg-base-300 text-base-content mt-8">
@@ -376,68 +649,71 @@
         }
       });
 
-      // Model Selection Animation Logic
-      const modelOverlay = document.getElementById("modelSelectionOverlay");
-      const modelContainer = document.getElementById("modelContainer");
-      const modelSelectBtn = document.getElementById("smallModelSelectBtn");
-
+      // Model Selection Functions
       function showModelSelection() {
-        modelOverlay.classList.add("active");
-        const modelCards = modelContainer.querySelectorAll(".model-card");
-        modelCards.forEach((card, index) => {
-          setTimeout(() => {
-            card.classList.add("enter");
-            card.style.opacity = "1";
-            card.style.transform = "scale(1) rotate(0deg)";
-          }, index * 150); // Staggered entrance
+        const modelSelection = document.getElementById("modelSelection");
+        modelSelection.classList.remove("hidden");
+        modelSelection.classList.add("flex");
+        // Reset animations for re-entry
+        const modelCards = document.querySelectorAll(".model-card");
+        modelCards.forEach((card) => {
+          card.style.animation = 'none';
+          card.offsetHeight; // Trigger reflow
+          card.style.animation = null;
         });
       }
 
-      function hideModelSelection(selectedCard = null) {
-        const modelCards = modelContainer.querySelectorAll(".model-card");
-        modelCards.forEach((card, index) => {
-          setTimeout(() => {
-            card.classList.remove("enter");
-            card.classList.add("exit");
-            card.style.opacity = "0";
-            card.style.transform = "scale(0.5) rotate(15deg) translateY(50px)";
-          }, index * 100); // Staggered exit
+      function hideModelSelection() {
+        const modelCards = document.querySelectorAll(".model-card");
+        modelCards.forEach((card) => {
+          card.classList.add("exit");
         });
         setTimeout(() => {
-          modelOverlay.classList.remove("active");
-          modelCards.forEach(card => card.classList.remove("exit"));
-        }, modelCards.length * 100 + 300); // Wait for exit animation to finish
+          const modelSelection = document.getElementById("modelSelection");
+          modelSelection.classList.add("hidden");
+          modelSelection.classList.remove("flex");
+          modelCards.forEach((card) => {
+            card.classList.remove("exit");
+          });
+        }, 300); // Match exit animation duration
       }
 
-      modelSelectBtn.addEventListener("click", function (e) {
-        e.preventDefault();
+      function selectModel(modelId, modelName) {
+        document.getElementById("model-input").value = modelId;
+        document.getElementById("small-selected-model-text").textContent = modelName;
+        hideModelSelection();
+        updateGenerateButtonState();
+      }
+
+      // Attach event listener to the "Select Model" button
+      document.getElementById("smallModelSelectBtn").addEventListener("click", function (e) {
+        e.stopPropagation();
         showModelSelection();
       });
 
-      modelContainer.addEventListener("click", function (e) {
-        const card = e.target.closest(".model-card");
-        if (!card) return;
-
-        if (card.classList.contains("paid")) {
-          const url = card.getAttribute("data-url");
-          if (url) window.location.href = url;
-        } else {
-          const modelId = card.getAttribute("data-model-id");
-          const modelName = card.getAttribute("data-model-name");
-          document.getElementById("model-input").value = modelId;
-          document.getElementById("small-selected-model-text").textContent = modelName;
-          updateGenerateButtonState();
-          hideModelSelection(card);
-        }
+      // Attach event listeners to model cards
+      document.querySelectorAll(".select-model").forEach((model) => {
+        model.addEventListener("click", function () {
+          const modelId = this.getAttribute("data-model-id");
+          const modelName = this.getAttribute("data-model-name");
+          selectModel(modelId, modelName);
+        });
       });
 
-      modelOverlay.addEventListener("click", function (e) {
-        if (e.target === modelOverlay) {
+      document.querySelectorAll(".paid-model").forEach((model) => {
+        model.addEventListener("click", function () {
+          window.location.href = "{% url 'subscriptions:plans' %}";
+        });
+      });
+
+      // Close model selection when clicking outside
+      document.getElementById("modelSelection").addEventListener("click", function (e) {
+        if (e.target === this) {
           hideModelSelection();
         }
       });
 
-      // Initial button state
+      // Call initially to set the correct state
       updateGenerateButtonState();
 
       // Navbar Options Toggle via Avatar Click
@@ -520,7 +796,9 @@
         .then(data => {
           if (data.status === 'success') {
             const titleSpan = document.querySelector(`#chat-title-${chatId} span`);
-            if (titleSpan) titleSpan.textContent = data.new_title;
+            if (titleSpan) {
+              titleSpan.textContent = data.new_title;
+            }
             const titleText = document.getElementById(`chat-title-${chatId}`);
             const titleForm = document.getElementById(`chat-form-${chatId}`);
             if (titleText && titleForm) {
@@ -542,6 +820,7 @@
           e.preventDefault();
           submitRenameForm(this);
         });
+
         const input = form.querySelector('input[name="title"]');
         if (input) {
           input.addEventListener('blur', function() {
@@ -550,7 +829,7 @@
         }
       });
 
-      // Scroll to bottom
+      // Scroll to bottom function
       function scrollToBottom() {
         const messagesContainer = document.querySelector(".messages-container");
         if (messagesContainer) {
@@ -603,14 +882,18 @@
         });
 
         confirmDeleteBtn.addEventListener("click", function () {
-          if (currentForm) currentForm.submit();
+          if (currentForm) {
+            currentForm.submit();
+          }
           closeDeleteModal();
         });
 
         cancelDeleteBtn.addEventListener("click", closeDeleteModal);
 
         deleteModal.addEventListener("click", function (e) {
-          if (e.target === deleteModal) closeDeleteModal();
+          if (e.target === deleteModal) {
+            closeDeleteModal();
+          }
         });
 
         function closeDeleteModal() {
@@ -619,6 +902,78 @@
           currentForm = null;
         }
       });
+
+      // Password Modal Handling
+      const changePasswordModal = document.getElementById("changePasswordModal");
+      const toggleNewPassword = document.getElementById("toggleNewPassword");
+      const toggleConfirmPassword = document.getElementById("toggleConfirmPassword");
+      const newPassword = document.getElementById("newPassword");
+      const confirmPassword = document.getElementById("confirmPassword");
+      const submitBtn = document.getElementById("changePasswordSubmit");
+
+      [toggleNewPassword, toggleConfirmPassword].forEach((toggle) => {
+        toggle.addEventListener("click", (e) => {
+          const input = e.target.closest("div").querySelector("input");
+          const icon = e.target.querySelector("i");
+          if (input.type === "password") {
+            input.type = "text";
+            icon.classList.replace("fa-eye-slash", "fa-eye");
+          } else {
+            input.type = "password";
+            icon.classList.replace("fa-eye", "fa-eye-slash");
+          }
+        });
+      });
+
+      function checkPasswordStrength(password) {
+        return {
+          length: password.length >= 8,
+          uppercase: /[A-Z]/.test(password),
+          number: /\d/.test(password),
+          special: /[!@#$%^&*()_+\-=[\]{};\'":\\|,.<>/?]/.test(password),
+        };
+      }
+
+      function updateStrengthIndicator(strength) {
+        const bars = document.querySelectorAll(".strength-bar");
+        const validations = Object.values(strength).filter(Boolean).length;
+        bars.forEach((bar, index) => bar.classList.toggle("active", index < validations));
+        document.querySelectorAll(".validation-list li").forEach((li) => {
+          const type = li.dataset.validation;
+          li.classList.toggle("valid", strength[type]);
+        });
+      }
+
+      function validateForm() {
+        const password = newPassword.value;
+        const confirm = confirmPassword.value;
+        const strength = checkPasswordStrength(password);
+        const isValid = Object.values(strength).every(Boolean) && password === confirm;
+        submitBtn.disabled = !isValid;
+        document.getElementById("confirmError").classList.toggle("hidden", password === confirm);
+      }
+
+      newPassword.addEventListener("input", () => {
+        const strength = checkPasswordStrength(newPassword.value);
+        updateStrengthIndicator(strength);
+        validateForm();
+      });
+      confirmPassword.addEventListener("input", validateForm);
+
+      document.getElementById("changePassword")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        changePasswordModal.classList.remove("hidden");
+        changePasswordModal.classList.add("flex");
+      });
+
+      [document.getElementById("closeModal"), document.getElementById("closeModalBtn")].forEach((btn) => {
+        btn.addEventListener("click", () => {
+          changePasswordModal.classList.add("hidden");
+          changePasswordModal.classList.remove("flex");
+        });
+      });
+
+      changePasswordModal.querySelector(".modal-box").addEventListener("click", (e) => e.stopPropagation());
 
       function downloadImage(url, filename) {
         const link = document.createElement("a");
