@@ -18,7 +18,7 @@
     />
 
     <style>
-      /* Animations */
+      /* Existing Animations */
       @keyframes float {
         0% { transform: translateY(0px); }
         50% { transform: translateY(-10px); }
@@ -54,88 +54,128 @@
         box-shadow: 0 0 30px rgba(99, 102, 241, 0.8);
       }
 
-      /* Dropdown Animation */
-      @keyframes dropdownSlideIn {
-        0% { opacity: 0; transform: translateY(-10px) scale(0.95); }
+      /* Enhanced Model Selection Animations */
+      #modelSelection {
+        background: radial-gradient(circle at center, rgba(30, 41, 59, 0.9), rgba(0, 0, 0, 0.95));
+        overflow: hidden;
+      }
+
+      .model-card {
+        position: relative;
+        opacity: 0;
+        background: linear-gradient(135deg, #1e40af, #7c3aed);
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(255, 255, 255, 0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+        overflow: hidden;
+      }
+
+      .model-card:hover {
+        transform: scale(1.1) rotate(2deg);
+        box-shadow: 0 12px 30px rgba(124, 58, 237, 0.6), 0 0 20px rgba(255, 255, 255, 0.4);
+      }
+
+      .model-card.paid-model {
+        background: linear-gradient(135deg, #b91c1c, #f59e0b);
+      }
+
+      .model-card:nth-child(1) { animation: orbitIn 0.8s ease-out 0.2s both; }
+      .model-card:nth-child(2) { animation: plasmaBurst 0.8s ease-out 0.4s both; }
+      .model-card:nth-child(3) { animation: warpSpeed 0.8s ease-out 0.6s both; }
+      .model-card:nth-child(4) { animation: quantumFade 0.8s ease-out 0.8s both; }
+      .model-card:nth-child(5) { animation: nebulaSwirl 0.8s ease-out 1s both; }
+
+      @keyframes orbitIn {
+        0% { opacity: 0; transform: translateY(-100vh) rotate(-360deg); }
+        60% { opacity: 0.7; transform: translateY(20px) rotate(0deg); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes plasmaBurst {
+        0% { opacity: 0; transform: scale(0) rotate(180deg); }
+        50% { opacity: 0.8; transform: scale(1.2) rotate(-90deg); }
+        100% { opacity: 1; transform: scale(1) rotate(0); }
+      }
+
+      @keyframes warpSpeed {
+        0% { opacity: 0; transform: translateX(100vw) scale(0.5); }
+        70% { opacity: 0.9; transform: translateX(-20px) scale(1.1); }
+        100% { opacity: 1; transform: translateX(0) scale(1); }
+      }
+
+      @keyframes quantumFade {
+        0% { opacity: 0; transform: translateY(100vh) scale(0.3); }
+        50% { opacity: 0.5; transform: translateY(-30px) scale(1.3); }
         100% { opacity: 1; transform: translateY(0) scale(1); }
       }
-      @keyframes dropdownSlideOut {
-        0% { opacity: 1; transform: translateY(0) scale(1); }
-        100% { opacity: 0; transform: translateY(-10px) scale(0.95); }
+
+      @keyframes nebulaSwirl {
+        0% { opacity: 0; transform: translateX(-100vw) rotate(360deg); }
+        60% { opacity: 0.7; transform: translateX(20px) rotate(-180deg); }
+        100% { opacity: 1; transform: translateX(0) rotate(0); }
       }
-      .small-model-dropdown {
+
+      @keyframes vortexExit {
+        0% { opacity: 1; transform: scale(1) rotate(0deg); }
+        100% { opacity: 0; transform: scale(0.2) rotate(720deg); }
+      }
+
+      .model-card.exit {
+        animation: vortexExit 0.5s ease-in both;
+      }
+
+      /* Glowing Particle Effects */
+      .particle {
         position: absolute;
-        background: white;
-        border: 1px solid rgba(99, 102, 241, 0.2);
-        border-radius: 0.5rem;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        z-index: 1000;
-        min-width: 180px;
-        bottom: 100%;
-        right: 0;
-        margin-bottom: 0.5rem;
-        transition: all 0.2s ease;
-        max-height: 200px;
-        overflow-y: auto;
-      }
-      .small-model-dropdown.visible {
-        display: block;
-        animation: dropdownSlideIn 0.3s ease-out forwards;
-      }
-      .small-model-dropdown.hidden {
-        display: block;
-        animation: dropdownSlideOut 0.3s ease-out forwards;
+        width: 4px;
+        height: 4px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.8), rgba(124, 58, 237, 0));
+        border-radius: 50%;
         pointer-events: none;
-      }
-      .small-model-dropdown.hidden:not(.animating) { display: none; }
-
-      /* Icon Bounce Animation */
-      @keyframes iconBounce {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.1); }
-        100% { transform: scale(1); }
+        animation: particleFloat 3s infinite ease-in-out;
       }
 
-      /* Dropdowns */
-      .small-model-dropdown ul { padding: 0.5rem; }
-      .small-model-dropdown ul li {
-        padding: 0.5rem 1rem;
-        border-radius: 0.375rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        user-select: none;
-        -moz-user-select: none;
-        -webkit-user-select: none;
-        -ms-user-select: none;
+      @keyframes particleFloat {
+        0% { transform: translateY(0) scale(1); opacity: 0.8; }
+        50% { transform: translateY(-20px) scale(1.5); opacity: 0.4; }
+        100% { transform: translateY(0) scale(1); opacity: 0.8; }
       }
-      .small-model-dropdown ul li:hover {
-        background: #6366f1;
+
+      /* Model Card Content */
+      .model-name {
         color: white;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        transform: scale(1.02);
-        text-decoration: none;
+        font-weight: 700;
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
       }
-      .small-model-dropdown ul li:hover .fa-robot,
-      .small-model-dropdown ul li:hover .fa-lock { color: white; }
-      .small-model-dropdown ul li:hover .fa-robot {
-        animation: iconBounce 0.3s ease;
-      }
-      .paid-model {
-        background-color: #f9fafb;
-        border-left: 3px solid #ffd700;
-      }
-      .paid-model:hover {
-        background: #f3f4f6;
-        color: #374151;
-        transform: none;
-        box-shadow: none;
-      }
-      .chat-dropdown { top: 110% !important; right: 0 !important; left: auto !important; z-index: 9999 !important; }
 
-      /* Layout Classes */
+      .model-icon {
+        font-size: 2.5rem;
+        color: #fff;
+        text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+        animation: glowPulse 2s infinite ease-in-out;
+      }
+
+      @keyframes glowPulse {
+        0% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+        50% { text-shadow: 0 0 20px rgba(255, 255, 255, 0.9); }
+        100% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+      }
+
+      .lock-icon {
+        color: #ffd700;
+        font-size: 1.5rem;
+        animation: lockGlow 1.5s infinite ease-in-out;
+      }
+
+      @keyframes lockGlow {
+        0% { text-shadow: 0 0 5px #ffd700; }
+        50% { text-shadow: 0 0 15px #ffd700; }
+        100% { text-shadow: 0 0 5px #ffd700; }
+      }
+
+      /* Existing Styles (unchanged) */
       .chat-container { height: calc(100vh - 64px - 4rem); display: flex; flex-direction: column; }
       .messages-container { flex-grow: 1; overflow-y: auto; padding: 1rem; }
       .prompt-container {
@@ -149,7 +189,6 @@
         box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
       }
 
-      /* Chat Bubbles */
       .chat-bubble-primary {
         background: linear-gradient(135deg, #6366f1, #818cf8) !important;
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -161,7 +200,6 @@
         color: white;
       }
 
-      /* Sidebar Styles */
       .sidebar-expanded { width: 16rem; transition: width 0.3s ease; }
       .sidebar-collapsed { width: 3.5rem; transition: width 0.3s ease; }
       .sidebar-collapsed .sidebar-content,
@@ -175,10 +213,6 @@
         position: relative;
       }
 
-      /* Gold Lock for Paid Models */
-      .paid-model .fa-lock { color: #ffd700; }
-
-      /* Navbar Left Options Animation */
       #navLeftArea { position: relative; overflow: hidden; }
       #logo { transition: opacity 0.5s ease; }
       #navOptions {
@@ -193,7 +227,6 @@
       }
       #navOptions.active { opacity: 1; transform: translateX(0); }
 
-      /* Textarea */
       .textarea-bordered {
         background: white;
         border: 1px solid rgba(99, 102, 241, 0.2);
@@ -205,13 +238,11 @@
         box-shadow: 0 0 8px rgba(99, 102, 241, 0.3);
       }
 
-      /* Buttons */
       .btn { transition: all 0.3s ease; }
       .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
       .btn-primary { background: linear-gradient(135deg, #6366f1, #818cf8); }
       .btn-secondary { background: linear-gradient(135deg, #8b5cf6, #a78bfa); }
 
-      /* Custom Scrollbar */
       ::-webkit-scrollbar { width: 8px; }
       ::-webkit-scrollbar-track { background: rgba(99, 102, 241, 0.1); }
       ::-webkit-scrollbar-thumb { background: #818cf8; border-radius: 4px; }
@@ -219,7 +250,6 @@
 
       .alert-fade { transition: opacity 0.5s ease-out; }
 
-      /* Sidebar Specific */
       .sidebar-expanded { width: 280px; }
       .sidebar-collapsed { width: 64px; }
       .sidebar-collapsed .sidebar-content { opacity: 0; visibility: hidden; width: 0; }
@@ -229,7 +259,6 @@
       .menu.bg-base-200 { overflow: visible !important; }
       .sidebar .dropdown-content { max-width: 260px; }
 
-      /* Inline Rename Styles */
       .chat-title-form input {
         font-size: 0.875rem;
         padding: 0.25rem;
@@ -238,7 +267,6 @@
         width: 100%;
       }
 
-      /* Tooltip Overrides */
       .tooltip { z-index: 3000 !important; }
       .tooltip:before,
       .tooltip:after {
@@ -249,7 +277,6 @@
         border-radius: 0.25rem;
       }
 
-      /* Modal Styles */
       .modal {
         display: none;
         position: fixed;
@@ -292,7 +319,6 @@
       }
       .modal-box .close-btn:hover { color: #818cf8; }
 
-      /* Download Button */
       .download-btn {
         position: absolute;
         bottom: 1rem;
@@ -400,7 +426,6 @@
         box-shadow: 0 6px 12px rgba(107, 114, 128, 0.3);
       }
 
-      /* Chat Item Specific */
       .chat-item { cursor: pointer; }
       .chat-item:hover { background: rgba(99, 102, 241, 0.1); }
     </style>
@@ -615,24 +640,6 @@
                       <span id="small-selected-model-text" class="truncate max-w-[80px] text-xs">{% if selected_model %}{{ selected_model.name }}{% else %}Model{% endif %}</span>
                       <i class="fas fa-chevron-down text-xs"></i>
                     </button>
-                    <div id="smallModelDropdown" class="small-model-dropdown hidden">
-                      <ul>
-                        {% for model in models %}
-                        {% if model.is_paid and not has_subscribed %}
-                        <li class="flex items-center gap-2 paid-model" data-url="{% url 'subscriptions:plans' %}">
-                          <i class="fas fa-robot text-primary"></i>
-                          <span class="flex-1 truncate tooltip" data-tip="{{ model.name }}">{{ model.name }}</span>
-                          <i class="fas fa-lock ml-2 text-gray-500"></i>
-                        </li>
-                        {% else %}
-                        <li class="flex items-center gap-2" onclick="selectModel('{{ model.id }}', '{{ model.name }}')">
-                          <i class="fas fa-robot text-primary"></i>
-                          <span class="flex-1 truncate tooltip" data-tip="{{ model.name }}">{{ model.name }}</span>
-                        </li>
-                        {% endif %}
-                        {% endfor %}
-                      </ul>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -642,6 +649,27 @@
           </form>
         </div>
       </main>
+    </div>
+
+    <!-- Enhanced Model Selection Interface -->
+    <div id="modelSelection" class="fixed inset-0 z-50 hidden flex items-center justify-center">
+      <div class="grid grid-cols-3 gap-12 p-12 relative">
+        {% for model in models %}
+        <div class="model-card {% if model.is_paid and not has_subscribed %}paid-model{% else %}select-model{% endif %}" data-model-id="{{ model.id }}" data-model-name="{{ model.name }}">
+          <div class="text-center relative">
+            <i class="fas fa-robot model-icon"></i>
+            <p class="model-name text-lg mt-4">{{ model.name }}</p>
+            {% if model.is_paid and not has_subscribed %}
+            <i class="fas fa-lock lock-icon mt-2"></i>
+            {% endif %}
+            <!-- Particles -->
+            <div class="particle" style="top: 10%; left: 20%;"></div>
+            <div class="particle" style="top: 30%; right: 10%;"></div>
+            <div class="particle" style="bottom: 20%; left: 15%;"></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
     </div>
 
     <footer class="footer footer-center p-4 bg-base-300 text-base-content mt-8">
@@ -679,32 +707,65 @@
         }
       });
 
-      // Small Model Dropdown Functions (Prompt Area)
-      function toggleSmallModelDropdown() {
-        const dropdown = document.getElementById("smallModelDropdown");
-        if (dropdown.classList.contains("hidden")) {
-          dropdown.classList.remove("hidden");
-          dropdown.classList.add("visible");
-          dropdown.classList.add("animating");
-          setTimeout(() => dropdown.classList.remove("animating"), 300);
-        } else {
-          dropdown.classList.remove("visible");
-          dropdown.classList.add("hidden");
-          dropdown.classList.add("animating");
-          setTimeout(() => dropdown.classList.remove("animating"), 300);
-        }
+      // Enhanced Model Selection Functions
+      function showModelSelection() {
+        const modelSelection = document.getElementById("modelSelection");
+        modelSelection.classList.remove("hidden");
+        modelSelection.classList.add("flex");
+        // Reset animations for re-entry
+        const modelCards = document.querySelectorAll(".model-card");
+        modelCards.forEach((card) => {
+          card.style.animation = 'none';
+          card.offsetHeight; // Trigger reflow
+          card.style.animation = null;
+        });
+      }
+
+      function hideModelSelection() {
+        const modelCards = document.querySelectorAll(".model-card");
+        modelCards.forEach((card) => {
+          card.classList.add("exit");
+        });
+        setTimeout(() => {
+          const modelSelection = document.getElementById("modelSelection");
+          modelSelection.classList.add("hidden");
+          modelSelection.classList.remove("flex");
+          modelCards.forEach((card) => {
+            card.classList.remove("exit");
+          });
+        }, 500); // Match exit animation duration
       }
 
       function selectModel(modelId, modelName) {
         document.getElementById("model-input").value = modelId;
         document.getElementById("small-selected-model-text").textContent = modelName;
-        toggleSmallModelDropdown(); // Close small dropdown
+        hideModelSelection();
         updateGenerateButtonState();
       }
 
       document.getElementById("smallModelSelectBtn").addEventListener("click", function (e) {
         e.stopPropagation();
-        toggleSmallModelDropdown();
+        showModelSelection();
+      });
+
+      document.querySelectorAll(".select-model").forEach((model) => {
+        model.addEventListener("click", function () {
+          const modelId = this.getAttribute("data-model-id");
+          const modelName = this.getAttribute("data-model-name");
+          selectModel(modelId, modelName);
+        });
+      });
+
+      document.querySelectorAll(".paid-model").forEach((model) => {
+        model.addEventListener("click", function () {
+          window.location.href = "{% url 'subscriptions:plans' %}";
+        });
+      });
+
+      document.getElementById("modelSelection").addEventListener("click", function (e) {
+        if (e.target === this) {
+          hideModelSelection();
+        }
       });
 
       // Call initially to set the correct state
@@ -732,12 +793,6 @@
         if (!document.getElementById("navLeftArea").contains(e.target)) {
           navOptions.classList.remove("active");
           logo.style.opacity = 1;
-        }
-        const smallModelDropdown = document.getElementById("smallModelDropdown");
-        const smallModelSelectBtn = document.getElementById("smallModelSelectBtn");
-        if (!smallModelDropdown.contains(e.target) && !smallModelSelectBtn.contains(e.target)) {
-          smallModelDropdown.classList.remove("visible");
-          smallModelDropdown.classList.add("hidden");
         }
       });
 
@@ -782,7 +837,6 @@
         }
       }
 
-      // Function to handle rename submission
       function submitRenameForm(form) {
         const formData = new FormData(form);
         const chatId = form.id.replace('chat-form-', '');
@@ -816,15 +870,12 @@
         });
       }
 
-      // Handle rename form submission via AJAX for both Enter and blur
       document.querySelectorAll('.chat-title-form').forEach(form => {
-        // Handle Enter key submission
         form.addEventListener('submit', function(e) {
           e.preventDefault();
           submitRenameForm(this);
         });
 
-        // Handle blur (clicking outside)
         const input = form.querySelector('input[name="title"]');
         if (input) {
           input.addEventListener('blur', function() {
@@ -833,7 +884,7 @@
         }
       });
 
-      // Function to scroll to the bottom of the messages container
+      // Scroll to bottom function
       function scrollToBottom() {
         const messagesContainer = document.querySelector(".messages-container");
         if (messagesContainer) {
@@ -852,12 +903,10 @@
         const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
         let currentForm = null;
 
-        // Scroll to bottom on initial load if there's an active chat
         if (document.querySelector(".messages-container").children.length > 0) {
           scrollToBottom();
         }
 
-        // Make entire chat item clickable and scroll to bottom
         chatItems.forEach((item) => {
           item.addEventListener("click", function (e) {
             const url = this.getAttribute("data-chat-url");
@@ -865,21 +914,18 @@
             const dropdown = this.querySelector(".dropdown-content");
             const target = e.target;
 
-            // Prevent navigation if clicking on rename form, dropdown, or its contents
             if (
               (titleForm && !titleForm.classList.contains("hidden") && titleForm.contains(target)) ||
               (dropdown && dropdown.contains(target)) ||
-              target.closest(".dropdown") // Includes the ellipsis button
+              target.closest(".dropdown")
             ) {
               return;
             }
 
             window.location.href = url;
-            // Note: scrollToBottom() will be triggered on page load after navigation
           });
         });
 
-        // Delete functionality
         deleteItems.forEach((item) => {
           item.addEventListener("click", function (e) {
             e.preventDefault();
@@ -910,16 +956,6 @@
           deleteModal.querySelector(".delete-modal-box").classList.remove("active");
           currentForm = null;
         }
-
-        // Handle clicks on paid models (only redirect if not subscribed)
-        const paidModelItems = document.querySelectorAll(".paid-model");
-        paidModelItems.forEach((item) => {
-          item.addEventListener("click", function (e) {
-            e.stopPropagation();
-            const url = this.getAttribute("data-url");
-            window.location.href = url;
-          });
-        });
       });
 
       // Password Modal Handling

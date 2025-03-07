@@ -3,6 +3,8 @@ from django.http import JsonResponse
 from django.contrib.auth import logout
 from django.contrib import messages
 import os
+import time  # To wait before polling
+
 import uuid
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
@@ -302,6 +304,85 @@ def generate_image(request):
                     generated_image = ContentFile(
                         response.content, name=f"{uuid.uuid4()}.png"
                     )
+
+            elif model.name.lower() == "starry-ai":
+                print("Using Starry AI API for image generation")
+
+                # Step 1: Submit the image generation request
+                create_url = "https://api.starryai.com/creations/"
+                payload = {
+                    "model": "lyra",
+                    "aspectRatio": "square",
+                    "highResolution": False,
+                    "images": 1,
+                    "steps": 20,
+                    "initialImageMode": "color",
+                    "prompt": prompt,
+                }
+                headers = {
+                    "accept": "application/json",
+                    "content-type": "application/json",
+                    "X-API-Key": settings.STARRY_AI_SECRET_KEY,
+                }
+
+                response = requests.post(create_url, json=payload, headers=headers)
+
+                if response.status_code == 200:
+                    response_data = response.json()
+                    creation_id = response_data.get("id")
+
+                    if not creation_id:
+                        messages.error(
+                            request, "StarryAI did not return a valid creation ID"
+                        )
+                        return redirect("image_generation:dashboard")
+
+                    # Step 2: Poll for completion
+                    status_url = f"https://api.starryai.com/creations/{creation_id}"
+                    max_attempts = 10  # Prevent infinite looping
+                    attempt = 0
+
+                    while attempt < max_attempts:
+                        time.sleep(5)  # Wait for 5 seconds before checking
+                        status_response = requests.get(status_url, headers=headers)
+
+                        if status_response.status_code == 200:
+                            status_data = status_response.json()
+                            if status_data.get("status") == "completed":
+                                images = status_data.get("images", [])
+                                if images and images[0].get("url"):
+                                    image_url = images[0]["url"]  # Pick first image
+                                    break  # Exit loop as image is found
+                        else:
+                            messages.error(request, "Failed to check StarryAI status")
+                            return redirect("image_generation:dashboard")
+
+                        attempt += 1
+                    else:
+                        messages.error(
+                            request, "StarryAI took too long to generate an image"
+                        )
+                        return redirect("image_generation:dashboard")
+
+                    # Step 3: Download and store the image
+                    print("Downloading image from:", image_url)
+                    image_response = requests.get(image_url)
+
+                    if image_response.status_code == 200:
+                        generated_image = ContentFile(
+                            image_response.content, name=f"{uuid.uuid4()}.png"
+                        )
+                    else:
+                        messages.error(
+                            request, "Failed to download the image from StarryAI"
+                        )
+                        return redirect("image_generation:dashboard")
+
+                else:
+                    error_message = response.json().get("message", "Unknown error")
+                    messages.error(request, f"StarryAI Error: {error_message}")
+                    return redirect("image_generation:dashboard")
+
             else:
                 result = pipe(prompt)
                 generated_image = result.images[0]
