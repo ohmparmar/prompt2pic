@@ -30,7 +30,6 @@ def signup(request):
         email = request.POST.get("email")
         password = request.POST.get("password")
 
-        # Check if email is already registered
         try:
             user = CustomUser.objects.get(email=email)  # Use CustomUser
             if user.otp_verified:
@@ -48,8 +47,14 @@ def signup(request):
                 return redirect("authentication:otp_verification")
         except CustomUser.DoesNotExist:
             pass
-
-        # Password validation
+        existing_username = CustomUser.objects.filter(username=username)  # Use CustomUser
+        if existing_username.exists():
+            messages.error(request, "This username is not available.")
+            return render(
+                request,
+                "authentication/signup.html",
+                {"username": username, "email": email},
+            )
         if (
             len(password) < 6
             or not re.search(r"[A-Z]", password)
