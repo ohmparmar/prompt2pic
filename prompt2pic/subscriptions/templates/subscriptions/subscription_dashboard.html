@@ -1,0 +1,621 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Subscriptions</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+
+    <style>
+      body {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #c7d2fe, #e9d5ff, #bfdbfe, #dbeafe);
+        background-size: 400% 400%;
+        animation: gradientBG 15s ease infinite;
+        overflow-x: hidden;
+        font-family: 'Arial', sans-serif;
+      }
+
+      /* Background Animation */
+      @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+
+      /* Animations */
+      @keyframes fadeInUp {
+        0% { opacity: 0; transform: translateY(30px); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes glow {
+        0% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.6); }
+        50% { box-shadow: 0 0 25px rgba(16, 185, 129, 0.9), 0 0 40px rgba(16, 185, 129, 0.4); }
+        100% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.6); }
+      }
+
+      @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-15px); }
+      }
+
+      @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+      }
+
+      @keyframes sparkleHover {
+        0% { opacity: 0; transform: scale(0) rotate(0deg); }
+        50% { opacity: 1; transform: scale(1.5) rotate(180deg); }
+        100% { opacity: 0; transform: scale(0) rotate(360deg); }
+      }
+
+      @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+      }
+
+      @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-20px); }
+      }
+
+      @keyframes rotateIn {
+        0% { transform: rotate(-10deg) scale(0.9); opacity: 0; }
+        100% { transform: rotate(0) scale(1); opacity: 1; }
+      }
+
+      .animate-fadeInUp { animation: fadeInUp 0.8s ease-out both; }
+      .animate-float { animation: float 6s ease-in-out infinite; }
+      .animate-pulse { animation: pulse 3s infinite; }
+      .animate-glow { animation: glow 3s infinite; }
+      .animate-bounce { animation: bounce 2s ease infinite; }
+      .animate-rotateIn { animation: rotateIn 0.8s ease-out both; }
+
+      /* Animation Delays */
+      .delay-100 { animation-delay: 0.1s; }
+      .delay-200 { animation-delay: 0.2s; }
+      .delay-300 { animation-delay: 0.3s; }
+      .delay-400 { animation-delay: 0.4s; }
+      .delay-500 { animation-delay: 0.5s; }
+
+      .sparkle-icon {
+        position: absolute;
+        color: #ffef00;
+        opacity: 0;
+        font-size: 1.8rem;
+        pointer-events: none;
+        animation: sparkleHover 1.5s ease-in-out;
+        z-index: 10;
+        text-shadow: 0 0 10px rgba(255, 239, 0, 0.8);
+      }
+
+      /* Cards */
+      .card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(10px);
+        border-radius: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+        transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                    box-shadow 0.5s ease;
+        position: relative;
+        overflow: hidden;
+        padding: 2.5rem;
+      }
+      .card:hover {
+        transform: translateY(-15px) scale(1.02);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+      }
+      .card::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.8s ease;
+        pointer-events: none;
+        transform: scale(0.8);
+      }
+      .card:hover::before { 
+        opacity: 1; 
+        transform: scale(1);
+      }
+      .card::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transition: 0.5s;
+      }
+      .card:hover::after {
+        left: 100%;
+      }
+
+      /* Subscription Card Styling */
+      .subscription-card.active {
+        border: 4px solid #10b981;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(52, 211, 153, 0.15));
+        animation: glow 3s infinite;
+      }
+      .subscription-card.active::before {
+        background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, transparent 70%);
+      }
+      .subscription-card.expired {
+        border: 4px solid #ef4444;
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(248, 113, 113, 0.15));
+        opacity: 0.9;
+      }
+      .subscription-card {
+        border-left: 8px solid #8b5cf6;
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(99, 102, 241, 0.15));
+      }
+
+      /* Gradient Text */
+      .gradient-text {
+        background: linear-gradient(45deg, #6366f1, #8b5cf6, #ec4899);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: shimmer 3s linear infinite;
+      }
+
+      /* Buttons */
+      .btn-subscribe {
+        background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
+        background-size: 200% auto;
+        animation: shimmer 3s linear infinite;
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                    box-shadow 0.4s ease;
+        position: relative;
+        overflow: hidden;
+        border: none;
+        font-weight: bold;
+        letter-spacing: 0.5px;
+      }
+      .btn-subscribe:hover {
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 10px 25px rgba(99, 102, 241, 0.5);
+      }
+      .btn-subscribe::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: width 0.8s ease, height 0.8s ease;
+      }
+      .btn-subscribe:hover::after {
+        width: 250%;
+        height: 250%;
+      }
+
+      /* Navbar */
+      .navbar {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(15px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.4s ease;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+      }
+      .navbar:hover { 
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.12);
+        background: rgba(255, 255, 255, 0.9);
+      }
+
+      /* Footer */
+      footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(15px);
+        padding: 1.2rem 0;
+        text-align: center;
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+        transition: transform 0.4s ease, background 0.4s ease;
+        border-top: 1px solid rgba(255, 255, 255, 0.3);
+        z-index: 100;
+      }
+      footer:hover { 
+        transform: translateY(-8px); 
+        background: rgba(255, 255, 255, 0.9);
+      }
+      footer p { 
+        font-size: 0.95rem; 
+        color: #4a5568; 
+        font-weight: 500; 
+      }
+
+      /* No Subscription Sparkles */
+      .no-subscription-container {
+        position: relative;
+        overflow: hidden;
+      }
+      .no-subscription-sparkle {
+        position: absolute;
+        width: 25px;
+        height: 25px;
+        background: radial-gradient(circle, #ffef00 10%, transparent 70%);
+        border-radius: 50%;
+        opacity: 0;
+        filter: blur(1px);
+        box-shadow: 0 0 20px rgba(255, 239, 0, 0.8);
+        animation: sparkleHover 2s infinite;
+      }
+      .no-subscription-sparkle:nth-child(1) { top: 15%; left: 20%; animation-delay: 0s; }
+      .no-subscription-sparkle:nth-child(2) { top: 35%; left: 70%; animation-delay: 0.7s; }
+      .no-subscription-sparkle:nth-child(3) { top: 65%; left: 30%; animation-delay: 1.4s; }
+      .no-subscription-sparkle:nth-child(4) { top: 25%; left: 85%; animation-delay: 0.3s; }
+      .no-subscription-sparkle:nth-child(5) { top: 75%; left: 60%; animation-delay: 1.1s; }
+      .no-subscription-sparkle:nth-child(6) { top: 45%; left: 15%; animation-delay: 1.8s; }
+
+      /* Status Badges */
+      .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+      .status-badge.active {
+        background: linear-gradient(135deg, #10b981, #34d399);
+        color: white;
+      }
+      .status-badge.expired {
+        background: linear-gradient(135deg, #ef4444, #f87171);
+        color: white;
+      }
+
+      /* Decorative Elements */
+      .decorative-circle {
+        position: absolute;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+        filter: blur(40px);
+        z-index: -1;
+      }
+      .circle-1 {
+        width: 300px;
+        height: 300px;
+        top: 10%;
+        left: -100px;
+      }
+      .circle-2 {
+        width: 400px;
+        height: 400px;
+        bottom: 10%;
+        right: -150px;
+        background: linear-gradient(135deg, rgba(236, 72, 153, 0.2), rgba(139, 92, 246, 0.2));
+      }
+      .circle-3 {
+        width: 250px;
+        height: 250px;
+        top: 40%;
+        right: 20%;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(99, 102, 241, 0.2));
+      }
+
+      /* Avatar Glow Effect */
+      .avatar-container {
+        position: relative;
+      }
+      .avatar-container::after {
+        content: '';
+        position: absolute;
+        top: -5px;
+        left: -5px;
+        right: -5px;
+        bottom: -5px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #6366f1, #8b5cf6, #ec4899, #6366f1);
+        background-size: 400% 400%;
+        z-index: -1;
+        animation: shimmer 3s linear infinite;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      .avatar-container:hover::after {
+        opacity: 1;
+      }
+
+      /* Transaction Details */
+      .transaction-details {
+        position: relative;
+        overflow: hidden;
+        border-radius: 1rem;
+        background: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(5px);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      .transaction-details:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+  </head>
+  <body class="overflow-x-hidden">
+    <!-- Decorative Background Elements -->
+    <div class="decorative-circle circle-1"></div>
+    <div class="decorative-circle circle-2"></div>
+    <div class="decorative-circle circle-3"></div>
+
+    <!-- Navbar -->
+    <div class="navbar bg-base-100 bg-opacity-80 backdrop-blur-md shadow-lg ">
+      <div class="flex-1">
+        <!-- <a
+          href="{% url 'image_generation:dashboard' %}"
+          class="btn btn-ghost normal-case text-2xl font-bold"
+        >
+          <span class="gradient-text">Prompt2Pic</span>
+          <i class="fas fa-camera-retro ml-2 text-secondary animate-pulse"></i>
+        </a> -->
+        <a href="{% url 'image_generation:dashboard' %}" id="logo" class="btn btn-ghost normal-case text-2xl text-primary">Prompt2Pic <i class="fas fa-camera-retro ml-2 text-secondary"></i></a>
+
+
+      </div>
+      <div class="flex-none gap-2">
+        <div class="dropdown dropdown-end">
+          <!-- <button id="avatarBtn" class="btn btn-ghost btn-circle avatar-container animate-float">
+            <div class="w-12 rounded-full ring ring-primary ring-offset-2 ring-offset-base-100">
+              <img
+                src="https://api.dicebear.com/6.x/initials/svg?seed={{ request.user.username }}&backgroundColor=6366f1"
+                alt="User Avatar"
+              />
+            </div>
+          </button> -->
+          <!-- <button id="avatarBtn" class="btn btn-ghost btn-circle avatar">
+            <div class="w-10 rounded-full">
+              <img src="https://api.dicebear.com/6.x/initials/svg?seed={{ request.user.username }}" alt="User Avatar" />
+            </div>
+          </button> -->
+          <button id="avatarBtn" class="btn btn-ghost btn-circle avatar" ">
+            <div class="w-10 rounded-full">
+              <img src="https://api.dicebear.com/6.x/initials/svg?seed={{ request.user.username }}" alt="User Avatar">
+            </div>
+          </button>
+          <!-- <ul tabindex="0" class="mt-3 z-[1] p-2 shadow-lg menu menu-sm dropdown-content bg-base-100 rounded-box w-52 backdrop-blur-md bg-opacity-90">
+            <li><a><i class="fas fa-user mr-2"></i> Profile</a></li>
+            <li><a><i class="fas fa-cog mr-2"></i> Settings</a></li>
+            <li><a><i class="fas fa-sign-out-alt mr-2"></i> Logout</a></li>
+          </ul> -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto p-6 py-16 mb-20">
+      <h1 class="text-5xl font-bold text-center mb-16 gradient-text animate-fadeInUp">
+        <i class="fas fa-crown mr-3"></i> Your Subscription Dashboard
+      </h1>
+
+      {% if subscriptions %}
+      <!-- Active Subscriptions Section -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-16">
+        {% for subscription in subscriptions %}
+        <div class="card subscription-card {% if subscription.is_active %}active{% else %}expired{% endif %} animate-fadeInUp delay-{{ forloop.counter }}00">
+          <div class="absolute top-4 right-4">
+            {% if subscription.is_active %}
+            <span class="status-badge active"><i class="fas fa-check-circle"></i> Active</span>
+            {% else %}
+            <span class="status-badge expired"><i class="fas fa-times-circle"></i> Expired</span>
+            {% endif %}
+          </div>
+          
+          <h2 class="text-3xl font-bold text-primary mb-6 flex items-center">
+            {% if subscription.plan_type == 'Basic' %}
+            <i class="fas fa-star mr-3 text-yellow-500"></i>
+            {% elif subscription.plan_type == 'Premium' %}
+            <i class="fas fa-gem mr-3 text-purple-500"></i>
+            {% elif subscription.plan_type == 'Pro' %}
+            <i class="fas fa-crown mr-3 text-blue-500"></i>
+            {% else %}
+            <i class="fas fa-certificate mr-3 text-primary"></i>
+            {% endif %}
+            {{ subscription.plan_type }}
+          </h2>
+          
+          <div class="flex items-center mb-4">
+            <i class="fas fa-calendar-alt text-gray-500 mr-3"></i>
+            <div>
+              <p class="text-gray-600">
+                Start Date: <span class="font-semibold">{{ subscription.start_date|date:"F d, Y" }}</span>
+              </p>
+            </div>
+          </div>
+          
+          <div class="flex items-center mb-6">
+            <i class="fas fa-hourglass-end text-gray-500 mr-3"></i>
+            <div>
+              <p class="text-gray-600">
+                End Date: <span class="font-semibold">{{ subscription.end_date|date:"F d, Y" }}</span>
+              </p>
+            </div>
+          </div>
+          
+          <!-- Payment Details -->
+          <div class="transaction-details p-5 mt-4">
+            <h3 class="text-lg font-bold text-gray-700 mb-4 flex items-center">
+              <i class="fas fa-credit-card mr-2 text-primary"></i> Payment Details
+            </h3>
+            
+            <div class="flex items-center mb-2">
+              <i class="fas fa-hashtag text-gray-500 mr-3"></i>
+              <p class="text-gray-600">
+                Transaction ID: <span class="font-mono font-medium">#{{ subscription.transaction.transaction_id }}</span>
+              </p>
+            </div>
+            
+            <div class="flex items-center mb-2">
+              <i class="fas fa-check-circle text-gray-500 mr-3"></i>
+              <p class="text-gray-600">
+                Status: 
+                {% if subscription.transaction.status == 1 %}
+                <span class="text-green-600 font-semibold">Success</span>
+                {% else %}
+                <span class="text-red-600 font-semibold">Failed</span>
+                {% endif %}
+              </p>
+            </div>
+            
+            <div class="flex items-center">
+              <i class="fas fa-dollar-sign text-gray-500 mr-3"></i>
+              <p class="text-gray-600">
+                Amount: <span class="font-semibold">${{ subscription.transaction.amount_paid }}</span>
+              </p>
+            </div>
+          </div>
+          
+        
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <!-- No Subscriptions -->
+      <div class="text-center py-20 animate-fadeInUp no-subscription-container">
+        <div class="no-subscription-sparkle"></div>
+        <div class="no-subscription-sparkle"></div>
+        <div class="no-subscription-sparkle"></div>
+        <div class="no-subscription-sparkle"></div>
+        <div class="no-subscription-sparkle"></div>
+        <div class="no-subscription-sparkle"></div>
+        
+        <div class="animate-float">
+          <i class="fas fa-magic text-6xl text-primary mb-8 animate-pulse"></i>
+        </div>
+        
+        <h2 class="text-4xl font-bold text-gray-800 mb-6 animate-rotateIn">
+          No Subscriptions Found
+        </h2>
+        
+        <p class="text-gray-600 text-xl mb-10 max-w-2xl mx-auto">
+          Unlock premium features and enhance your creative journey by subscribing today!
+        </p>
+        
+        <a
+          href="{% url 'subscriptions:plans' %}"
+          class="btn btn-subscribe text-white px-10 py-4 rounded-full text-lg animate-pulse"
+        >
+          <i class="fas fa-rocket mr-2"></i> Explore Plans
+        </a>
+        
+        <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          <div class="bg-white bg-opacity-70 backdrop-blur-sm p-6 rounded-xl shadow-md">
+            <i class="fas fa-bolt text-3xl text-yellow-500 mb-4"></i>
+            <h3 class="text-lg font-semibold mb-2">Faster Generation</h3>
+            <p class="text-gray-600">Priority access to our AI image generation servers</p>
+          </div>
+          
+          <div class="bg-white bg-opacity-70 backdrop-blur-sm p-6 rounded-xl shadow-md">
+            <i class="fas fa-images text-3xl text-purple-500 mb-4"></i>
+            <h3 class="text-lg font-semibold mb-2">Higher Resolution</h3>
+            <p class="text-gray-600">Generate images in stunning high definition quality</p>
+          </div>
+          
+          <div class="bg-white bg-opacity-70 backdrop-blur-sm p-6 rounded-xl shadow-md">
+            <i class="fas fa-palette text-3xl text-blue-500 mb-4"></i>
+            <h3 class="text-lg font-semibold mb-2">Advanced Styles</h3>
+            <p class="text-gray-600">Access to premium artistic styles and filters</p>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer footer-center p-4 bg-base-300 text-base-content">
+      <div class="flex items-center justify-center gap-2">
+        <p>Copyright © 2025 - All rights reserved by Prompt2Pic</p>
+        <div class="flex gap-4 ml-4">
+          <a href="#" class="text-gray-600 hover:text-primary transition-colors"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="text-gray-600 hover:text-primary transition-colors"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="text-gray-600 hover:text-primary transition-colors"><i class="fab fa-github"></i></a>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      // Add sparkle effect on hover
+      document.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('mouseenter', () => {
+          const rect = card.getBoundingClientRect();
+          const sparkleCount = 5;
+
+          for (let i = 0; i < sparkleCount; i++) {
+            const sparkle = document.createElement('i');
+            sparkle.className = 'fas fa-sparkles sparkle-icon';
+            sparkle.style.top = `${Math.random() * rect.height}px`;
+            sparkle.style.left = `${Math.random() * rect.width}px`;
+            sparkle.style.animationDelay = `${Math.random() * 0.5}s`;
+            sparkle.style.fontSize = `${Math.random() * 1 + 1}rem`;
+            card.appendChild(sparkle);
+
+            // Remove sparkle after animation completes
+            setTimeout(() => {
+              sparkle.remove();
+            }, 1500);
+          }
+        });
+      });
+
+      // Add staggered animation to cards
+      document.addEventListener('DOMContentLoaded', () => {
+        const cards = document.querySelectorAll('.card');
+        cards.forEach((card, index) => {
+          card.style.animationDelay = `${index * 0.1}s`;
+        });
+      });
+
+      // Add hover effect to buttons
+      document.querySelectorAll('.btn').forEach(btn => {
+        btn.addEventListener('mouseenter', () => {
+          btn.classList.add('animate-pulse');
+        });
+        btn.addEventListener('mouseleave', () => {
+          btn.classList.remove('animate-pulse');
+        });
+      });
+
+      // Add parallax effect to decorative circles
+      document.addEventListener('mousemove', (e) => {
+        const circles = document.querySelectorAll('.decorative-circle');
+        const x = e.clientX / window.innerWidth;
+        const y = e.clientY / window.innerHeight;
+        
+        circles.forEach(circle => {
+          const speed = 30;
+          const xOffset = (x - 0.5) * speed;
+          const yOffset = (y - 0.5) * speed;
+          
+          circle.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
+        });
+      });
+    </script>
+  </body>
+</html>

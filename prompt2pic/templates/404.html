@@ -1,0 +1,103 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .bg-image {
+            background-image: url('https://www.tailwindai.dev/placeholder.svg');
+            background-size: cover;
+            background-position: center;
+        }
+        .float-bounce {
+            animation: bounce 2s ease-in-out infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .spin-orbit {
+            animation: orbit 10s linear infinite;
+        }
+        @keyframes orbit {
+            0% { transform: rotate(0deg) translateX(150px) rotate(0deg); }
+            100% { transform: rotate(360deg) translateX(150px) rotate(-360deg); }
+        }
+        .bg-gradient-circle {
+            background: radial-gradient(circle, rgba(139,92,246,0.2) 0%, rgba(255,255,255,0) 70%);
+        }
+        .glitch {
+            animation: glitch 1s linear infinite;
+        }
+        @keyframes glitch {
+            2%, 64% { transform: translate(2px, 0) skew(0deg); }
+            4%, 60% { transform: translate(-2px, 0) skew(0deg); }
+            62% { transform: translate(0, 0) skew(5deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 flex items-center justify-center p-4 overflow-hidden">
+    <!-- Animated Background Elements -->
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute w-64 h-64 bg-purple-300 rounded-full opacity-20 top-[-50px] left-[-50px] pulse"></div>
+        <div class="absolute w-96 h-96 bg-pink-300 rounded-full opacity-15 bottom-[-100px] right-[-100px] pulse" style="animation-delay: 1s;"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div class="w-8 h-8 bg-yellow-400 rounded-full spin-orbit"></div>
+            <div class="w-12 h-12 bg-blue-400 rounded-full spin-orbit" style="animation-delay: -3s;"></div>
+        </div>
+    </div>
+
+    <div class="card w-full max-w-lg bg-base-100 shadow-2xl relative z-10 bg-gradient-circle">
+        <div class="card-body text-center relative">
+            <!-- Glitchy 404 Text -->
+            <div class="relative mb-8">
+                <h1 class="text-9xl font-bold text-primary opacity-20 absolute -top-16 left-1/2 transform -translate-x-1/2">404</h1>
+                <h2 class="text-5xl font-bold text-primary mt-8 float-bounce relative z-20 glitch">
+                    Page Not Found
+                </h2>
+            </div>
+
+            <!-- Animated SVG Icon -->
+            <div class="mb-6">
+                <svg class="w-24 h-24 mx-auto text-primary float-bounce" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                </svg>
+            </div>
+
+            <div class="space-y-4 mb-8">
+                <p class="text-gray-600 font-medium">Lost in the digital cosmos?</p>
+                <p class="text-gray-500 text-sm">The page you're seeking has vanished into the void!</p>
+            </div>
+
+            <!-- Animated Button with SVG -->
+            <div class="relative">
+                <svg class="absolute w-40 h-20 -top-16 left-1/2 transform -translate-x-1/2" viewBox="0 0 100 50">
+                    <path d="M10 40 Q50 0 90 40" fill="none" stroke="#8B5CF6" stroke-width="2" stroke-dasharray="5,5">
+                        <animate attributeName="stroke-dashoffset" from="0" to="-10" dur="1s" repeatCount="indefinite"/>
+                    </path>
+                </svg>
+                <a href="{% url 'image_generation:dashboard' %}" class="btn btn-primary btn-wide transform transition-all hover:scale-105 flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5v-8l-10 5-10-5v8z"/>
+                    </svg>
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

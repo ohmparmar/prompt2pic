@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Verification</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        .floating { animation: float 3s ease-in-out infinite; }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 flex items-center justify-center p-4">
+    <div class="relative w-full max-w-md">
+        <!-- Floating elements -->
+        <div class="absolute top-0 left-0 -mt-16 -ml-16 text-white opacity-50 floating" style="animation-delay: 0s;">
+            <i class="fas fa-lock text-6xl"></i>
+        </div>
+        <div class="absolute bottom-0 right-0 -mb-16 -mr-16 text-white opacity-50 floating" style="animation-delay: 1s;">
+            <i class="fas fa-shield-alt text-6xl"></i>
+        </div>
+        <div class="absolute top-1/2 left-1/4 text-white opacity-50 floating" style="animation-delay: 1.5s;">
+            <i class="fas fa-key text-4xl"></i>
+        </div>
+
+        <!-- Main container -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title text-2xl font-bold text-center mb-6">Enter OTP</h2>
+                
+                <!-- Messages -->
+                <div class="messages mb-4">
+                    {% for message in messages %}
+                        <div class="alert alert-info shadow-lg">
+                            <div>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current flex-shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span>{{ message }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- OTP Form -->
+                <form method="POST" class="space-y-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="email" value="{{ email }}">
+                    <div class="flex justify-between">
+                        {% for _ in "123456" %}
+                            <input type="text" name="otp{{ forloop.counter }}" id="otp{{ forloop.counter }}"
+                                   maxlength="1" class="input input-bordered w-12 h-12 text-center text-xl"
+                                   oninput="this.value.length >= 1 ? document.getElementById('otp{{ forloop.counter|add:1 }}').focus() : null" required>
+                        {% endfor %}
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-full" ">Verify OTP</button>
+                </form>
+
+                <!-- Resend OTP Form -->
+                <form method="POST" class="mt-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="email" value="" id="hiddenEmail">
+                    <button type="submit" name="resend_otp" class="btn btn-outline btn-secondary w-full" onclick="document.getElementById('hiddenEmail').value = getEmailFromLocalStorage();">Resend OTP</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

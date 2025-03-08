@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Receipt - Prompt2Pic</title>
+    <style>
+        /* Default Light Mode */
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to bottom, #f0f2f5, #dfe3e8);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            max-width: 650px;
+            margin: 40px auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            border: 3px solid #e2e8f0;
+        }
+        .header {
+            background: linear-gradient(135deg, #7c3aed, #d946ef, #fb7185);
+            color: white;
+            padding: 25px;
+            border-radius: 15px 15px 0 0;
+            text-align: center;
+            position: relative;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.15);
+            transform: rotate(30deg);
+            animation: shine 5s infinite;
+        }
+        .header h2 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .receipt-details {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.03);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .receipt-details:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        }
+        .receipt-details p {
+            margin: 12px 0;
+            font-size: 16px;
+            color: #2d3748;
+            display: flex;
+            justify-content: space-between; /* Ensures even spacing between label and value */
+            align-items: center;
+            gap: 20px; /* Adds space between label and value for better separation */
+        }
+        .receipt-details p span:first-child {
+            flex: 1; /* Allows the label to grow and wrap if needed */
+            text-align: left;
+        }
+        .receipt-details p span:last-child {
+            flex: 0 0 auto; /* Keeps the value fixed width, preventing it from shrinking */
+            text-align: right;
+        }
+        .amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #7c3aed;
+        }
+        .plan-type {
+            font-weight: bold;
+            color: #d946ef;
+        }
+        .transaction-id {
+            font-family: 'Courier New', monospace;
+            color: #4a5568;
+            background: #edf2f7;
+            padding: 2px 8px;
+            border-radius: 5px;
+        }
+        .footer {
+            font-size: 14px;
+            color: #718096;
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px dashed #e2e8f0;
+        }
+        .footer a {
+            color: #7c3aed;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+        .footer a:hover {
+            color: #fb7185;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(30deg); }
+            50% { transform: translateX(100%) rotate(30deg); }
+            100% { transform: translateX(-100%) rotate(30deg); }
+        }
+
+        /* Dark Mode Styles */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(to bottom, #1a202c, #2d3748) !important;
+                color: #e2e8f0 !important;
+            }
+            .container {
+                background: #2d3748 !important;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+                border: 3px solid #4a5568 !important;
+            }
+            .receipt-details {
+                background: #4a5568 !important;
+                color: #e2e8f0 !important;
+                box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+            }
+            .receipt-details p {
+                color: #e2e8f0 !important;
+            }
+            .amount {
+                color: #a78bfa;
+            }
+            .plan-type {
+                color: #ed9aff;
+            }
+            .transaction-id {
+                background: #718096 !important;
+                color: #e2e8f0 !important;
+            }
+            .footer {
+                color: #a0aec0 !important;
+                border-top: 1px dashed #718096;
+            }
+            .footer a {
+                color: #a78bfa !important;
+            }
+            .footer a:hover {
+                color: #feb2b2 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Payment Receipt - Prompt2Pic</h2>
+        </div>
+        <p style="font-size: 16px; color: #555;">Thank you for your payment!</p>
+        <div class="receipt-details">
+            <p><span>Total Payment Made:</span> <span class="amount">${{amount}}</span></p>
+            <p><span>Plan Type:</span> <span class="plan-type">{{plan_type}}</span></p>
+            <p><span>Transaction ID:</span> <span class="transaction-id">{{transaction_id}}</span></p>
+        </div>
+        <p style="font-size: 14px; color: #777;">Please keep this receipt for your records.</p>
+        <div class="footer">
+            Questions? Contact us at 
+            <a href="mailto:support@prompt2pic.com">support@prompt2pic.com</a><br>
+            Powered by <a href="https://stripe.com" target="_blank">Stripe</a>
+        </div>
+    </div>
+</body>
+</html>

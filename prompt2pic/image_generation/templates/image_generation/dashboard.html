@@ -1,0 +1,1043 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+
+    <style>
+      /* Existing Animations */
+      @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+      }
+      .float-animation { animation: float 6s ease-in-out infinite; }
+
+      @keyframes pulse-ring {
+        0% { transform: scale(0.33); opacity: 1; }
+        80%, 100% { transform: scale(1.5); opacity: 0; }
+      }
+      @keyframes pulse-dot {
+        0% { transform: scale(0.8); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(0.8); }
+      }
+      .loader-ring {
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        border: 4px solid rgba(99, 102, 241, 0.3);
+        border-radius: 50%;
+        animation: pulse-ring 1.25s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+      }
+      .loader-dot {
+        position: absolute;
+        width: 150px;
+        height: 150px;
+        background: linear-gradient(45deg, #6366f1, #818cf8);
+        border-radius: 50%;
+        animation: pulse-dot 1.25s cubic-bezier(0.455, 0.03, 0.515, 0.955) -0.4s infinite;
+        box-shadow: 0 0 30px rgba(99, 102, 241, 0.8);
+      }
+
+      /* Enhanced Model Selection Animations */
+      #modelSelection {
+        background: radial-gradient(circle at center, rgba(30, 41, 59, 0.9), rgba(0, 0, 0, 0.95));
+        overflow: hidden;
+      }
+
+      .model-card {
+        position: relative;
+        opacity: 0;
+        background: linear-gradient(135deg, #1e40af, #7c3aed);
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(255, 255, 255, 0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+        overflow: hidden;
+      }
+
+      .model-card:hover {
+        transform: scale(1.1) rotate(2deg);
+        box-shadow: 0 12px 30px rgba(124, 58, 237, 0.6), 0 0 20px rgba(255, 255, 255, 0.4);
+      }
+
+      .model-card.paid-model {
+        background: linear-gradient(135deg, #b91c1c, #f59e0b);
+      }
+
+      .model-card:nth-child(1) { animation: orbitIn 0.8s ease-out 0.2s both; }
+      .model-card:nth-child(2) { animation: plasmaBurst 0.8s ease-out 0.4s both; }
+      .model-card:nth-child(3) { animation: warpSpeed 0.8s ease-out 0.6s both; }
+      .model-card:nth-child(4) { animation: quantumFade 0.8s ease-out 0.8s both; }
+      .model-card:nth-child(5) { animation: nebulaSwirl 0.8s ease-out 1s both; }
+
+      @keyframes orbitIn {
+        0% { opacity: 0; transform: translateY(-100vh) rotate(-360deg); }
+        60% { opacity: 0.7; transform: translateY(20px) rotate(0deg); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes plasmaBurst {
+        0% { opacity: 0; transform: scale(0) rotate(180deg); }
+        50% { opacity: 0.8; transform: scale(1.2) rotate(-90deg); }
+        100% { opacity: 1; transform: scale(1) rotate(0); }
+      }
+
+      @keyframes warpSpeed {
+        0% { opacity: 0; transform: translateX(100vw) scale(0.5); }
+        70% { opacity: 0.9; transform: translateX(-20px) scale(1.1); }
+        100% { opacity: 1; transform: translateX(0) scale(1); }
+      }
+
+      @keyframes quantumFade {
+        0% { opacity: 0; transform: translateY(100vh) scale(0.3); }
+        50% { opacity: 0.5; transform: translateY(-30px) scale(1.3); }
+        100% { opacity: 1; transform: translateY(0) scale(1); }
+      }
+
+      @keyframes nebulaSwirl {
+        0% { opacity: 0; transform: translateX(-100vw) rotate(360deg); }
+        60% { opacity: 0.7; transform: translateX(20px) rotate(-180deg); }
+        100% { opacity: 1; transform: translateX(0) rotate(0); }
+      }
+
+      @keyframes vortexExit {
+        0% { opacity: 1; transform: scale(1) rotate(0deg); }
+        100% { opacity: 0; transform: scale(0.2) rotate(720deg); }
+      }
+
+      .model-card.exit {
+        animation: vortexExit 0.5s ease-in both;
+      }
+
+      /* Glowing Particle Effects */
+      .particle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.8), rgba(124, 58, 237, 0));
+        border-radius: 50%;
+        pointer-events: none;
+        animation: particleFloat 3s infinite ease-in-out;
+      }
+
+      @keyframes particleFloat {
+        0% { transform: translateY(0) scale(1); opacity: 0.8; }
+        50% { transform: translateY(-20px) scale(1.5); opacity: 0.4; }
+        100% { transform: translateY(0) scale(1); opacity: 0.8; }
+      }
+
+      /* Model Card Content */
+      .model-name {
+        color: white;
+        font-weight: 700;
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+      }
+
+      .model-icon {
+        font-size: 2.5rem;
+        color: #fff;
+        text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+        animation: glowPulse 2s infinite ease-in-out;
+      }
+
+      @keyframes glowPulse {
+        0% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+        50% { text-shadow: 0 0 20px rgba(255, 255, 255, 0.9); }
+        100% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+      }
+
+      .lock-icon {
+        color: #ffd700;
+        font-size: 1.5rem;
+        animation: lockGlow 1.5s infinite ease-in-out;
+      }
+
+      @keyframes lockGlow {
+        0% { text-shadow: 0 0 5px #ffd700; }
+        50% { text-shadow: 0 0 15px #ffd700; }
+        100% { text-shadow: 0 0 5px #ffd700; }
+      }
+
+      /* Existing Styles (unchanged) */
+      .chat-container { height: calc(100vh - 64px - 4rem); display: flex; flex-direction: column; }
+      .messages-container { flex-grow: 1; overflow-y: auto; padding: 1rem; }
+      .prompt-container {
+        position: sticky;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 1.5rem;
+        border-top: 1px solid rgba(99, 102, 241, 0.2);
+        z-index: 10;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+      }
+
+      .chat-bubble-primary {
+        background: linear-gradient(135deg, #6366f1, #818cf8) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+      }
+      .chat-bubble-secondary {
+        background: linear-gradient(135deg, #8b5cf6, #a78bfa) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+      }
+
+      .sidebar-expanded { width: 16rem; transition: width 0.3s ease; }
+      .sidebar-collapsed { width: 3.5rem; transition: width 0.3s ease; }
+      .sidebar-collapsed .sidebar-content,
+      .sidebar-collapsed .sidebar-title { display: none; }
+      .sidebar {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-right: 1px solid rgba(99, 102, 241, 0.2);
+        transition: width 0.3s ease;
+        overflow: visible;
+        position: relative;
+      }
+
+      #navLeftArea { position: relative; overflow: hidden; }
+      #logo { transition: opacity 0.5s ease; }
+      #navOptions {
+        position: absolute;
+        left: 0;
+        top: 0;
+        display: flex;
+        gap: 0.5rem;
+        opacity: 0;
+        transform: translateX(-100%);
+        transition: all 0.5s ease;
+      }
+      #navOptions.active { opacity: 1; transform: translateX(0); }
+
+      .textarea-bordered {
+        background: white;
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      }
+      .textarea-bordered:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 8px rgba(99, 102, 241, 0.3);
+      }
+
+      .btn { transition: all 0.3s ease; }
+      .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+      .btn-primary { background: linear-gradient(135deg, #6366f1, #818cf8); }
+      .btn-secondary { background: linear-gradient(135deg, #8b5cf6, #a78bfa); }
+
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-track { background: rgba(99, 102, 241, 0.1); }
+      ::-webkit-scrollbar-thumb { background: #818cf8; border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+
+      .alert-fade { transition: opacity 0.5s ease-out; }
+
+      .sidebar-expanded { width: 280px; }
+      .sidebar-collapsed { width: 64px; }
+      .sidebar-collapsed .sidebar-content { opacity: 0; visibility: hidden; width: 0; }
+      .sidebar-collapsed .sidebar-collapsed-content { display: flex !important; }
+      .dropdown-content { position: absolute; z-index: 1000; min-width: 200px; overflow: visible; }
+      .sidebar-collapsed-content { top: 1rem; left: 50%; transform: translateX(-50%); }
+      .menu.bg-base-200 { overflow: visible !important; }
+      .sidebar .dropdown-content { max-width: 260px; }
+
+      .chat-title-form input {
+        font-size: 0.875rem;
+        padding: 0.25rem;
+        border: 1px solid #ccc;
+        border-radius: 0.25rem;
+        width: 100%;
+      }
+
+      .tooltip { z-index: 3000 !important; }
+      .tooltip:before,
+      .tooltip:after {
+        background-color: rgba(0, 0, 0, 0.85) !important;
+        color: #fff !important;
+        font-size: 0.875rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.25rem;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 10000;
+        backdrop-filter: blur(5px);
+      }
+      .modal.active {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s ease;
+      }
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      .modal-box {
+        background: white;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        max-width: 90%;
+        width: 400px;
+        position: relative;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+      }
+      .modal-box.active { transform: scale(1); }
+      .modal-box .close-btn {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #6366f1;
+        transition: color 0.2s ease;
+      }
+      .modal-box .close-btn:hover { color: #818cf8; }
+
+      .download-btn {
+        position: absolute;
+        bottom: 1rem;
+        right: 1rem;
+        background: linear-gradient(135deg, #6366f1, #818cf8);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        opacity: 0.9;
+      }
+      .download-btn:hover {
+        opacity: 1;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+      }
+      .download-btn i { font-size: 1.2rem; }
+      .image-container { position: relative; display: inline-block; max-width: 100%; }
+      .delete-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        z-index: 10001;
+        backdrop-filter: blur(5px);
+      }
+      .delete-modal.active {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s ease;
+      }
+      .delete-modal-box {
+        background: white;
+        padding: 2rem;
+        border-radius: 1rem;
+        max-width: 90%;
+        width: 420px;
+        position: relative;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(239, 68, 68, 0.1);
+        transform: translateY(-20px);
+        transition: all 0.3s ease;
+      }
+      .delete-modal-box.active {
+        transform: translateY(0);
+      }
+      .delete-modal-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+      }
+      .delete-modal-header i {
+        font-size: 2.5rem;
+        color: #ef4444;
+        margin-bottom: 1rem;
+        animation: pulse-dot 1.5s ease-in-out infinite;
+      }
+      .delete-modal-header h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1f2937;
+      }
+      .delete-modal-header p {
+        color: #6b7280;
+        margin-top: 0.5rem;
+      }
+      .delete-modal-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+      }
+      .btn-delete-confirm {
+        background: linear-gradient(135deg, #ef4444, #f87171);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+      }
+      .btn-delete-confirm:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(239, 68, 68, 0.3);
+      }
+      .btn-delete-cancel {
+        background: linear-gradient(135deg, #6b7280, #9ca3af);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+      }
+      .btn-delete-cancel:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(107, 114, 128, 0.3);
+      }
+
+      .chat-item { cursor: pointer; }
+      .chat-item:hover { background: rgba(99, 102, 241, 0.1); }
+    </style>
+  </head>
+  <body class="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 overflow-hidden">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center backdrop-blur-sm">
+      <div class="relative flex flex-col items-center">
+        <div class="loader-ring"></div>
+        <div class="loader-dot"></div>
+        <div class="text-white text-xl mt-40 font-bold">Generating Your Image</div>
+        <div class="text-white text-sm mt-2">Please wait while we create something amazing...</div>
+        <div class="mt-4"><span class="loading loading-dots loading-lg text-primary"></span></div>
+      </div>
+    </div>
+
+    <!-- Navbar -->
+    <div class="navbar bg-base-100 bg-opacity-80 backdrop-blur-md shadow-lg">
+      <div class="flex-1 relative" id="navLeftArea">
+        <a id="logo" class="btn btn-ghost normal-case text-2xl text-primary">Prompt2Pic <i class="fas fa-camera-retro ml-2 text-secondary"></i></a>
+        <div id="navOptions" class="flex items-center">
+          <a href="{% url 'image_generation:change_password' %}" class="btn btn-ghost text-primary">Change Password <i class="fas fa-lock ml-1"></i></a>
+          <a href="{% url 'subscriptions:subscription_dashboard' %}" class="btn btn-ghost text-primary">View Subscription <i class="fas fa-star ml-1"></i></a>
+          <a id="logout" class="btn btn-ghost text-primary" href="{% url 'authentication:logout' %}">Logout <i class="fas fa-sign-out-alt ml-1"></i></a>
+        </div>
+      </div>
+      <div class="flex-none gap-2">
+        <div class="relative inline-block text-left">
+          <button id="avatarBtn" class="btn btn-ghost btn-circle avatar">
+            <div class="w-10 rounded-full">
+              <img src="https://api.dicebear.com/6.x/initials/svg?seed={{ request.user.username }}" alt="User Avatar" />
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="modal fixed inset-0 z-[10000] hidden items-center justify-center bg-black bg-opacity-50 p-4">
+      <div class="modal-box relative w-full max-w-md bg-white rounded-xl shadow-2xl border border-primary/10 transform transition-all duration-300 ease-in-out">
+        <button id="closeModal" class="btn btn-sm btn-circle btn-ghost absolute top-4 right-4">
+          <i class="fas fa-times text-gray-500 hover:text-primary"></i>
+        </button>
+        <div class="text-center mb-6">
+          <h3 class="text-2xl font-bold text-primary mb-2">Change Password</h3>
+          <p class="text-sm text-gray-500">Secure your account with a strong password</p>
+        </div>
+        <form id="changePasswordForm" method="post" action="{% url 'image_generation:change_password' %}" class="space-y-4">
+          {% csrf_token %}
+          <div class="form-control relative">
+            <label class="label" for="newPassword"><span class="label-text font-semibold">New Password</span></label>
+            <div class="relative">
+              <input type="password" id="newPassword" name="new_password" placeholder="Enter new password" class="input input-bordered w-full pr-10 border-primary/30 focus:border-primary focus:ring-2 focus:ring-primary/20" required />
+              <span class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer" id="toggleNewPassword"><i class="fas fa-eye-slash text-gray-400 hover:text-primary"></i></span>
+            </div>
+            <div class="password-strength">
+              <div class="strength-bar"></div>
+              <div class="strength-bar"></div>
+              <div class="strength-bar"></div>
+              <div class="strength-bar"></div>
+            </div>
+            <ul class="validation-list">
+              <li data-validation="length">At least 8 characters</li>
+              <li data-validation="uppercase">One uppercase letter</li>
+              <li data-validation="number">One number</li>
+              <li data-validation="special">One special character</li>
+            </ul>
+          </div>
+          <div class="form-control relative">
+            <label class="label" for="confirmPassword"><span class="label-text font-semibold">Confirm New Password</span></label>
+            <div class="relative">
+              <input type="password" id="confirmPassword" name="confirm_password" placeholder="Confirm new password" class="input input-bordered w-full pr-10 border-primary/30 focus:border-primary focus:ring-2 focus:ring-primary/20" required />
+              <span class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer" id="toggleConfirmPassword"><i class="fas fa-eye-slash text-gray-400 hover:text-primary"></i></span>
+            </div>
+            <p id="confirmError" class="text-error text-xs mt-1 hidden">Passwords do not match</p>
+          </div>
+          <div class="modal-action mt-6 flex justify-center space-x-4">
+            <button type="button" id="closeModalBtn" class="btn btn-outline btn-primary">Cancel</button>
+            <button type="submit" id="changePasswordSubmit" class="btn btn-primary" disabled>Change Password <i class="fas fa-lock ml-2"></i></button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="deleteConfirmationModal" class="delete-modal">
+      <div class="delete-modal-box">
+        <div class="delete-modal-header">
+          <i class="fas fa-trash-alt"></i>
+          <h3>Delete Chat Session</h3>
+          <p>Are you sure you want to delete this chat? This action cannot be undone.</p>
+        </div>
+        <div class="delete-modal-actions">
+          <button class="btn-delete-cancel" id="cancelDeleteBtn">Cancel</button>
+          <button class="btn-delete-confirm" id="confirmDeleteBtn">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex h-[calc(100vh-64px)]">
+      <!-- Sidebar (Chat History) -->
+      <aside id="chatHistorySidebar" class="bg-base-100 shadow-xl p-4 flex-shrink-0 sidebar sidebar-expanded">
+        <div class="sidebar-content">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold text-primary sidebar-title">Chat Sessions</h2>
+            <button id="sidebarToggleBtn" class="btn btn-sm btn-ghost"><i class="fas fa-angle-left"></i></button>
+          </div>
+          <a href="{% url 'image_generation:create_chat' %}" class="btn btn-primary w-full mb-4 flex items-center gap-2"><i class="fas fa-comment-dots"></i><span>New Chat</span></a>
+          <ul class="menu bg-base-200 w-full rounded-box">
+            {% for chat in history %}
+            <li class="chat-item relative w-full max-w-full {% if active_chat.id == chat.id %}bg-primary/10{% endif %}" data-chat-url="{% url 'image_generation:dashboard_with_chat' chat.id %}">
+              <div class="flex items-center justify-between w-full p-3">
+                <div class="flex-1 mx-2 truncate min-w-0">
+                  <a href="{% url 'image_generation:dashboard_with_chat' chat.id %}" id="chat-title-{{ chat.id }}" class="chat-title-text flex items-center"><i class="fas fa-comment-alt text-primary mr-2"></i><span>{{ chat.title }}</span></a>
+                  <form class="inline-block hidden chat-title-form" id="chat-form-{{ chat.id }}" method="post" action="{% url 'image_generation:rename_chat' chat.id %}">
+                    {% csrf_token %}
+                    <input type="text" name="title" value="{{ chat.title }}" />
+                  </form>
+                </div>
+                <span class="text-xs text-gray-400 flex-shrink-0">{{ chat.created_at|date:"M d" }}</span>
+                <div class="dropdown dropdown-end flex-none w-8 text-right flex-shrink-0">
+                  <label tabindex="0" class="btn btn-ghost btn-xs m-1"><i class="fas fa-ellipsis-v"></i></label>
+                  <ul tabindex="0" class="dropdown-content menu chat-dropdown p-2 shadow bg-base-100 rounded-box w-52">
+                    <li><a onclick="showRenameForm('{{ chat.id }}')"><i class="fas fa-pencil-alt mr-2"></i>Rename</a></li>
+                    <li class="delete-chat-item" data-chat-id="{{ chat.id }}">
+                      <form method="post" action="{% url 'image_generation:delete_chat' chat.id %}" id="delete-form-{{ chat.id }}" style="display: none;">
+                        {% csrf_token %}
+                      </form>
+                      <a class="w-full text-left text-error"><i class="fas fa-trash-alt mr-2"></i>Delete</a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="sidebar-collapsed-content hidden absolute top-4 left-1/2 -translate-x-1/2 flex-col items-center gap-2">
+          <a href="{% url 'image_generation:create_chat' %}" class="btn btn-circle btn-primary btn-sm tooltip tooltip-right" data-tip="New Chat"><i class="fas fa-comment-dots fa-2x"></i></a>
+          <button id="sidebarToggleCollapsedBtn" class="btn btn-circle btn-sm btn-ghost tooltip tooltip-right" data-tip="Expand"><i class="fas fa-angle-right"></i></button>
+        </div>
+      </aside>
+
+      <!-- Main Chat Area -->
+      <main class="flex-1 flex flex-col main-chat-area">
+        {% if messages %}
+        <div id="messagesContainer" class="p-4">
+          {% for message in messages %}
+          <div class="alert alert-info alert-fade">{{ message }}</div>
+          {% endfor %}
+        </div>
+        {% endif %}
+        <div class="messages-container">
+          {% if active_chat %}
+            {% for message in active_chat.messages.all %}
+              <div class="mb-8">
+                <div class="chat chat-end mb-2">
+                  <div class="chat-image avatar">
+                    <div class="w-10 rounded-full">
+                      <img src="https://api.dicebear.com/6.x/initials/svg?seed={{ request.user.username }}" alt="User" />
+                    </div>
+                  </div>
+                  <div class="chat-bubble chat-bubble-primary"><p>{{ message.user_prompt }}</p></div>
+                </div>
+                <div class="chat chat-start">
+                  <div class="chat-image avatar">
+                    <div class="w-10 rounded-full">
+                      <img src="https://api.dicebear.com/6.x/bottts/svg?seed=AI" alt="AI" />
+                    </div>
+                  </div>
+                  <div class="chat-bubble chat-bubble-secondary">
+                    {% if message.image_generated %}
+                    <div class="image-container">
+                      <img src="{{ message.image_generated.url }}" class="max-w-sm rounded-lg shadow-lg" alt="Generated image" />
+                      <button class="download-btn" onclick="downloadImage('{{ message.image_generated.url }}', 'Prompt2Pic-{{ message.id }}.png')">
+                        <i class="fas fa-download"></i>
+                      </button>
+                    </div>
+                    {% else %}
+                    <p>No image generated.</p>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="chat-footer opacity-50 text-xs mt-1">
+                  {{ message.created_at|timesince }} ago {% if message.agent %}<span class="ml-2">via {{ message.agent.name }}</span>{% endif %}
+                </div>
+              </div>
+            {% empty %}
+              <div class="text-center text-gray-300 mt-8">
+                <i class="fas fa-magic text-4xl mb-4"></i>
+                <p>No messages yet in this chat.</p>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="text-center text-gray-300 mt-8">
+              <i class="fas fa-magic text-4xl mb-4"></i>
+              <p>Select a chat to view messages or start generating amazing images with AI!</p>
+            </div>
+          {% endif %}
+        </div>
+        <div class="prompt-container">
+          <form method="POST" action="{% url 'image_generation:generate_image' %}" id="generateForm" class="w-full">
+            {% csrf_token %}
+            <div class="flex flex-col gap-4">
+              <!-- Prompt Textarea with Integrated Buttons -->
+              <div class="relative">
+                <textarea name="prompt" id="promptInput" class="textarea textarea-bordered w-full resize-y pr-28" rows="4" placeholder="Describe the image you want to create...">{{ prompt_input }}</textarea>
+                <div class="absolute bottom-3 right-3 flex items-center gap-2">
+                  <button type="submit" id="generateBtn" class="btn btn-primary btn-sm px-2 py-1" disabled><i class="fas fa-wand-magic-sparkles"></i></button>
+                  <div class="relative">
+                    <button type="button" id="smallModelSelectBtn" class="btn btn-secondary btn-sm px-3 py-1 flex items-center gap-1">
+                      <i class="fas fa-robot text-xs"></i>
+                      <span id="small-selected-model-text" class="truncate max-w-[80px] text-xs">{% if selected_model %}{{ selected_model.name }}{% else %}Model{% endif %}</span>
+                      <i class="fas fa-chevron-down text-xs"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <input type="hidden" id="model-input" name="model" value="{{ selected_model.id }}" />
+              <input type="hidden" id="chat-id-input" name="chat_id" value="{% if active_chat %}{{ active_chat.id }}{% endif %}" />
+            </div>
+          </form>
+        </div>
+      </main>
+    </div>
+
+    <!-- Enhanced Model Selection Interface -->
+    <div id="modelSelection" class="fixed inset-0 z-50 hidden flex items-center justify-center">
+      <div class="grid grid-cols-3 gap-12 p-12 relative">
+        {% for model in models %}
+        <div class="model-card {% if model.is_paid and not has_subscribed %}paid-model{% else %}select-model{% endif %}" data-model-id="{{ model.id }}" data-model-name="{{ model.name }}">
+          <div class="text-center relative">
+            <i class="fas fa-robot model-icon"></i>
+            <p class="model-name text-lg mt-4">{{ model.name }}</p>
+            {% if model.is_paid and not has_subscribed %}
+            <i class="fas fa-lock lock-icon mt-2"></i>
+            {% endif %}
+            <!-- Particles -->
+            <div class="particle" style="top: 10%; left: 20%;"></div>
+            <div class="particle" style="top: 30%; right: 10%;"></div>
+            <div class="particle" style="bottom: 20%; left: 15%;"></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <footer class="footer footer-center p-4 bg-base-300 text-base-content mt-8">
+      <div><p>Copyright © 2025 - All rights reserved by Prompt2Pic</p></div>
+    </footer>
+
+    <script>
+      // Handle form submission and loading state
+      document.getElementById("generateForm").addEventListener("submit", function (e) {
+        document.getElementById("loadingOverlay").classList.remove("hidden");
+      });
+
+      // Prompt input and model selection button state
+      const promptInput = document.getElementById("promptInput");
+      const generateBtn = document.getElementById("generateBtn");
+
+      function updateGenerateButtonState() {
+        const prompt = promptInput.value.trim();
+        const modelSelected = document.getElementById("model-input").value !== "";
+        generateBtn.disabled = prompt === "" || !modelSelected;
+      }
+
+      promptInput.addEventListener("input", updateGenerateButtonState);
+
+      // Auto-hide alerts after 3 seconds
+      document.addEventListener("DOMContentLoaded", function () {
+        const alerts = document.querySelectorAll(".alert");
+        if (alerts.length > 0) {
+          setTimeout(() => {
+            alerts.forEach((alert) => {
+              alert.style.opacity = "0";
+              setTimeout(() => alert.remove(), 500);
+            });
+          }, 3000);
+        }
+      });
+
+      // Enhanced Model Selection Functions
+      function showModelSelection() {
+        const modelSelection = document.getElementById("modelSelection");
+        modelSelection.classList.remove("hidden");
+        modelSelection.classList.add("flex");
+        // Reset animations for re-entry
+        const modelCards = document.querySelectorAll(".model-card");
+        modelCards.forEach((card) => {
+          card.style.animation = 'none';
+          card.offsetHeight; // Trigger reflow
+          card.style.animation = null;
+        });
+      }
+
+      function hideModelSelection() {
+        const modelCards = document.querySelectorAll(".model-card");
+        modelCards.forEach((card) => {
+          card.classList.add("exit");
+        });
+        setTimeout(() => {
+          const modelSelection = document.getElementById("modelSelection");
+          modelSelection.classList.add("hidden");
+          modelSelection.classList.remove("flex");
+          modelCards.forEach((card) => {
+            card.classList.remove("exit");
+          });
+        }, 500); // Match exit animation duration
+      }
+
+      function selectModel(modelId, modelName) {
+        document.getElementById("model-input").value = modelId;
+        document.getElementById("small-selected-model-text").textContent = modelName;
+        hideModelSelection();
+        updateGenerateButtonState();
+      }
+
+      document.getElementById("smallModelSelectBtn").addEventListener("click", function (e) {
+        e.stopPropagation();
+        showModelSelection();
+      });
+
+      document.querySelectorAll(".select-model").forEach((model) => {
+        model.addEventListener("click", function () {
+          const modelId = this.getAttribute("data-model-id");
+          const modelName = this.getAttribute("data-model-name");
+          selectModel(modelId, modelName);
+        });
+      });
+
+      document.querySelectorAll(".paid-model").forEach((model) => {
+        model.addEventListener("click", function () {
+          window.location.href = "{% url 'subscriptions:plans' %}";
+        });
+      });
+
+      document.getElementById("modelSelection").addEventListener("click", function (e) {
+        if (e.target === this) {
+          hideModelSelection();
+        }
+      });
+
+      // Call initially to set the correct state
+      updateGenerateButtonState();
+
+      // Navbar Options Toggle via Avatar Click
+      const avatarBtn = document.getElementById("avatarBtn");
+      const navOptions = document.getElementById("navOptions");
+      const logo = document.getElementById("logo");
+      function toggleNavOptions() {
+        if (navOptions.classList.contains("active")) {
+          navOptions.classList.remove("active");
+          logo.style.opacity = 1;
+        } else {
+          navOptions.classList.add("active");
+          logo.style.opacity = 0;
+        }
+      }
+      avatarBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        toggleNavOptions();
+      });
+
+      document.addEventListener("click", function (e) {
+        if (!document.getElementById("navLeftArea").contains(e.target)) {
+          navOptions.classList.remove("active");
+          logo.style.opacity = 1;
+        }
+      });
+
+      // Sidebar Toggle Functions
+      function toggleSidebar() {
+        const sidebar = document.getElementById("chatHistorySidebar");
+        const sidebarToggleBtn = document.getElementById("sidebarToggleBtn");
+        const sidebarToggleCollapsedBtn = document.getElementById("sidebarToggleCollapsedBtn");
+        if (sidebar.classList.contains("sidebar-expanded")) {
+          sidebar.classList.remove("sidebar-expanded");
+          sidebar.classList.add("sidebar-collapsed");
+          sidebarToggleBtn.innerHTML = '<i class="fas fa-angle-right"></i>';
+          if (sidebarToggleCollapsedBtn) sidebarToggleCollapsedBtn.innerHTML = '<i class="fas fa-angle-right"></i>';
+          sidebar.querySelector(".sidebar-content").style.display = "none";
+          sidebar.querySelector(".sidebar-collapsed-content").classList.remove("hidden");
+        } else {
+          sidebar.classList.remove("sidebar-collapsed");
+          sidebar.classList.add("sidebar-expanded");
+          sidebarToggleBtn.innerHTML = '<i class="fas fa-angle-left"></i>';
+          if (sidebarToggleCollapsedBtn) sidebarToggleCollapsedBtn.innerHTML = '<i class="fas fa-angle-left"></i>';
+          sidebar.querySelector(".sidebar-content").style.display = "block";
+          sidebar.querySelector(".sidebar-collapsed-content").classList.add("hidden");
+        }
+      }
+      document.getElementById("sidebarToggleBtn").addEventListener("click", toggleSidebar);
+      if (document.getElementById("sidebarToggleCollapsedBtn")) {
+        document.getElementById("sidebarToggleCollapsedBtn").addEventListener("click", toggleSidebar);
+      }
+
+      // Inline Rename Functions
+      function showRenameForm(chatId) {
+        const titleText = document.getElementById("chat-title-" + chatId);
+        const titleForm = document.getElementById("chat-form-" + chatId);
+        if (titleText && titleForm) {
+          titleText.classList.add("hidden");
+          titleForm.classList.remove("hidden");
+          const input = titleForm.querySelector('input[name="title"]');
+          if (input) {
+            input.focus();
+            input.select();
+          }
+        }
+      }
+
+      function submitRenameForm(form) {
+        const formData = new FormData(form);
+        const chatId = form.id.replace('chat-form-', '');
+        fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            const titleSpan = document.querySelector(`#chat-title-${chatId} span`);
+            if (titleSpan) {
+              titleSpan.textContent = data.new_title;
+            }
+            const titleText = document.getElementById(`chat-title-${chatId}`);
+            const titleForm = document.getElementById(`chat-form-${chatId}`);
+            if (titleText && titleForm) {
+              titleText.classList.remove('hidden');
+              titleForm.classList.add('hidden');
+            }
+          } else {
+            alert(data.message || 'Error renaming chat');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred while renaming the chat');
+        });
+      }
+
+      document.querySelectorAll('.chat-title-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          submitRenameForm(this);
+        });
+
+        const input = form.querySelector('input[name="title"]');
+        if (input) {
+          input.addEventListener('blur', function() {
+            submitRenameForm(form);
+          });
+        }
+      });
+
+      // Scroll to bottom function
+      function scrollToBottom() {
+        const messagesContainer = document.querySelector(".messages-container");
+        if (messagesContainer) {
+          messagesContainer.scrollTo({
+            top: messagesContainer.scrollHeight,
+            behavior: "smooth"
+          });
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const chatItems = document.querySelectorAll(".chat-item");
+        const deleteItems = document.querySelectorAll(".delete-chat-item");
+        const deleteModal = document.getElementById("deleteConfirmationModal");
+        const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+        const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
+        let currentForm = null;
+
+        if (document.querySelector(".messages-container").children.length > 0) {
+          scrollToBottom();
+        }
+
+        chatItems.forEach((item) => {
+          item.addEventListener("click", function (e) {
+            const url = this.getAttribute("data-chat-url");
+            const titleForm = this.querySelector(".chat-title-form");
+            const dropdown = this.querySelector(".dropdown-content");
+            const target = e.target;
+
+            if (
+              (titleForm && !titleForm.classList.contains("hidden") && titleForm.contains(target)) ||
+              (dropdown && dropdown.contains(target)) ||
+              target.closest(".dropdown")
+            ) {
+              return;
+            }
+
+            window.location.href = url;
+          });
+        });
+
+        deleteItems.forEach((item) => {
+          item.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            currentForm = this.querySelector("form");
+            deleteModal.classList.add("active");
+            deleteModal.querySelector(".delete-modal-box").classList.add("active");
+          });
+        });
+
+        confirmDeleteBtn.addEventListener("click", function () {
+          if (currentForm) {
+            currentForm.submit();
+          }
+          closeDeleteModal();
+        });
+
+        cancelDeleteBtn.addEventListener("click", closeDeleteModal);
+
+        deleteModal.addEventListener("click", function (e) {
+          if (e.target === deleteModal) {
+            closeDeleteModal();
+          }
+        });
+
+        function closeDeleteModal() {
+          deleteModal.classList.remove("active");
+          deleteModal.querySelector(".delete-modal-box").classList.remove("active");
+          currentForm = null;
+        }
+      });
+
+      // Password Modal Handling
+      const changePasswordModal = document.getElementById("changePasswordModal");
+      const toggleNewPassword = document.getElementById("toggleNewPassword");
+      const toggleConfirmPassword = document.getElementById("toggleConfirmPassword");
+      const newPassword = document.getElementById("newPassword");
+      const confirmPassword = document.getElementById("confirmPassword");
+      const submitBtn = document.getElementById("changePasswordSubmit");
+
+      [toggleNewPassword, toggleConfirmPassword].forEach((toggle) => {
+        toggle.addEventListener("click", (e) => {
+          const input = e.target.closest("div").querySelector("input");
+          const icon = e.target.querySelector("i");
+          if (input.type === "password") {
+            input.type = "text";
+            icon.classList.replace("fa-eye-slash", "fa-eye");
+          } else {
+            input.type = "password";
+            icon.classList.replace("fa-eye", "fa-eye-slash");
+          }
+        });
+      });
+
+      function checkPasswordStrength(password) {
+        return {
+          length: password.length >= 8,
+          uppercase: /[A-Z]/.test(password),
+          number: /\d/.test(password),
+          special: /[!@#$%^&*()_+\-=[\]{};\'":\\|,.<>/?]/.test(password),
+        };
+      }
+
+      function updateStrengthIndicator(strength) {
+        const bars = document.querySelectorAll(".strength-bar");
+        const validations = Object.values(strength).filter(Boolean).length;
+        bars.forEach((bar, index) => bar.classList.toggle("active", index < validations));
+        document.querySelectorAll(".validation-list li").forEach((li) => {
+          const type = li.dataset.validation;
+          li.classList.toggle("valid", strength[type]);
+        });
+      }
+
+      function validateForm() {
+        const password = newPassword.value;
+        const confirm = confirmPassword.value;
+        const strength = checkPasswordStrength(password);
+        const isValid = Object.values(strength).every(Boolean) && password === confirm;
+        submitBtn.disabled = !isValid;
+        document.getElementById("confirmError").classList.toggle("hidden", password === confirm);
+      }
+
+      newPassword.addEventListener("input", () => {
+        const strength = checkPasswordStrength(newPassword.value);
+        updateStrengthIndicator(strength);
+        validateForm();
+      });
+      confirmPassword.addEventListener("input", validateForm);
+
+      document.getElementById("changePassword")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        changePasswordModal.classList.remove("hidden");
+        changePasswordModal.classList.add("flex");
+      });
+
+      [document.getElementById("closeModal"), document.getElementById("closeModalBtn")].forEach((btn) => {
+        btn.addEventListener("click", () => {
+          changePasswordModal.classList.add("hidden");
+          changePasswordModal.classList.remove("flex");
+        });
+      });
+
+      changePasswordModal.querySelector(".modal-box").addEventListener("click", (e) => e.stopPropagation());
+
+      function downloadImage(url, filename) {
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename || "Prompt2Pic-image.png";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    </script>
+  </body>
+</html>
