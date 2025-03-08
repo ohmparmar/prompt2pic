@@ -83,25 +83,19 @@ WSGI_APPLICATION = "prompt2pic.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.mysql",
-#         "NAME": env("DATABASE_NAME"),  # Replace with your database name
-#         "USER": env("DATABASE_USER"),  # Replace with your database user
-#         "PASSWORD": env("DATABASE_PASSWORD"),  # Replace with your database password
-#         "HOST": env("DATABASE_HOST"),  # Or your database host
-#         "PORT": env("DATABASE_PORT"),  # Or your database port
-#     }
-# }
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": env("DATABASE_NAME"),  # Replace with your database name
+        "USER": env("DATABASE_USER"),  # Replace with your database user
+        "PASSWORD": env("DATABASE_PASSWORD"),  # Replace with your database password
+        "HOST": env("DATABASE_HOST"),  # Or your database host
+        "PORT": env("DATABASE_PORT"),  # Or your database port
+    }
+}
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
