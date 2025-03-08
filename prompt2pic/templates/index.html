@@ -11,63 +11,212 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* Enhanced Floating Animation */
         @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(2deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
         }
         .float-animation {
-            animation: float 6s ease-in-out infinite;
+            animation: float 5s ease-in-out infinite;
+            transition: transform 0.3s ease;
+        }
+        .float-animation:hover {
+            transform: scale(1.05);
+            animation-play-state: paused;
+        }
+
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Card Hover Effect */
+        .feature-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Button Glow Effect */
+        .btn-glow {
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-glow::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shine 2s infinite;
+        }
+        @keyframes shine {
+            0% { left: -100%; }
+            20% { left: 100%; }
+            100% { left: 100%; }
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .card-body {
+                padding: 1.5rem;
+            }
+            .text-5xl {
+                font-size: 2rem;
+            }
+            .text-4xl {
+                font-size: 1.75rem;
+            }
+            .text-2xl {
+                font-size: 1.25rem;
+            }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #8b5cf6;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ec4899;
         }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex justify-center items-center p-4">
-    <div class="container mx-auto px-4">
-        <div class="card bg-base-100 shadow-xl max-w-5xl mx-auto overflow-hidden">
-            <div class="card-body p-8 md:p-16 text-center">
-                <h1 class="text-5xl font-bold mb-6 text-primary">
-                    Welcome to Prompt2Pic
-                    <i class="fas fa-camera-retro mr-2"></i>
-                </h1>
-                <p class="text-xl mb-8">Transform your imagination into stunning visuals!</p>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-                    <div class="flex flex-col items-center space-y-4">
-                        <i class="fas fa-pencil-alt text-4xl text-accent"></i>
-                        <h3 class="text-2xl font-semibold">Write Your Prompt</h3>
-                        <p>Describe the image you want to create in words.</p>
-                    </div>
-                    <div class="flex flex-col items-center space-y-4">
-                        <i class="fas fa-image text-4xl text-success"></i>
-                        <h3 class="text-2xl font-semibold">Generate Beautiful Images</h3>
-                        <p>Our AI turns your prompts into stunning visuals.</p>
-                    </div>
-                </div>
-                
-                <div class="mb-12 relative">
-                    <img src="{% static 'authentication/images/ai-image.png' %}" 
-                    alt="AI-generated futuristic cityscape" 
-                    class="rounded-lg shadow-2xl mx-auto max-w-xs float-animation">
-                                   <div class="absolute -top-4 -left-4 bg-secondary text-white rounded-full p-3 shadow-lg">
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <div class="absolute -bottom-4 -right-4 bg-accent text-white rounded-full p-3 shadow-lg">
-                        <i class="fas fa-palette"></i>
-                    </div>
-                </div>
+<body class="bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500">
+    <!-- Background Particles -->
+    <div id="particles-js" class="fixed inset-0 z-0"></div>
 
-                <div class="flex justify-center space-x-4">
-                    <a href="{% url 'authentication:signup' %}" class="btn btn-primary btn-lg">
-                        Get Started
-                        <i class="fas fa-arrow-right ml-2"></i>
-                    </a>
-                    <a href="{% url 'about' %}" class="btn btn-outline btn-lg">
-                        Learn More
-                        <i class="fas fa-info-circle ml-2"></i>
-                    </a>
+    <!-- Scrollable Content with Reduced Height -->
+    <div class="relative z-10 py-6">
+        <div class="container mx-auto px-4">
+            <!-- Main Card -->
+            <div class="card bg-base-100 shadow-2xl max-w-6xl mx-auto overflow-hidden rounded-3xl mb-6">
+                <div class="card-body p-6 md:p-10 text-center">
+                    <h1 class="text-5xl md:text-5xl font-bold mb-4 gradient-text">
+                        Welcome to Prompt2Pic
+                        <i class="fas fa-camera-retro ml-2 animate-pulse"></i>
+                    </h1>
+                    <p class="text-lg md:text-xl mb-6 text-gray-700 animate-fade-in">
+                        Turn your imagination into <span class="font-semibold text-primary">stunning visuals</span>!
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="feature-card bg-base-200 p-4 rounded-lg">
+                            <i class="fas fa-pencil-alt text-3xl text-accent mb-2 animate-bounce"></i>
+                            <h3 class="text-xl font-semibold mb-1">Write Your Prompt</h3>
+                            <p class="text-gray-600 text-sm">Describe your vision in words.</p>
+                        </div>
+                        <div class="feature-card bg-base-200 p-4 rounded-lg">
+                            <i class="fas fa-image text-3xl text-success mb-2 animate-bounce"></i>
+                            <h3 class="text-xl font-semibold mb-1">Generate Images</h3>
+                            <p class="text-gray-600 text-sm">AI crafts visuals in seconds.</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-6 relative">
+                        <img src="{% static 'authentication/images/ai-image.png' %}" 
+                             alt="AI-generated futuristic cityscape" 
+                             class="rounded-lg shadow-2xl mx-auto max-w-[200px] md:max-w-[250px] float-animation">
+                        <div class="absolute -top-4 -left-4 bg-secondary text-white rounded-full p-2 shadow-lg animate-spin-slow">
+                            <i class="fas fa-star text-sm"></i>
+                        </div>
+                        <div class="absolute -bottom-4 -right-4 bg-accent text-white rounded-full p-2 shadow-lg animate-spin-slow">
+                            <i class="fas fa-palette text-sm"></i>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col md:flex-row justify-center space-y-3 md:space-y-0 md:space-x-4">
+                        <a href="{% url 'authentication:signup' %}" class="btn btn-primary btn-md btn-glow">
+                            Get Started
+                            <i class="fas fa-arrow-right ml-2"></i>
+                        </a>
+                        <a href="{% url 'about' %}" class="btn btn-outline btn-md btn-glow">
+                            Learn More
+                            <i class="fas fa-info-circle ml-2"></i>
+                        </a>
+                    </div>
+
+                    <p class="mt-4 text-xs text-gray-500 animate-fade-in">
+                        Powered by xAI • Join thousands of creators!
+                    </p>
                 </div>
             </div>
+
+            <!-- Additional Section -->
+            <section class="text-center py-8">
+                <h2 class="text-4xl font-bold mb-4 gradient-text">Why Choose Prompt2Pic?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                    <div class="feature-card bg-base-200 p-4 rounded-lg">
+                        <i class="fas fa-rocket text-3xl text-primary mb-2"></i>
+                        <h3 class="text-lg font-semibold mb-1">Lightning Fast</h3>
+                        <p class="text-gray-600 text-sm">Images in seconds.</p>
+                    </div>
+                    <div class="feature-card bg-base-200 p-4 rounded-lg">
+                        <i class="fas fa-paint-brush text-3xl text-accent mb-2"></i>
+                        <h3 class="text-lg font-semibold mb-1">Customizable</h3>
+                        <p class="text-gray-600 text-sm">Fine-tune your prompts.</p>
+                    </div>
+                    <div class="feature-card bg-base-200 p-4 rounded-lg">
+                        <i class="fas fa-users text-3xl text-success mb-2"></i>
+                        <h3 class="text-lg font-semibold mb-1">Community</h3>
+                        <p class="text-gray-600 text-sm">Share with others.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="text-center py-4 text-white">
+                <p class="text-sm">© 2025 Prompt2Pic. All rights reserved.</p>
+                <p class="mt-1 text-sm">Follow us: 
+                    <a href="#" class="text-primary"><i class="fab fa-twitter mx-1"></i></a>
+                    <a href="#" class="text-primary"><i class="fab fa-instagram mx-1"></i></a>
+                </p>
+            </footer>
         </div>
     </div>
+
+    <!-- Particles.js and Animations -->
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script>
+        particlesJS("particles-js", {
+            "particles": {
+                "number": { "value": 60, "density": { "enable": true, "value_area": 800 } },
+                "color": { "value": "#ffffff" },
+                "shape": { "type": "circle" },
+                "opacity": { "value": 0.5, "random": true },
+                "size": { "value": 3, "random": true },
+                "line_linked": { "enable": true, "distance": 150, "color": "#ffffff", "opacity": 0.4, "width": 1 },
+                "move": { "enable": true, "speed": 2, "direction": "none", "random": false, "straight": false }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": { "onhover": { "enable": true, "mode": "repulse" }, "onclick": { "enable": true, "mode": "push" } },
+                "modes": { "repulse": { "distance": 100, "duration": 0.4 } }
+            },
+            "retina_detect": true
+        });
+
+        /* Fade-in animation */
+        document.querySelectorAll('.animate-fade-in').forEach(el => {
+            el.style.opacity = 0;
+            setTimeout(() => {
+                el.style.transition = 'opacity 1s ease';
+                el.style.opacity = 1;
+            }, 100);
+        });
+    </script>
 </body>
 </html>

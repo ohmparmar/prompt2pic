@@ -16,7 +16,6 @@ venv/
 *.sqlite3
 
 # Static files
-/static/
 media/
 
 # IDE and editor files
