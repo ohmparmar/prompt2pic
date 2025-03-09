@@ -3,8 +3,8 @@ from .models import Agent, Chat, ChatMessage
 
 @admin.register(Agent)
 class AgentAdmin(admin.ModelAdmin):
-    list_display = ('name', 'is_available')
-    list_filter = ('is_available',)
+    list_display = ('name', 'is_available','is_paid')
+    list_filter = ('is_available','is_paid')
     search_fields = ('name',)
 
 @admin.register(Chat)

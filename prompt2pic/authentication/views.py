@@ -41,6 +41,9 @@ def signup(request):
                 )
             else:
                 resend_otp(user)
+                user.password = make_password(password)
+                user.username = username
+                user.save()
                 messages.info(request, "OTP sent to your email. Please verify.")
                 request.session["email"] = email  # Store email in session
                 request.session["password"] = password  # Store password in session
